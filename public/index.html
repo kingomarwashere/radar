@@ -3,6 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0d0d0d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Radar">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="description" content="Live police sightings, speed cameras and turn-by-turn navigation.">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon.svg">
   <title>Radar</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
@@ -15,26 +23,26 @@
 
 <!-- ── Normal top bar ──────────────────────────── -->
 <div id="topbar">
-  <div id="logo">📡 RADAR</div>
+  <div id="logo">📡</div>
   <div id="filters">
     <button class="filter-btn active" data-layer="police" title="Police">🚔</button>
-    <button class="filter-btn active" data-layer="speed"  title="Speed cams">📷</button>
+    <button class="filter-btn active" data-layer="speed"  title="Cameras">📷</button>
     <button class="filter-btn active" data-layer="red_light" title="Red light">🔴</button>
   </div>
-  <button id="search-toggle" title="Navigate">🔍</button>
-  <button id="style-toggle" title="Map style">🗺</button>
+  <button id="search-toggle" title="Navigate">🔍 Navigate</button>
+  <button id="style-toggle" title="Settings">⚙️</button>
 </div>
 
 <!-- ── Route planner (from / to) ───────────────── -->
 <div id="route-planner" class="hidden">
   <div id="planner-top">
-    <button id="planner-back">←</button>
+    <button id="planner-back" aria-label="Back">←</button>
     <div id="planner-fields">
       <div class="field-row" id="from-row">
         <div class="field-dot dot-from"></div>
         <input id="from-input" class="field-input" type="text"
-               placeholder="Your location" autocomplete="off" spellcheck="false">
-        <button class="field-clear hidden" id="from-clear">✕</button>
+               placeholder="My location" autocomplete="off" spellcheck="false">
+        <button class="field-clear hidden" id="from-clear" aria-label="Clear">✕</button>
       </div>
       <div class="field-connector">
         <div class="connector-line"></div>
@@ -44,7 +52,7 @@
         <div class="field-dot dot-to"></div>
         <input id="to-input" class="field-input" type="text"
                placeholder="Where to?" autocomplete="off" spellcheck="false">
-        <button class="field-clear hidden" id="to-clear">✕</button>
+        <button class="field-clear hidden" id="to-clear" aria-label="Clear">✕</button>
       </div>
     </div>
   </div>
@@ -56,25 +64,43 @@
   <div id="preview-head">
     <div id="preview-meta">
       <div id="preview-dist">–</div>
-      <div id="preview-time">–</div>
-      <div id="preview-eta">–</div>
+      <div id="preview-sub">
+        <span id="preview-time">–</span>
+        <span id="preview-eta">–</span>
+      </div>
     </div>
-    <button id="start-nav-btn">▶ Go</button>
-    <button id="cancel-route-btn">✕</button>
+    <div id="preview-actions">
+      <button id="start-nav-btn">▶ Go</button>
+      <button id="cancel-route-btn">✕</button>
+    </div>
   </div>
   <div id="directions-list"></div>
 </div>
 
-<!-- ── Active navigation: instruction ──────────── -->
+<!-- ── Active navigation ────────────────────────── -->
 <div id="nav-instruction" class="hidden">
-  <div id="nav-icon">↑</div>
-  <div id="nav-text">
-    <div id="nav-dist">–</div>
-    <div id="nav-street">–</div>
+  <div id="nav-main">
+    <div id="nav-icon">↑</div>
+    <div id="nav-text">
+      <div id="nav-dist">–</div>
+      <div id="nav-street">–</div>
+    </div>
+    <div id="nav-speed-badge" class="hidden"><span id="nav-speed-val">–</span></div>
+  </div>
+  <div id="nav-next-wrap" class="hidden">
+    <span id="nav-next-icon">→</span>
+    <span id="nav-next-label">Then –</span>
   </div>
 </div>
 
-<!-- ── Active navigation: footer ───────────────── -->
+<!-- ── Camera / hazard alert bar ────────────────── -->
+<div id="alert-bar" class="hidden">
+  <span id="alert-icon">📷</span>
+  <span id="alert-text">Speed camera ahead</span>
+  <span id="alert-dist">–</span>
+</div>
+
+<!-- ── Nav footer ───────────────────────────────── -->
 <div id="nav-footer" class="hidden">
   <div id="nav-eta-block">
     <div id="nav-eta">–</div>
@@ -87,25 +113,37 @@
   <button id="end-nav-btn">✕ End</button>
 </div>
 
-<!-- ── Map style panel ─────────────────────────── -->
+<!-- ── Arrival overlay ──────────────────────────── -->
+<div id="arrival-overlay" class="hidden">
+  <div id="arrival-card">
+    <div id="arrival-emoji">🏁</div>
+    <div id="arrival-title">You've arrived!</div>
+    <div id="arrival-dest">–</div>
+    <button id="arrival-done">Done</button>
+  </div>
+</div>
+
+<!-- ── Settings & Style panel ───────────────────── -->
 <div id="style-panel" class="hidden">
   <div id="style-panel-bg"></div>
   <div id="style-sheet">
     <div id="style-header">
-      <span>Map style</span>
+      <span>Settings</span>
       <button id="style-close">✕</button>
     </div>
+
+    <div class="settings-section-label">Map style</div>
     <div id="style-grid">
       <button class="style-btn active" data-style="dark">
         <div class="style-thumb" style="background:#1a1a2e"></div>
         <span>Dark</span>
       </button>
       <button class="style-btn" data-style="light">
-        <div class="style-thumb" style="background:#f5f3ee"></div>
+        <div class="style-thumb" style="background:#f5f3ee;border:1px solid #ccc"></div>
         <span>Light</span>
       </button>
       <button class="style-btn" data-style="voyager">
-        <div class="style-thumb" style="background:#d4e4c8;border:2px solid #bbb"></div>
+        <div class="style-thumb" style="background:#d4e4c8;border:1px solid #aaa"></div>
         <span>Street</span>
       </button>
       <button class="style-btn" data-style="satellite">
@@ -113,15 +151,38 @@
         <span>Satellite</span>
       </button>
       <button class="style-btn" data-style="terrain">
-        <div class="style-thumb" style="background:#c5d8a4;border:2px solid #bbb"></div>
+        <div class="style-thumb" style="background:#c5d8a4;border:1px solid #aaa"></div>
         <span>Terrain</span>
       </button>
     </div>
+
+    <div class="settings-section-label" style="margin-top:18px">Alerts & navigation</div>
+    <div id="settings-toggles">
+      <label class="setting-row"><span>🔊 Voice guidance</span>     <input type="checkbox" id="s-voice"   checked></label>
+      <label class="setting-row"><span>📷 Camera alerts</span>      <input type="checkbox" id="s-camera"  checked></label>
+      <label class="setting-row"><span>🚔 Police alerts</span>      <input type="checkbox" id="s-police"  checked></label>
+      <label class="setting-row"><span>📳 Haptic feedback</span>    <input type="checkbox" id="s-haptic"  checked></label>
+    </div>
+
+    <div class="settings-section-label" style="margin-top:18px">Units</div>
+    <div id="unit-toggle">
+      <button class="unit-btn active" data-unit="kmh">km/h</button>
+      <button class="unit-btn" data-unit="mph">mph</button>
+    </div>
+
+    <button id="install-btn" class="hidden">⬇ Add to home screen</button>
   </div>
 </div>
 
 <!-- ── Report FAB ──────────────────────────────── -->
 <button id="report-btn" title="Report sighting">🚨</button>
+
+<!-- ── PWA install toast ───────────────────────── -->
+<div id="install-toast" class="hidden">
+  <span>📡 Add Radar to your home screen</span>
+  <button id="install-toast-btn">Install</button>
+  <button id="install-toast-close">✕</button>
+</div>
 
 <!-- ── Report modal ────────────────────────────── -->
 <div id="modal-overlay" class="hidden">
