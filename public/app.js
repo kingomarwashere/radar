@@ -997,6 +997,16 @@ function parseShareHash(){
 }
 parseShareHash();
 
+/* ── Keep planner below keyboard on iOS (visualViewport shrinks, vh/dvh don't) ── */
+(()=>{
+  const pl=$$('route-planner');
+  function syncPlannerH(){
+    const h=window.visualViewport?window.visualViewport.height:window.innerHeight;
+    pl.style.maxHeight=Math.floor(h*0.82)+'px';
+  }
+  window.visualViewport?.addEventListener('resize',syncPlannerH);
+})();
+
 /* ═══════════════════════════════════════════════
    WAKE LOCK
 ═══════════════════════════════════════════════ */

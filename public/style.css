@@ -77,8 +77,7 @@ body:not(.nav-3d) .leaflet-control { opacity: 1; transition: opacity 0.3s; }
 #route-planner {
   position: absolute; top: 0; left: 0; right: 0; z-index: 1100;
   background: var(--surface); border-bottom: 1px solid rgba(255,255,255,.07);
-  /* 58svh uses the SMALL viewport (keyboard excluded) so results are never clipped */
-  max-height: 58svh; overflow: hidden;
+  max-height: 80dvh; overflow: hidden; /* JS overrides this when keyboard appears */
   display: flex; flex-direction: column;
 }
 #planner-top { flex-shrink: 0; }
