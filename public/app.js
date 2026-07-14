@@ -86,7 +86,13 @@ const TILES = {
   terrain:   { url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',                          sub:'abc',  attr:'©OpenStreetMap ©OpenTopoMap' },
 };
 
-const map = L.map('map', { center:[-27.5,133.5], zoom:5, zoomControl:false });
+const map = L.map('map', {
+  center:[-27.5,133.5], zoom:5, zoomControl:false,
+  rotate:true,          // leaflet-rotate: enable bearing API
+  touchRotate:true,     // two-finger pinch-rotate gesture
+  rotateControl:false,  // we use our own compass widget
+  bearing:0,
+});
 L.control.zoom({ position:'bottomleft' }).addTo(map);
 map.locate({ setView:true, maxZoom:14, timeout:8000 });
 
@@ -890,7 +896,7 @@ function endNav(){
   topbar.classList.remove('hidden'); reportBtn.classList.remove('hidden');
 
   headingUpMode=false;
-  document.getElementById('map').style.transform='';
+  if(map.setBearing) map.setBearing(0);
   $$('north-up-btn').classList.add('hidden');
   $$('compass-widget').classList.add('hidden');
 
@@ -904,9 +910,12 @@ function endNav(){
 
 function gpsErr(e){console.warn('GPS',e.code,e.message);}
 
-function makeUserMarker(lat,lng,hdg=0){
+function makeUserMarker(lat,lng,gpsHdg=0){
+  // Counter-rotate the icon against the map bearing so the arrow always points
+  // in the GPS travel direction in screen space regardless of map rotation.
+  const iconRot = gpsHdg - (map.getBearing ? map.getBearing() : 0);
   return L.marker([lat,lng],{
-    icon:L.divIcon({html:`<span class="user-arrow" style="transform:rotate(${hdg}deg)">▲</span>`,className:'',iconSize:[32,32],iconAnchor:[16,16]}),
+    icon:L.divIcon({html:`<span class="user-arrow" style="transform:rotate(${iconRot}deg)">▲</span>`,className:'',iconSize:[32,32],iconAnchor:[16,16]}),
     zIndexOffset:1000,
   });
 }
@@ -921,11 +930,7 @@ function onGPS(pos){
 
   if(navState==='navigating'){
     map.setView([lat,lng],Math.max(map.getZoom(),15),{animate:true,duration:0.8});
-
-    if(headingUpMode){
-      document.getElementById('map').style.transform=`rotate(${-hdg}deg) scale(1.5)`;
-      updateCompass(hdg);
-    }
+    if(headingUpMode && map.setBearing) map.setBearing(hdg);
   }
 
   let rawMs=rawSpd;
@@ -950,7 +955,7 @@ function onGPS(pos){
     } else navSpeedBadge.classList.add('hidden');
   }
 
-  prevPos={lat,lng,ts:pos.timestamp};
+  prevPos={lat,lng,ts:pos.timestamp,hdg};
   if(navState!=='navigating'||!routePoints.length)return;
 
   const {idx,dist}=nearestOnRoute(routePoints,lat,lng);
@@ -1022,22 +1027,34 @@ function updateNavPanel(distToTurn){
 
 function getSpeedLimit(){ const m=maneuvers[currentMidx]; return(m?.speed_limit&&m.speed_limit<200)?m.speed_limit:null; }
 
-/* ── Compass widget ──────────────────────────── */
-function updateCompass(hdg){
-  const needle=$$('compass-needle');
-  if(!needle)return;
-  needle.style.transform=`translateX(-50%) translateY(-100%) rotate(${hdg}deg)`;
+/* ── Compass widget — driven by map's rotate event ── */
+function updateCompass(){
+  const bearing = map.getBearing ? map.getBearing() : 0;
+  const needle = $$('compass-needle');
+  if(needle) needle.style.transform=`translateX(-50%) translateY(-100%) rotate(${bearing}deg)`;
+  // Show compass + north-up button whenever map isn't north-up
+  const off = Math.abs(bearing % 360) > 0.5;
+  $$('compass-widget').classList.toggle('hidden', !off);
+  $$('north-up-btn').classList.toggle('hidden', !off);
+  // Rebuild user marker so arrow stays correct after free rotation
+  if(userMarker && prevPos){
+    const ll = userMarker.getLatLng();
+    const gpsHdg = prevPos.hdg ?? 0;
+    map.removeLayer(userMarker);
+    userMarker = makeUserMarker(ll.lat, ll.lng, gpsHdg).addTo(map);
+  }
 }
 
-$$('compass-widget').addEventListener('click',resetNorthUp);
-$$('north-up-btn').addEventListener('click',resetNorthUp);
+// Wire map rotate event (fires on setBearing AND two-finger gesture)
+map.on('rotate', updateCompass);
+
+$$('compass-widget').addEventListener('click', resetNorthUp);
+$$('north-up-btn').addEventListener('click', resetNorthUp);
 
 function resetNorthUp(){
-  headingUpMode=false;
-  document.getElementById('map').style.transform='';
-  const needle=$$('compass-needle');
-  if(needle) needle.style.transform='translateX(-50%) translateY(-100%) rotate(0deg)';
-  $$('north-up-btn').classList.add('hidden');
+  headingUpMode = false;
+  if(map.setBearing) map.setBearing(0);
+  // updateCompass fires via the rotate event automatically
 }
 
 /* ── Proximity alerts (cameras + police + schools) ──── */
