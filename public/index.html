@@ -2,56 +2,92 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Radar — Live Police & Camera Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Radar</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
-  <div id="map"></div>
 
-  <!-- Top bar -->
-  <div id="topbar">
-    <div id="logo">📡 RADAR</div>
-    <div id="filters">
-      <button class="filter-btn active" data-layer="police" title="Police sightings">🚔</button>
-      <button class="filter-btn active" data-layer="speed" title="Speed cameras">📷</button>
-      <button class="filter-btn active" data-layer="red_light" title="Red light cameras">🔴</button>
-    </div>
-    <div id="report-count">— reports</div>
+<div id="map"></div>
+
+<!-- ── Normal top bar ──────────────────────────── -->
+<div id="topbar">
+  <div id="logo">📡 RADAR</div>
+  <div id="filters">
+    <button class="filter-btn active" data-layer="police" title="Police">🚔</button>
+    <button class="filter-btn active" data-layer="speed"  title="Speed cams">📷</button>
+    <button class="filter-btn active" data-layer="red_light" title="Red light">🔴</button>
   </div>
+  <button id="search-toggle" title="Navigate">🔍</button>
+</div>
 
-  <!-- Report button -->
-  <button id="report-btn" title="Report police">🚨</button>
+<!-- ── Search bar (replaces topbar when searching) ─ -->
+<div id="search-bar" class="hidden">
+  <button id="search-close">✕</button>
+  <input id="search-input" type="text" placeholder="Search destination…" autocomplete="off" spellcheck="false">
+  <div id="search-results"></div>
+</div>
 
-  <!-- Report modal -->
-  <div id="modal-overlay" class="hidden">
-    <div id="modal">
-      <h2>Report a sighting</h2>
-      <p id="modal-coords"></p>
+<!-- ── Route preview bar (shows after route calc) ── -->
+<div id="preview-bar" class="hidden">
+  <div id="preview-summary">
+    <span id="preview-dist">–</span>
+    <span id="preview-time">–</span>
+    <span id="preview-eta">ETA –</span>
+  </div>
+  <button id="start-nav-btn">▶ Start</button>
+  <button id="cancel-route-btn">✕</button>
+</div>
 
-      <div class="type-grid">
-        <button class="type-btn active" data-type="police">🚔 Police</button>
-        <button class="type-btn" data-type="speed_trap">📸 Speed trap</button>
-        <button class="type-btn" data-type="accident">⚠️ Accident</button>
-        <button class="type-btn" data-type="hazard">🚧 Hazard</button>
-      </div>
+<!-- ── Active navigation: instruction banner ─────── -->
+<div id="nav-instruction" class="hidden">
+  <div id="nav-icon">↑</div>
+  <div id="nav-text">
+    <div id="nav-dist">–</div>
+    <div id="nav-street">–</div>
+  </div>
+</div>
 
-      <textarea id="desc-input" placeholder="Optional note (e.g. heading north, 3 units)" rows="2" maxlength="120"></textarea>
+<!-- ── Active navigation: footer ─────────────────── -->
+<div id="nav-footer" class="hidden">
+  <div id="nav-eta-block">
+    <div id="nav-eta">–</div>
+    <div id="nav-remaining">–</div>
+  </div>
+  <div id="speed-block">
+    <div id="speed-limit-sign" class="hidden"><span id="speed-limit-val">–</span></div>
+    <div id="current-speed">– <small>km/h</small></div>
+  </div>
+  <button id="end-nav-btn">✕ End</button>
+</div>
 
-      <div class="modal-actions">
-        <button id="cancel-btn">Cancel</button>
-        <button id="submit-btn">Submit</button>
-      </div>
+<!-- ── Report FAB (hidden during nav) ────────────── -->
+<button id="report-btn" title="Report sighting">🚨</button>
+
+<!-- ── Report modal ──────────────────────────────── -->
+<div id="modal-overlay" class="hidden">
+  <div id="modal">
+    <h2>Report a sighting</h2>
+    <p id="modal-coords"></p>
+    <div class="type-grid">
+      <button class="type-btn active" data-type="police">🚔 Police</button>
+      <button class="type-btn" data-type="speed_trap">📸 Speed trap</button>
+      <button class="type-btn" data-type="accident">⚠️ Accident</button>
+      <button class="type-btn" data-type="hazard">🚧 Hazard</button>
+    </div>
+    <textarea id="desc-input" placeholder="Optional note…" rows="2" maxlength="120"></textarea>
+    <div class="modal-actions">
+      <button id="cancel-btn">Cancel</button>
+      <button id="submit-btn">Submit</button>
     </div>
   </div>
+</div>
 
-  <!-- Marker detail popup is handled by Leaflet bindPopup -->
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-  <script src="/app.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="/app.js"></script>
 </body>
 </html>

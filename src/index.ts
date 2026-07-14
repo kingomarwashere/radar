@@ -4,6 +4,7 @@ import type { Env } from './types';
 import reports from './routes/reports';
 import cameras from './routes/cameras';
 import seed from './routes/seed';
+import route from './routes/route';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -12,6 +13,7 @@ app.use('*', cors({ origin: '*' }));
 app.route('/api/reports', reports);
 app.route('/api/cameras', cameras);
 app.route('/api/admin/seed', seed);
+app.route('/api/route', route);
 
 app.get('/api/health', (c) => c.json({ ok: true, ts: Date.now() }));
 
