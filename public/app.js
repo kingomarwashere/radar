@@ -509,7 +509,6 @@ const topbar=$$('topbar'), planner=$$('route-planner'), plannerBack=$$('planner-
       startNavBtn=$$('start-nav-btn'), cancelRoute=$$('cancel-route-btn'),
       navInst=$$('nav-instruction'), navIconEl=$$('nav-icon'),
       navDistEl=$$('nav-dist'), navStreetEl=$$('nav-street'),
-      navSpeedBadge=$$('nav-speed-badge'), navSpeedVal=$$('nav-speed-val'),
       navNextWrap=$$('nav-next-wrap'), navNextIcon=$$('nav-next-icon'), navNextLabel=$$('nav-next-label'),
       alertBar=$$('alert-bar'), alertIcon=$$('alert-icon'), alertText=$$('alert-text'), alertDist=$$('alert-dist'),
       navFooter=$$('nav-footer'), navETA=$$('nav-eta'), navRemaining=$$('nav-remaining'),
@@ -599,10 +598,15 @@ let userPanning=false, pausePanTimer=null;
 map.on('dragstart zoomstart', ()=>{
   userPanning=true;
   clearTimeout(pausePanTimer);
-  pausePanTimer=setTimeout(()=>{ userPanning=false; }, 10000);
+  if(navState==='navigating') $$('recenter-btn').classList.remove('hidden');
+  pausePanTimer=setTimeout(()=>{
+    userPanning=false;
+    $$('recenter-btn').classList.add('hidden');
+  }, 4000);
 });
 let nearCameras=[], nearReports=[], alertedIds=new Set();
 let alertHideTimer=null;
+let activeAlert=null; // {lat,lng,dismissDist} — persists bar until hazard is passed
 let schoolZones=[];
 let headingUpMode=false;
 let arrivedFlag=false;
@@ -1033,8 +1037,8 @@ arrivalDone.addEventListener('click',()=>{arrivalOverlay.classList.add('hidden')
 function startNav(){
   previewBar.classList.add('hidden');
   topbar.classList.add('hidden');
-  reportBtn.classList.add('hidden');
   navInst.classList.remove('hidden');
+  document.body.classList.add('navigating');
   navFooter.classList.remove('hidden');
   navState='navigating';
   currentMidx=0; lastVoice=-1; offCount=0; alertedIds.clear();
@@ -1078,7 +1082,10 @@ function endNav(){
   navState='idle';
   if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}
   [navInst,navFooter,alertBar,arrivalOverlay].forEach(el=>el.classList.add('hidden'));
-  topbar.classList.remove('hidden'); reportBtn.classList.remove('hidden');
+  topbar.classList.remove('hidden');
+  document.body.classList.remove('navigating');
+  $$('recenter-btn').classList.add('hidden');
+  activeAlert=null;
 
   headingUpMode=false;
   disable3DView();
@@ -1097,6 +1104,49 @@ function endNav(){
 
 function gpsErr(e){console.warn('GPS',e.code,e.message);}
 
+/* ── Auto-zoom + look-ahead per zoom level ──────── */
+function targetNavZoom(speedMs){
+  const kmh=speedMs*3.6;
+  if(kmh>75) return 16;
+  if(kmh>35) return 17;
+  return 18;
+}
+// Max look-ahead (metres) that keeps car at ~65% down the visible map at each zoom
+const LOOK_CAP={16:300,17:150,18:75};
+
+/* ── Silent reroute (mid-navigation, no preview bar) ── */
+async function reroute(lat,lng){
+  if(!routePoints.length) return;
+  showToast('Recalculating…',20000);
+  const dest=routePoints[routePoints.length-1];
+  const costOpts={};
+  if(routeOpts.avoidTolls||routeOpts.avoidHighways){
+    costOpts.auto={};
+    if(routeOpts.avoidTolls) costOpts.auto.toll_booth_penalty=9999;
+    if(routeOpts.avoidHighways) costOpts.auto.use_highways=0.1;
+  }
+  try{
+    const resp=await fetch('/api/route',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        locations:[{lon:lng,lat:lat},{lon:dest[1],lat:dest[0]}],
+        costing:'auto',
+        directions_options:{units:'kilometers',language:'en-US'},
+        ...(Object.keys(costOpts).length?{costing_options:costOpts}:{}),
+      })});
+    if(!resp.ok){showToast('Could not reroute',3000);return;}
+    const data=await resp.json();
+    routeData=data.trip;
+    routePoints=decodePolyline6(routeData.legs[0].shape);
+    maneuvers=routeData.legs[0].maneuvers;
+    currentMidx=0; lastVoice=-1;
+    allRoutes=[routeData]; selectedRouteIdx=0;
+    if(routeLine) routeLine.setLatLngs(routePoints);
+    if(traveledLine) traveledLine.setLatLngs([]);
+    showToast('Route updated',2000);
+    loadNearCameras(); loadNearReports();
+  }catch{showToast('Rerouting failed',3000);}
+}
+
 function makeUserIcon(gpsHdg=0){
   const iconRot = gpsHdg - (map.getBearing ? map.getBearing() : 0);
   return L.divIcon({
@@ -1111,9 +1161,28 @@ function makeUserMarker(lat,lng,gpsHdg=0){
 /* ── GPS handler ────────────────────────────────── */
 function onGPS(pos){
   const {latitude:lat,longitude:lng,speed:rawSpd,heading}=pos.coords;
-  // Raw heading from GPS (or calc from movement), then smooth it
-  const rawHdg=(heading!=null&&!isNaN(heading))?heading:(prevPos?bearing(prevPos.lat,prevPos.lng,lat,lng):smoothHdg);
-  const hdg=applySmoothing(rawHdg);
+
+  // Speed first — needed by heading-freeze logic below
+  let speedMs=rawSpd;
+  if((speedMs==null||isNaN(speedMs))&&prevPos){
+    const dt=(pos.timestamp-prevPos.ts)/1000;
+    if(dt>0) speedMs=haversine(prevPos.lat,prevPos.lng,lat,lng)/dt;
+  }
+  speedMs=speedMs??0;
+
+  // Heading: use hardware GPS heading directly when moving (CoreLocation already smooths it).
+  // Apply EMA only for the calculated-from-position fallback.
+  // Freeze entirely when stopped to prevent map spin at red lights.
+  const isMoving=speedMs>1.5;
+  let hdg;
+  if(heading!=null&&!isNaN(heading)&&isMoving){
+    hdg=heading; smoothHdg=heading; hdgSet=true;
+  } else if(!isMoving){
+    hdg=hdgSet?smoothHdg:0;
+  } else {
+    const rawHdg=prevPos?bearing(prevPos.lat,prevPos.lng,lat,lng):smoothHdg;
+    hdg=applySmoothing(rawHdg);
+  }
 
   if(!userMarker){
     userMarker=makeUserMarker(lat,lng,hdg).addTo(map);
@@ -1122,25 +1191,22 @@ function onGPS(pos){
     userMarker.setIcon(makeUserIcon(hdg));
   }
 
-  if(navState==='navigating' && !userPanning){
-    // setBearing uses smoothed heading — no jitter in map rotation
-    if(headingUpMode && map.setBearing) map.setBearing(hdg);
-    // panTo (NOT setView) — never changes zoom mid-nav, no jitter
+  if(navState==='navigating'&&!userPanning){
+    if(headingUpMode&&map.setBearing) map.setBearing(hdg);
     if(perspective3D){
-      const lookM=Math.min(350,Math.max(80,(rawSpd??0)*7));
+      const zoom=map.getZoom();
+      const lookM=Math.min(LOOK_CAP[zoom]??75,Math.max(20,speedMs*7));
       const [aLat,aLng]=aheadPoint(lat,lng,hdg,lookM);
-      map.panTo([aLat,aLng],{animate:true,duration:0.4,easeLinearity:0.5,noMoveStart:true});
+      const targetZoom=targetNavZoom(speedMs);
+      if(targetZoom!==zoom){
+        map.setView([aLat,aLng],targetZoom,{animate:true,duration:0.6,noMoveStart:true});
+      } else {
+        map.panTo([aLat,aLng],{animate:true,duration:0.4,easeLinearity:0.5,noMoveStart:true});
+      }
     } else {
       map.panTo([lat,lng],{animate:true,duration:0.5,noMoveStart:true});
     }
   }
-
-  let rawMs=rawSpd;
-  if((rawMs==null||isNaN(rawMs))&&prevPos){
-    const dt=(pos.timestamp-prevPos.ts)/1000;
-    if(dt>0) rawMs=haversine(prevPos.lat,prevPos.lng,lat,lng)/dt;
-  }
-  const speedMs=rawMs??0;
 
   if(navState==='navigating'){
     currentSpeedEl.innerHTML=fmtSpeed(speedMs);
@@ -1149,12 +1215,9 @@ function onGPS(pos){
     const over=dispLim&&(prefs.unit==='mph'?toMph(speedMs):toKmh(speedMs))>dispLim;
     currentSpeedEl.classList.toggle('over-limit',over);
     speedLimitSign.classList.toggle('over-limit',over);
-    navSpeedBadge.classList.toggle('over',over);
     if(over&&prefs.haptic&&navigator.vibrate) navigator.vibrate([100,50,100]);
-    if(dispLim){
-      navSpeedBadge.classList.remove('hidden');
-      navSpeedVal.textContent=dispLim;
-    } else navSpeedBadge.classList.add('hidden');
+    if(dispLim){speedLimitSign.classList.remove('hidden');speedLimitVal.textContent=dispLim;}
+    else speedLimitSign.classList.add('hidden');
   }
 
   prevPos={lat,lng,ts:pos.timestamp,hdg};
@@ -1165,12 +1228,7 @@ function onGPS(pos){
 
   if(dist>60){
     offCount++;
-    if(offCount>=3){
-      offCount=0;
-      const destPt=routePoints[routePoints.length-1];
-      calcRoute(lat,lng,destPt[0],destPt[1]).then(()=>{if(navState==='preview')startNav();});
-      return;
-    }
+    if(offCount>=3){offCount=0;reroute(lat,lng);return;}
   } else offCount=0;
 
   for(let i=maneuvers.length-1;i>=0;i--){if(idx>=maneuvers[i].begin_shape_index){currentMidx=i;break;}}
@@ -1185,7 +1243,6 @@ function onGPS(pos){
   checkProximityAlerts(lat,lng,hdg);
   updateSpeedProfileCursor();
 
-  // Enable heading-up mode once moving
   if(!headingUpMode&&speedMs>2){
     headingUpMode=true;
     $$('north-up-btn').classList.remove('hidden');
@@ -1247,6 +1304,11 @@ map.on('rotate', updateCompass);
 
 $$('compass-widget').addEventListener('click', resetNorthUp);
 $$('north-up-btn').addEventListener('click', resetNorthUp);
+$$('recenter-btn').addEventListener('click',()=>{
+  userPanning=false;
+  clearTimeout(pausePanTimer);
+  $$('recenter-btn').classList.add('hidden');
+});
 
 function resetNorthUp(){
   headingUpMode = false;
@@ -1267,6 +1329,17 @@ async function loadNearReports(){
 }
 
 function checkProximityAlerts(lat,lng,userHeading){
+  // Live-update distance on active alert; dismiss once we've passed the hazard
+  if(activeAlert){
+    const d=haversine(lat,lng,activeAlert.lat,activeAlert.lng);
+    if(d>activeAlert.dismissDist){
+      alertBar.classList.add('hidden');
+      activeAlert=null;
+    } else {
+      alertDist.textContent=fmtDist(d);
+    }
+  }
+
   if(prefs.cameraAlerts){
     for(const cam of nearCameras){
       const d=haversine(lat,lng,cam.lat,cam.lng);
@@ -1285,7 +1358,7 @@ function checkProximityAlerts(lat,lng,userHeading){
         alertedIds.add(key);
         const label={speed:'Speed camera',red_light:'Red light camera',average_speed:'Avg speed camera'}[cam.type]??'Camera';
         const limitStr=cam.speed_limit?` · ${cam.speed_limit} km/h`:'';
-        showAlert('📷',`${label}${limitStr}`,fmtDist(d),false);
+        showAlert('📷',`${label}${limitStr}`,fmtDist(d),false,cam.lat,cam.lng,500);
         cameraChime();
         if(prefs.haptic&&navigator.vibrate) navigator.vibrate(200);
       }
@@ -1300,21 +1373,20 @@ function checkProximityAlerts(lat,lng,userHeading){
       if(d<300&&!alertedIds.has(key)){
         alertedIds.add(key);
         const label=r.type==='police'?'Police reported ahead':'Speed trap reported';
-        showAlert('🚔',label,fmtDist(d),true);
+        showAlert('🚔',label,fmtDist(d),true,r.lat,r.lng,700);
         policeChime();
         if(prefs.haptic&&navigator.vibrate) navigator.vibrate([200,100,200]);
       }
       if(d>600)alertedIds.delete(key);
     }
   }
-  // School zone alerts
   if(isSchoolHours()&&schoolZones.length){
     for(const sz of schoolZones){
       const d=haversine(lat,lng,sz.lat,sz.lng);
       const key=`sz-${sz.lat.toFixed(4)}-${sz.lng.toFixed(4)}`;
       if(d<250&&!alertedIds.has(key)){
         alertedIds.add(key);
-        showAlert('🏫','School zone · 40 km/h',fmtDist(d),false);
+        showAlert('🏫','School zone · 40 km/h',fmtDist(d),false,sz.lat,sz.lng,400);
         schoolChime();
         if(prefs.haptic&&navigator.vibrate) navigator.vibrate([150,75,150]);
       }
@@ -1323,7 +1395,7 @@ function checkProximityAlerts(lat,lng,userHeading){
   }
 }
 
-function showAlert(icon,text,dist,isPolice){
+function showAlert(icon,text,dist,isPolice,hazLat,hazLng,dismissDist){
   alertIcon.textContent=icon;
   alertText.textContent=text;
   alertDist.textContent=dist;
@@ -1331,8 +1403,8 @@ function showAlert(icon,text,dist,isPolice){
   const instH=navInst.offsetHeight;
   alertBar.style.top=(instH+8)+'px';
   alertBar.classList.remove('hidden');
+  activeAlert=hazLat!=null?{lat:hazLat,lng:hazLng,dismissDist:dismissDist??600}:null;
   clearTimeout(alertHideTimer);
-  alertHideTimer=setTimeout(()=>alertBar.classList.add('hidden'),5000);
 }
 
 /* ── Voice guidance ─────────────────────────────── */
