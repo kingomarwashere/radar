@@ -22,27 +22,50 @@
     <button class="filter-btn active" data-layer="red_light" title="Red light">🔴</button>
   </div>
   <button id="search-toggle" title="Navigate">🔍</button>
+  <button id="style-toggle" title="Map style">🗺</button>
 </div>
 
-<!-- ── Search bar (replaces topbar when searching) ─ -->
-<div id="search-bar" class="hidden">
-  <button id="search-close">✕</button>
-  <input id="search-input" type="text" placeholder="Search destination…" autocomplete="off" spellcheck="false">
+<!-- ── Route planner (from / to) ───────────────── -->
+<div id="route-planner" class="hidden">
+  <div id="planner-top">
+    <button id="planner-back">←</button>
+    <div id="planner-fields">
+      <div class="field-row" id="from-row">
+        <div class="field-dot dot-from"></div>
+        <input id="from-input" class="field-input" type="text"
+               placeholder="Your location" autocomplete="off" spellcheck="false">
+        <button class="field-clear hidden" id="from-clear">✕</button>
+      </div>
+      <div class="field-connector">
+        <div class="connector-line"></div>
+        <button id="swap-btn" title="Swap">⇅</button>
+      </div>
+      <div class="field-row" id="to-row">
+        <div class="field-dot dot-to"></div>
+        <input id="to-input" class="field-input" type="text"
+               placeholder="Where to?" autocomplete="off" spellcheck="false">
+        <button class="field-clear hidden" id="to-clear">✕</button>
+      </div>
+    </div>
+  </div>
   <div id="search-results"></div>
 </div>
 
-<!-- ── Route preview bar (shows after route calc) ── -->
+<!-- ── Route preview ───────────────────────────── -->
 <div id="preview-bar" class="hidden">
-  <div id="preview-summary">
-    <span id="preview-dist">–</span>
-    <span id="preview-time">–</span>
-    <span id="preview-eta">ETA –</span>
+  <div id="preview-head">
+    <div id="preview-meta">
+      <div id="preview-dist">–</div>
+      <div id="preview-time">–</div>
+      <div id="preview-eta">–</div>
+    </div>
+    <button id="start-nav-btn">▶ Go</button>
+    <button id="cancel-route-btn">✕</button>
   </div>
-  <button id="start-nav-btn">▶ Start</button>
-  <button id="cancel-route-btn">✕</button>
+  <div id="directions-list"></div>
 </div>
 
-<!-- ── Active navigation: instruction banner ─────── -->
+<!-- ── Active navigation: instruction ──────────── -->
 <div id="nav-instruction" class="hidden">
   <div id="nav-icon">↑</div>
   <div id="nav-text">
@@ -51,7 +74,7 @@
   </div>
 </div>
 
-<!-- ── Active navigation: footer ─────────────────── -->
+<!-- ── Active navigation: footer ───────────────── -->
 <div id="nav-footer" class="hidden">
   <div id="nav-eta-block">
     <div id="nav-eta">–</div>
@@ -64,10 +87,43 @@
   <button id="end-nav-btn">✕ End</button>
 </div>
 
-<!-- ── Report FAB (hidden during nav) ────────────── -->
+<!-- ── Map style panel ─────────────────────────── -->
+<div id="style-panel" class="hidden">
+  <div id="style-panel-bg"></div>
+  <div id="style-sheet">
+    <div id="style-header">
+      <span>Map style</span>
+      <button id="style-close">✕</button>
+    </div>
+    <div id="style-grid">
+      <button class="style-btn active" data-style="dark">
+        <div class="style-thumb" style="background:#1a1a2e"></div>
+        <span>Dark</span>
+      </button>
+      <button class="style-btn" data-style="light">
+        <div class="style-thumb" style="background:#f5f3ee"></div>
+        <span>Light</span>
+      </button>
+      <button class="style-btn" data-style="voyager">
+        <div class="style-thumb" style="background:#d4e4c8;border:2px solid #bbb"></div>
+        <span>Street</span>
+      </button>
+      <button class="style-btn" data-style="satellite">
+        <div class="style-thumb" style="background:#2d4a2d"></div>
+        <span>Satellite</span>
+      </button>
+      <button class="style-btn" data-style="terrain">
+        <div class="style-thumb" style="background:#c5d8a4;border:2px solid #bbb"></div>
+        <span>Terrain</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Report FAB ──────────────────────────────── -->
 <button id="report-btn" title="Report sighting">🚨</button>
 
-<!-- ── Report modal ──────────────────────────────── -->
+<!-- ── Report modal ────────────────────────────── -->
 <div id="modal-overlay" class="hidden">
   <div id="modal">
     <h2>Report a sighting</h2>
