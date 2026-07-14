@@ -227,6 +227,31 @@ function nearestOnRoute(pts,lat,lng){
   return {idx:minI,dist:minD};
 }
 
+/* ═══════════════════════════════════════════════
+   3D PERSPECTIVE VIEW
+═══════════════════════════════════════════════ */
+let perspective3D = true;
+
+// Returns [lat, lng] of a point distM metres ahead along headingDeg
+function aheadPoint(lat, lng, hdgDeg, distM) {
+  const R = 6371000, d = distM / R, b = hdgDeg * Math.PI / 180;
+  const la = lat * Math.PI / 180, lo = lng * Math.PI / 180;
+  const la2 = Math.asin(Math.sin(la)*Math.cos(d) + Math.cos(la)*Math.sin(d)*Math.cos(b));
+  const lo2 = lo + Math.atan2(Math.sin(b)*Math.sin(d)*Math.cos(la), Math.cos(d)-Math.sin(la)*Math.sin(la2));
+  return [la2 * 180/Math.PI, lo2 * 180/Math.PI];
+}
+
+function enable3DView() {
+  perspective3D = true;
+  document.body.classList.add('nav-3d');
+  const btn = $$('view-toggle'); if(btn){ btn.textContent='2D'; btn.title='Switch to 2D view'; }
+}
+function disable3DView() {
+  perspective3D = false;
+  document.body.classList.remove('nav-3d');
+  const btn = $$('view-toggle'); if(btn){ btn.textContent='3D'; btn.title='Switch to 3D view'; }
+}
+
 const ARROW = {1:'↑',2:'↑',3:'↑',4:'🏁',5:'🏁',6:'🏁',7:'↑',8:'↑',9:'↗',10:'→',11:'↪',12:'↩',13:'↩',14:'↩',15:'←',16:'↖',17:'↑',18:'↗',19:'↖',22:'↗',23:'↖',24:'⇒',25:'↻',26:'↑',28:'⛴'};
 
 /* ── Toast helper ─────────────────────────────── */
@@ -927,6 +952,7 @@ document.addEventListener('visibilitychange',()=>{
 ═══════════════════════════════════════════════ */
 startNavBtn.addEventListener('click',startNav);
 endNavBtn.addEventListener('click',endNav);
+$$('view-toggle').addEventListener('click',()=>{ perspective3D ? disable3DView() : enable3DView(); });
 arrivalDone.addEventListener('click',()=>{arrivalOverlay.classList.add('hidden');endNav();});
 
 function startNav(){
@@ -938,10 +964,12 @@ function startNav(){
   navState='navigating';
   currentMidx=0; lastVoice=-1; offCount=0; alertedIds.clear();
   remainingSec=routeData.summary.time;
-  arrivedFlag=false; headingUpMode=false;
+  arrivedFlag=false; headingUpMode=true;
 
   $$('compass-widget').classList.remove('hidden');
+  $$('view-toggle').classList.remove('hidden');
   acquireWakeLock();
+  enable3DView();
 
   loadNearCameras();
   loadNearReports();
@@ -959,9 +987,11 @@ function endNav(){
   topbar.classList.remove('hidden'); reportBtn.classList.remove('hidden');
 
   headingUpMode=false;
+  disable3DView();
   if(map.setBearing) map.setBearing(0);
   $$('north-up-btn').classList.add('hidden');
   $$('compass-widget').classList.add('hidden');
+  $$('view-toggle').classList.add('hidden');
 
   releaseWakeLock();
   clearRoute();
@@ -992,8 +1022,16 @@ function onGPS(pos){
   userMarker=makeUserMarker(lat,lng,hdg).addTo(map);
 
   if(navState==='navigating'){
-    map.setView([lat,lng],Math.max(map.getZoom(),15),{animate:true,duration:0.8});
     if(headingUpMode && map.setBearing) map.setBearing(hdg);
+    const zoom = Math.max(map.getZoom(), perspective3D ? 17 : 15);
+    if(perspective3D && speedMs > 0.5){
+      // Centre ahead of the user so road fills the top 2/3 of the tilted view
+      const lookM = Math.min(350, Math.max(80, speedMs * 7));
+      const [aLat, aLng] = aheadPoint(lat, lng, hdg, lookM);
+      map.setView([aLat, aLng], zoom, {animate:true, duration:0.55, easeLinearity:0.4});
+    } else {
+      map.setView([lat,lng], zoom, {animate:true, duration:0.8});
+    }
   }
 
   let rawMs=rawSpd;
