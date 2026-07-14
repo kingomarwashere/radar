@@ -244,6 +244,7 @@ function aheadPoint(lat, lng, hdgDeg, distM) {
 function enable3DView() {
   perspective3D = true;
   document.body.classList.add('nav-3d');
+  if(navState==='navigating') map.setZoom(16,{animate:true});
   const btn = $$('view-toggle'); if(btn){ btn.textContent='2D'; btn.title='Switch to 2D view'; }
 }
 function disable3DView() {
@@ -1110,13 +1111,14 @@ function gpsErr(e){console.warn('GPS',e.code,e.message);}
 
 /* ── Auto-zoom + look-ahead per zoom level ──────── */
 function targetNavZoom(speedMs){
+  if(perspective3D) return 16; // 3D always uses zoom 16 — tilt provides the depth, not zoom
   const kmh=speedMs*3.6;
   if(kmh>75) return 16;
   if(kmh>35) return 17;
   return 18;
 }
-// Max look-ahead (metres) that keeps car at ~65% down the visible map at each zoom
-const LOOK_CAP={16:300,17:150,18:75};
+// Max look-ahead in metres per zoom level (keeps car visible in lower third of screen)
+const LOOK_CAP={15:900,16:500,17:220,18:90};
 
 /* ── Silent reroute (mid-navigation, no preview bar) ── */
 async function reroute(lat,lng){
@@ -1199,7 +1201,7 @@ function onGPS(pos){
     if(headingUpMode&&map.setBearing) map.setBearing(hdg);
     if(perspective3D){
       const zoom=map.getZoom();
-      const lookM=Math.min(LOOK_CAP[zoom]??75,Math.max(20,speedMs*7));
+      const lookM=Math.min(LOOK_CAP[zoom]??90,Math.max(60,speedMs*12));
       const [aLat,aLng]=aheadPoint(lat,lng,hdg,lookM);
       const targetZoom=targetNavZoom(speedMs);
       if(targetZoom!==zoom){
