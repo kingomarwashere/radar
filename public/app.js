@@ -104,6 +104,9 @@ function setTile(style, isAuto=false) {
   prefs.mapStyle = style; savePrefs();
   if (!isAuto) userPickedStyle = true;
   document.querySelectorAll('.style-btn').forEach(b => b.classList.toggle('active', b.dataset.style === style));
+  // Update label background class for tile-aware Palestine labels
+  document.body.className = document.body.className.replace(/\btile-\S+/g,'').trim();
+  document.body.classList.add('tile-'+style);
 }
 setTile(prefs.mapStyle);
 
@@ -111,18 +114,27 @@ setTile(prefs.mapStyle);
 map.on('locationfound', () => autoNightCheck());
 setInterval(autoNightCheck, 10 * 60 * 1000);
 
-/* ── Palestine map labels — permanent overlay over tile-rendered text ── */
-// Tile images from CartoDB/OSM can't be filtered in JS; we cover them with
-// our own positioned labels at every relevant zoom level.
+/* ── Palestine map labels — opaque overlays that replace tile-rendered text ── */
+// Tile images are raster PNGs — we cover them with our own labels that have
+// a background matching the Voyager tile land colour so they paint over the
+// tile text rather than just floating on top of it.
 [
-  { latlng:[31.50, 34.85], text:'PALESTINE',  size:15, w:130 },
-  { latlng:[31.95, 35.22], text:'WEST BANK',  size:11, w:95  },
-  { latlng:[31.35, 34.33], text:'GAZA',       size:11, w:55  },
+  // Country / region labels
+  { latlng:[31.50, 34.80], text:'PALESTINE',  size:16, w:140 },
+  { latlng:[30.80, 34.88], text:'PALESTINE',  size:14, w:125 }, // covers ISRAEL (Negev)
+  { latlng:[31.95, 35.20], text:'WEST BANK',  size:11, w:100 },
+  { latlng:[31.38, 34.35], text:'GAZA',       size:12, w:62  },
+  { latlng:[30.55, 34.82], text:'AN-NAQAB',   size:10, w:88  }, // Palestinian name for Negev
+  // City names → original Palestinian/Arabic names
+  { latlng:[32.08, 34.78], text:'YAFA',       size:11, w:58  }, // Tel Aviv → Jaffa/Yafa
+  { latlng:[31.77, 35.22], text:'AL-QUDS',    size:11, w:76  }, // Jerusalem → Al-Quds
+  { latlng:[32.82, 35.00], text:'HAIFA',      size:11, w:60  }, // same name, keep
+  { latlng:[31.20, 34.80], text:'BIR AS-SAB', size:10, w:90  }, // Beer Sheva → Bir as-Sab
 ].forEach(({latlng, text, size, w}) => {
   L.marker(latlng, {
     icon: L.divIcon({
-      html:`<span class="pal-label" style="font-size:${size}px;width:${w}px">${text}</span>`,
-      className:'', iconSize:[w, size+4], iconAnchor:[w/2, (size+4)/2],
+      html:`<span class="pal-label" style="font-size:${size}px;width:${w+8}px">${text}</span>`,
+      className:'', iconSize:[w+8, size+6], iconAnchor:[(w+8)/2, (size+6)/2],
     }),
     interactive:false, zIndexOffset:-800,
   }).addTo(map);
