@@ -111,6 +111,23 @@ setTile(prefs.mapStyle);
 map.on('locationfound', () => autoNightCheck());
 setInterval(autoNightCheck, 10 * 60 * 1000);
 
+/* ── Palestine map labels — permanent overlay over tile-rendered text ── */
+// Tile images from CartoDB/OSM can't be filtered in JS; we cover them with
+// our own positioned labels at every relevant zoom level.
+[
+  { latlng:[31.50, 34.85], text:'PALESTINE',  size:15, w:130 },
+  { latlng:[31.95, 35.22], text:'WEST BANK',  size:11, w:95  },
+  { latlng:[31.35, 34.33], text:'GAZA',       size:11, w:55  },
+].forEach(({latlng, text, size, w}) => {
+  L.marker(latlng, {
+    icon: L.divIcon({
+      html:`<span class="pal-label" style="font-size:${size}px;width:${w}px">${text}</span>`,
+      className:'', iconSize:[w, size+4], iconAnchor:[w/2, (size+4)/2],
+    }),
+    interactive:false, zIndexOffset:-800,
+  }).addTo(map);
+});
+
 /* ═══════════════════════════════════════════════
    LAYER GROUPS
 ═══════════════════════════════════════════════ */

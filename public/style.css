@@ -534,6 +534,18 @@ body.navigating #report-btn {
   width: 44px; height: 44px;
 }
 
+/* ── Palestine map labels ─────────────────────── */
+.pal-label {
+  display: block; text-align: center;
+  font-weight: 800; letter-spacing: .09em; color: #1e293b;
+  /* white halo so it's readable over any tile style */
+  text-shadow: 0 0 3px #fff, 0 0 6px #fff, 0 0 12px #fff,
+               1px 1px 0 #fff, -1px -1px 0 #fff,
+               1px -1px 0 #fff, -1px 1px 0 #fff;
+  white-space: nowrap; pointer-events: none;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
 /* ── 2D street name bubbles overlay ───────────── */
 #street-labels-overlay {
   position: absolute; inset: 0; z-index: 500;
