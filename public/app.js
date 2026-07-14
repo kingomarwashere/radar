@@ -586,6 +586,21 @@ let altLines=[];
 let routeLine=null, traveledLine=null, destMarker=null, userMarker=null;
 let watchId=null, currentMidx=0, offCount=0, prevPos=null;
 let lastVoice=-1, remainingSec=0;
+// Heading smoother — prevents jittery map rotation from noisy GPS bearing
+let smoothHdg=0, hdgSet=false;
+function applySmoothing(raw){
+  if(!hdgSet){ smoothHdg=raw; hdgSet=true; return raw; }
+  const diff=((raw-smoothHdg+540)%360)-180; // handles 359→1 wraparound
+  smoothHdg=(smoothHdg+diff*0.25+360)%360;
+  return smoothHdg;
+}
+// Pause auto-pan when user is manually zooming/panning the map
+let userPanning=false, pausePanTimer=null;
+map.on('dragstart zoomstart', ()=>{
+  userPanning=true;
+  clearTimeout(pausePanTimer);
+  pausePanTimer=setTimeout(()=>{ userPanning=false; }, 10000);
+});
 let nearCameras=[], nearReports=[], alertedIds=new Set();
 let alertHideTimer=null;
 let schoolZones=[];
@@ -1021,17 +1036,30 @@ function startNav(){
   acquireWakeLock();
   enable3DView();
 
-  // Immediately fly to the user's known position at street zoom
-  const knownPos = userMarker ? userMarker.getLatLng()
-                 : prevPos    ? {lat:prevPos.lat, lng:prevPos.lng}
-                 : null;
-  if(knownPos) map.setView([knownPos.lat, knownPos.lng], 17, {animate:true, duration:0.6});
+  // Reset heading smoother so it doesn't inherit stale heading
+  hdgSet=false; userPanning=false;
+
+  // Create traveledLine once here so updateRouteStyling can use setLatLngs
+  // (avoids per-tick remove/add which causes flicker during zoom)
+  if(traveledLine){ map.removeLayer(traveledLine); traveledLine=null; }
+  traveledLine=L.polyline([],{color:'#334155',weight:5,opacity:.7}).addTo(map);
+
+  // Get a FRESH high-accuracy GPS fix immediately (don't rely on stale userMarker)
+  navigator.geolocation.getCurrentPosition(pos=>{
+    userPanning=false; // don't let this trigger the pause
+    const {latitude:lat,longitude:lng}=pos.coords;
+    map.setView([lat,lng],17,{animate:true,duration:0.7});
+  }, ()=>{
+    // Fallback to last known position if getCurrentPosition fails
+    const k=userMarker?userMarker.getLatLng():prevPos?{lat:prevPos.lat,lng:prevPos.lng}:null;
+    if(k) map.setView([k.lat,k.lng],17,{animate:true,duration:0.7});
+  }, {enableHighAccuracy:true,timeout:8000,maximumAge:10000});
 
   loadNearCameras();
   loadNearReports();
 
   if(watchId!=null) navigator.geolocation.clearWatch(watchId);
-  watchId=navigator.geolocation.watchPosition(onGPS,gpsErr,{enableHighAccuracy:true,maximumAge:1000,timeout:10000});
+  watchId=navigator.geolocation.watchPosition(onGPS,gpsErr,{enableHighAccuracy:true,maximumAge:0,timeout:10000});
   updateNavPanel();
   dingChime();
 }
@@ -1072,21 +1100,23 @@ function makeUserMarker(lat,lng,gpsHdg=0){
 /* ── GPS handler ────────────────────────────────── */
 function onGPS(pos){
   const {latitude:lat,longitude:lng,speed:rawSpd,heading}=pos.coords;
-  const hdg=(heading!=null&&!isNaN(heading))?heading:(prevPos?bearing(prevPos.lat,prevPos.lng,lat,lng):0);
+  // Raw heading from GPS (or calc from movement), then smooth it
+  const rawHdg=(heading!=null&&!isNaN(heading))?heading:(prevPos?bearing(prevPos.lat,prevPos.lng,lat,lng):smoothHdg);
+  const hdg=applySmoothing(rawHdg);
 
   if(userMarker)map.removeLayer(userMarker);
   userMarker=makeUserMarker(lat,lng,hdg).addTo(map);
 
-  if(navState==='navigating'){
+  if(navState==='navigating' && !userPanning){
+    // setBearing uses smoothed heading — no jitter in map rotation
     if(headingUpMode && map.setBearing) map.setBearing(hdg);
-    const zoom = Math.max(map.getZoom(), perspective3D ? 17 : 15);
-    if(perspective3D && speedMs > 0.5){
-      // Centre ahead of the user so road fills the top 2/3 of the tilted view
-      const lookM = Math.min(350, Math.max(80, speedMs * 7));
-      const [aLat, aLng] = aheadPoint(lat, lng, hdg, lookM);
-      map.setView([aLat, aLng], zoom, {animate:true, duration:0.55, easeLinearity:0.4});
+    // panTo (NOT setView) — never changes zoom mid-nav, no jitter
+    if(perspective3D){
+      const lookM=Math.min(350,Math.max(80,(rawSpd??0)*7));
+      const [aLat,aLng]=aheadPoint(lat,lng,hdg,lookM);
+      map.panTo([aLat,aLng],{animate:true,duration:0.4,easeLinearity:0.5,noMoveStart:true});
     } else {
-      map.setView([lat,lng], zoom, {animate:true, duration:0.8});
+      map.panTo([lat,lng],{animate:true,duration:0.5,noMoveStart:true});
     }
   }
 
@@ -1152,11 +1182,10 @@ function onGPS(pos){
 }
 
 function updateRouteStyling(idx){
-  if(traveledLine)map.removeLayer(traveledLine);
-  if(idx>1){
-    traveledLine=L.polyline(routePoints.slice(0,idx+1),{color:'#3d3d5c',weight:5,opacity:.65}).addTo(map);
-    if(routeLine)routeLine.setLatLngs(routePoints.slice(idx));
-  }
+  if(!routePoints.length) return;
+  // setLatLngs on existing layers — never removes/re-adds so no flicker during zoom
+  if(traveledLine) traveledLine.setLatLngs(idx>1 ? routePoints.slice(0,idx+1) : []);
+  if(routeLine)    routeLine.setLatLngs(routePoints.slice(Math.max(0,idx-1)));
 }
 
 function updateNavPanel(distToTurn){
