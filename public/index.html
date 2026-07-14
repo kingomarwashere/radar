@@ -75,37 +75,36 @@
 
 <!-- ── Route preview ───────────────────────────── -->
 <div id="preview-bar" class="hidden">
+  <!-- Drag handle -->
+  <div id="sheet-handle"><div class="handle-pill"></div></div>
+
+  <!-- Always-visible summary row -->
   <div id="preview-head">
     <div id="preview-meta">
       <div id="preview-dist">–</div>
       <div id="preview-sub">
         <span id="preview-time">–</span>
+        <span class="preview-dot">·</span>
         <span id="preview-eta">–</span>
       </div>
       <div id="preview-avoidance-note" class="hidden"></div>
     </div>
     <div id="preview-actions">
-      <button id="share-route-btn" title="Share route">⎋ Share</button>
       <button id="start-nav-btn">▶ Go</button>
+      <button id="share-route-btn" title="Share">⎋</button>
       <button id="cancel-route-btn">✕</button>
     </div>
   </div>
-  <!-- ── Route chips (alt routes) ──────────────── -->
-  <div id="route-chips" class="hidden"></div>
-  <!-- ── Speed profile strip ────────────────────── -->
-  <div id="speed-profile" class="hidden">
-    <div id="speed-profile-bar"></div>
-    <div id="speed-profile-legend">
-      <span class="sp-legend-item"><span class="sp-dot" style="background:#22c55e"></span>100+</span>
-      <span class="sp-legend-item"><span class="sp-dot" style="background:#4caf50"></span>80</span>
-      <span class="sp-legend-item"><span class="sp-dot" style="background:#f59e0b"></span>60</span>
-      <span class="sp-legend-item"><span class="sp-dot" style="background:#fb923c"></span>50</span>
-      <span class="sp-legend-item"><span class="sp-dot" style="background:#ef4444"></span>&lt;50</span>
-      <span class="sp-legend-item"><span class="sp-dot" style="background:#3b82f6"></span>?</span>
+
+  <!-- Scrollable content — hidden in peek state -->
+  <div id="sheet-content">
+    <div id="route-chips" class="hidden"></div>
+    <div id="speed-profile" class="hidden">
+      <div id="speed-profile-bar"></div>
+      <div id="speed-profile-cursor" class="hidden"></div>
     </div>
-    <div id="speed-profile-cursor" class="hidden"></div>
+    <div id="directions-list"></div>
   </div>
-  <div id="directions-list"></div>
 </div>
 
 <!-- ── Active navigation ────────────────────────── -->

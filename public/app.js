@@ -447,6 +447,61 @@ const topbar=$$('topbar'), planner=$$('route-planner'), plannerBack=$$('planner-
       arrivalOverlay=$$('arrival-overlay'), arrivalDest=$$('arrival-dest'), arrivalDone=$$('arrival-done');
 
 let fromPlace=null, toPlace=null, activeField='to';
+
+/* ═══════════════════════════════════════════════
+   BOTTOM SHEET DRAG
+═══════════════════════════════════════════════ */
+const SNAP = { peek: 108, half: Math.round(window.innerHeight * 0.44), full: Math.round(window.innerHeight * 0.82) };
+
+function setSheetState(state, animate=true) {
+  const h = SNAP[state] ?? SNAP.peek;
+  if(!animate) previewBar.style.transition='none';
+  previewBar.style.setProperty('--sheet-h', h+'px');
+  if(!animate) requestAnimationFrame(()=>{ previewBar.style.transition=''; });
+  // Show/hide scrollable content below the header
+  const content = $$('sheet-content');
+  if(content) content.style.display = state==='peek' ? 'none' : '';
+}
+
+(()=>{
+  const handle = $$('sheet-handle');
+  if(!handle) return;
+  let startY=0, startH=0, dragging=false;
+
+  handle.addEventListener('pointerdown', e=>{
+    handle.setPointerCapture(e.pointerId);
+    dragging=true;
+    startY=e.clientY;
+    startH=previewBar.getBoundingClientRect().height;
+    previewBar.style.transition='none';
+  });
+
+  handle.addEventListener('pointermove', e=>{
+    if(!dragging) return;
+    const dy = startY - e.clientY;
+    const newH = Math.max(SNAP.peek, Math.min(SNAP.full, startH+dy));
+    previewBar.style.setProperty('--sheet-h', newH+'px');
+    // Show content once dragged above peek threshold
+    const content=$$('sheet-content');
+    if(content) content.style.display = newH > SNAP.peek+20 ? '' : 'none';
+  });
+
+  handle.addEventListener('pointerup', e=>{
+    if(!dragging) return;
+    dragging=false;
+    previewBar.style.transition='';
+    const cur = previewBar.getBoundingClientRect().height;
+    const midLow = (SNAP.peek+SNAP.half)/2;
+    const midHigh = (SNAP.half+SNAP.full)/2;
+    setSheetState(cur < midLow ? 'peek' : cur < midHigh ? 'half' : 'full');
+  });
+
+  // Tap the handle toggles peek ↔ half
+  handle.addEventListener('click', ()=>{
+    const cur = previewBar.getBoundingClientRect().height;
+    setSheetState(cur <= SNAP.peek+20 ? 'half' : 'peek');
+  });
+})();
 let navState='idle';
 let allRoutes=[], selectedRouteIdx=0;
 let routeData=null, routePoints=[], maneuvers=[];
@@ -655,6 +710,9 @@ async function calcRoute(fromLat,fromLng,toLat,toLng){
     applySelectedRoute();
     fetchSchoolZones();
     navState='preview';
+    // Hide topbar + FAB so the map and route are unobstructed
+    topbar.classList.add('hidden');
+    reportBtn.classList.add('hidden');
   }catch(e){alert('Routing error: '+e.message);}
 }
 
@@ -691,6 +749,8 @@ function applySelectedRoute(){
   renderRouteChips();
   renderSpeedProfile();
   previewBar.classList.remove('hidden');
+  // Start in peek so the route polyline is fully visible
+  setSheetState('peek');
 }
 
 function renderRouteChips(){
@@ -811,6 +871,9 @@ function clearRoute(){
   fromPlace=null; toPlace=null;
   fromInput.value=''; toInput.value='';
   fromClear.classList.add('hidden'); toClear.classList.add('hidden');
+  // Restore topbar and FAB
+  topbar.classList.remove('hidden');
+  reportBtn.classList.remove('hidden');
 }
 
 /* ── Share route ─────────────────────────────── */
