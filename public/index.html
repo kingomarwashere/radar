@@ -42,6 +42,7 @@
 
 <!-- ── Route planner (from / to) ───────────────── -->
 <div id="route-planner" class="hidden">
+  <div class="handle-row" style="padding:8px 0 4px"><div class="handle-pill"></div></div>
   <div id="planner-top">
     <button id="planner-back" aria-label="Back">←</button>
     <div id="planner-fields">
@@ -76,23 +77,24 @@
   <!-- Drag handle -->
   <div id="sheet-handle"><div class="handle-pill"></div></div>
 
-  <!-- Always-visible summary row -->
+  <!-- Always-visible summary row — Waze-style -->
   <div id="preview-head">
     <div id="preview-meta">
-      <div id="preview-dist">–</div>
-      <div id="preview-sub">
+      <div id="preview-top-row">
         <span id="preview-time">–</span>
-        <span class="preview-dot">·</span>
-        <span id="preview-eta">–</span>
+        <span id="preview-dist">–</span>
       </div>
+      <div id="preview-via"></div>
       <div id="preview-avoidance-note" class="hidden"></div>
     </div>
     <div id="preview-actions">
-      <button id="start-nav-btn">▶ Go</button>
-      <button id="share-route-btn" title="Share">⎋</button>
-      <button id="cancel-route-btn">✕</button>
+      <button id="cancel-route-btn">Cancel</button>
+      <button id="start-nav-btn">Go now</button>
     </div>
   </div>
+  <!-- hidden elements kept for JS compat -->
+  <span id="preview-eta" style="display:none"></span>
+  <span id="preview-sub" style="display:none"></span>
 
   <!-- Scrollable content — hidden in peek state -->
   <div id="sheet-content">

@@ -466,22 +466,33 @@ function disable3DView() {
 
 const ARROW = {1:'↑',2:'↑',3:'↑',4:'🏁',5:'🏁',6:'🏁',7:'↑',8:'↑',9:'↗',10:'→',11:'↪',12:'↩',13:'↩',14:'↩',15:'←',16:'↖',17:'↑',18:'↗',19:'↖',22:'↗',23:'↖',24:'⇒',25:'↻',26:'↑',28:'⛴'};
 
-// SVG nav icons for the main turn indicator — clean stroke arrows on the blue pill
+// SVG nav icons — chunky filled-arrow style for high readability
 function _navSvg(inner){
-  return `<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+  return `<svg viewBox="0 0 28 28" width="36" height="36" fill="white" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
 }
 const NAV_SVG = {
-  straight:   _navSvg('<line x1="12" y1="20" x2="12" y2="4"/><polyline points="6,10 12,4 18,10"/>'),
-  slightR:    _navSvg('<line x1="5" y1="19" x2="19" y2="5"/><polyline points="11,5 19,5 19,13"/>'),
-  right:      _navSvg('<line x1="4" y1="12" x2="20" y2="12"/><polyline points="14,6 20,12 14,18"/>'),
-  sharpR:     _navSvg('<path d="M8 4v8a4 4 0 004 4h4"/><polyline points="12,13 16,17 12,21"/>'),
-  uTurn:      _navSvg('<path d="M7 20V10a5 5 0 0110 0"/><polyline points="13,7 17,10 13,13"/>'),
-  left:       _navSvg('<line x1="20" y1="12" x2="4" y2="12"/><polyline points="10,6 4,12 10,18"/>'),
-  slightL:    _navSvg('<line x1="19" y1="19" x2="5" y2="5"/><polyline points="13,5 5,5 5,13"/>'),
-  arrive:     _navSvg('<line x1="12" y1="17" x2="12" y2="4"/><polyline points="6,10 12,4 18,10"/><circle cx="12" cy="20" r="2" fill="white" stroke="none"/>'),
-  roundabout: _navSvg('<circle cx="12" cy="12" r="6"/><polyline points="9,6 12,4 14,7"/>'),
-  ramp:       _navSvg('<line x1="4" y1="20" x2="4" y2="8"/><path d="M4 8Q4 4 9 4L20 4"/><polyline points="16,2 20,4 16,6"/>'),
-  ferry:      _navSvg('<path d="M3 14c3-2 6-3 9-3s6 1 9 3"/><line x1="12" y1="4" x2="12" y2="11"/><polyline points="8,8 12,4 16,8"/>'),
+  // Straight up — thick upward arrow
+  straight:   _navSvg('<path d="M14 24V8M7 15l7-9 7 9z" stroke="white" stroke-width="1" fill="white" stroke-linejoin="round"/>'),
+  // Slight right — diagonal arrow NE
+  slightR:    _navSvg('<path d="M6 22L20 8M20 8h-8M20 8v8" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Hard right — right-pointing arrow
+  right:      _navSvg('<path d="M5 14h18M16 7l7 7-7 7" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Sharp right — hook
+  sharpR:     _navSvg('<path d="M9 4v10a5 5 0 005 5h5M15 14l4 5-4 5" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // U-turn
+  uTurn:      _navSvg('<path d="M8 23V12a6 6 0 0112 0v2M15 9l5 5-5 5" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Hard left
+  left:       _navSvg('<path d="M23 14H5M12 7L5 14l7 7" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Slight left
+  slightL:    _navSvg('<path d="M22 22L8 8M8 8v8M8 8h8" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Arrive — pin drop
+  arrive:     _navSvg('<path d="M14 4a7 7 0 010 14c0 0-7-8-7-10A7 7 0 0114 4z" fill="white"/><circle cx="14" cy="11" r="3" fill="#ff2d55" stroke="none"/>'),
+  // Roundabout
+  roundabout: _navSvg('<circle cx="14" cy="14" r="7" stroke="white" stroke-width="2.5" fill="none"/><path d="M14 7l3 3-3 3" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Ramp / merge right
+  ramp:       _navSvg('<path d="M5 23V10M5 10Q5 5 12 5L23 5M18 3l5 2-5 2" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Ferry
+  ferry:      _navSvg('<path d="M4 17c3-3 7-4 10-4s7 1 10 4M14 5v8M9 9l5-5 5 5" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
 };
 const ARROW_SVG = {
   1:NAV_SVG.straight,2:NAV_SVG.straight,3:NAV_SVG.straight,
@@ -559,7 +570,10 @@ async function geocode(q, nearLat, nearLng){
       return {
         lat, lng,
         name: san(p.name || p.street || p.city || p.county || 'Place'),
-        sub:  san([p.housenumber ? `${p.housenumber} ${p.street||''}`.trim() : p.street, p.city, p.state].filter(Boolean).join(', ')),
+        // prefer suburb/town over city (LGA) to show e.g. "Punchbowl" not "Canterbury-Bankstown"
+        sub:  san([p.housenumber ? `${p.housenumber} ${p.street||''}`.trim() : p.street,
+                   p.suburb || p.district || p.town || p.village || p.city,
+                   p.state].filter(Boolean).join(', ')),
         osmKey: p.osm_key   ?? '',
         osmVal: p.osm_value ?? '',
       };
@@ -859,7 +873,7 @@ let fromPlace=null, toPlace=null, activeField='to';
 /* ═══════════════════════════════════════════════
    BOTTOM SHEET DRAG
 ═══════════════════════════════════════════════ */
-const SNAP = { peek: 108, half: Math.round(window.innerHeight * 0.44), full: Math.round(window.innerHeight * 0.82) };
+const SNAP = { peek: 192, half: Math.round(window.innerHeight * 0.44), full: Math.round(window.innerHeight * 0.82) };
 
 function setSheetState(state, animate=true) {
   const h = SNAP[state] ?? SNAP.peek;
@@ -988,7 +1002,7 @@ function _stepMarker(ts){
   if(navState==='navigating' && !userPanning){
     if(perspective3D){
       const zoom=map.getZoom();
-      const lookM=Math.min(LOOK_CAP[zoom]??90,Math.max(60,_mLastSpeedMs*12));
+      const lookM=Math.min(LOOK_CAP[zoom]??180,Math.max(150,_mLastSpeedMs*15));
       const [aLat,aLng]=aheadPoint(lat,lng,_mCurHdg,lookM);
       map.jumpTo({center:[aLng,aLat],bearing:_mCurHdg,pitch:65,zoom:16});
     } else {
@@ -1223,7 +1237,17 @@ function applySelectedRoute(){
   const td=routeData.summary.length, tt=routeData.summary.time;
   previewDist.textContent=fmtDist(td*1000);
   previewTime.textContent=fmtTime(tt);
-  previewETA.textContent=`ETA ${fmtETA(tt)}`;
+  if(previewETA) previewETA.textContent=`ETA ${fmtETA(tt)}`;
+  // Via description — pick up to 3 unique major road names from maneuvers
+  const viaRoads=[]; const seen=new Set();
+  for(const m of maneuvers){
+    for(const n of (m.street_names??[])){
+      if(n&&!seen.has(n)&&viaRoads.length<3){seen.add(n);viaRoads.push(n);}
+    }
+    if(viaRoads.length>=3) break;
+  }
+  const viaEl=$$('preview-via');
+  if(viaEl) viaEl.textContent = viaRoads.length ? 'Via '+viaRoads.join(', ') : '';
 
   const notes=[];
   if(routeOpts.avoidTolls) notes.push('No tolls');
@@ -1335,11 +1359,17 @@ function renderDirections(){
   directionsList.innerHTML=maneuvers.map((m,i)=>{
     const d=cumDist; cumDist+=(m.length??0)*1000;
     const streets=san((m.street_names??[]).join(' / ')||m.instruction?.split('.')[0]||'—');
-    const speedStr=(m.speed_limit&&m.speed_limit<200)?`${m.speed_limit}`:'';
+    const instr=san(m.instruction??'');
+    const speedStr=(m.speed_limit&&m.speed_limit<200)?`${m.speed_limit} km/h`:'';
     const isLast=m.type>=4&&m.type<=6;
+    // Only show instruction if it adds info beyond the street name
+    const showInstr=instr&&!instr.toLowerCase().startsWith(streets.toLowerCase().slice(0,10));
     return `<div class="dir-step${isLast?' dir-arrive':''}">
       <span class="dir-arrow">${ARROW[m.type]??'↑'}</span>
-      <span class="dir-info"><span class="dir-street">${escHtml(streets)}</span><span class="dir-instr">${escHtml(san(m.instruction??''))}</span></span>
+      <div class="dir-info">
+        <span class="dir-street">${escHtml(streets)}</span>
+        ${showInstr?`<span class="dir-instr">${escHtml(instr)}</span>`:''}
+      </div>
       ${speedStr?`<span class="dir-speed">${speedStr}</span>`:''}
       <span class="dir-dist">${i===0?'Start':fmtDist(d)}</span>
     </div>`;

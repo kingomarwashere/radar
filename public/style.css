@@ -53,11 +53,24 @@ body {
 /* search-toggle and style-toggle removed — replaced by idle-bar */
 
 /* ── Route planner ────────────────────────────── */
+/* Planner slides UP from bottom like Waze — must override .hidden's display:none
+   using !important on an ID selector (higher specificity than .hidden class) */
 #route-planner {
-  position: absolute; top: 0; left: 0; right: 0; z-index: 1100;
-  background: var(--surface); border-bottom: 1px solid rgba(148,163,184,.08);
-  max-height: 80dvh; overflow: hidden; /* JS overrides this when keyboard appears */
-  display: flex; flex-direction: column;
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 1100;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  border-top: 1px solid rgba(148,163,184,.08);
+  max-height: 90dvh; overflow: hidden;
+  display: flex !important; /* beats .hidden { display:none !important } */
+  flex-direction: column;
+  transform: translateY(110%);
+  transition: transform .35s cubic-bezier(0.32, 0.72, 0, 1);
+  pointer-events: none;
+  box-shadow: 0 -8px 48px rgba(0,0,0,.7);
+}
+#route-planner:not(.hidden) {
+  transform: translateY(0);
+  pointer-events: auto;
 }
 #planner-top { flex-shrink: 0; }
 #search-results {
@@ -136,17 +149,16 @@ body {
 .result-fav-btn.saved { color: var(--amber); }
 .no-results { padding: 12px 10px; color: var(--muted); font-size: .85rem; }
 
-/* ── Preview bar — draggable bottom sheet ─────── */
+/* ── Preview bar — Waze-style bottom sheet ─────── */
 #preview-bar {
   position: absolute; bottom: 0; left: 0; right: 0; z-index: 1000;
   background: var(--surface);
   border-radius: 24px 24px 0 0;
   box-shadow: 0 -8px 48px rgba(0,0,0,.7), 0 -1px 0 rgba(148,163,184,.08);
   display: flex; flex-direction: column;
-  max-height: var(--sheet-h, 108px); /* JS controls this */
+  max-height: var(--sheet-h, 148px); /* JS controls this */
   overflow: hidden;
   transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1);
-  /* keep safe area padding at the very bottom */
   padding-bottom: env(safe-area-inset-bottom);
 }
 #sheet-handle {
@@ -161,37 +173,38 @@ body {
   margin: 0 auto;
 }
 #preview-head {
-  display: flex; align-items: center; gap: 10px;
-  padding: 0 14px 14px; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 0 16px 16px; flex-shrink: 0;
 }
 #preview-meta { flex: 1; min-width: 0; }
-#preview-dist { font-size: 1.6rem; font-weight: 800; line-height: 1; }
-#preview-sub  {
-  font-size: .8rem; color: var(--muted); margin-top: 4px;
-  display: flex; align-items: center; gap: 5px;
+/* Waze-style: big time on left, distance on right, same row */
+#preview-top-row {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 8px;
 }
-.preview-dot { color: rgba(255,255,255,.2); }
+#preview-time { font-size: 2.4rem; font-weight: 900; line-height: 1; letter-spacing: -0.03em; }
+#preview-dist { font-size: 1.1rem; font-weight: 600; color: var(--muted); }
+#preview-via {
+  font-size: .78rem; color: var(--muted); margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 #preview-avoidance-note { font-size: .72rem; color: var(--amber); margin-top: 3px; }
-#preview-actions { display: flex; gap: 7px; flex-shrink: 0; }
-#start-nav-btn {
-  background: linear-gradient(135deg, #ff2d55, #cc1133);
-  border: none; border-radius: 14px;
-  color: #fff; cursor: pointer; font-size: .95rem; font-weight: 800;
-  padding: 13px 22px; white-space: nowrap;
-  box-shadow: 0 2px 16px rgba(255,45,85,.5);
-  transition: filter .15s, transform .1s;
-  letter-spacing: .02em;
-}
-#start-nav-btn:active { transform: scale(.96); }
-#share-route-btn {
-  background: rgba(255,255,255,0.08); border: 1px solid var(--border);
-  border-radius: 14px; color: var(--muted); cursor: pointer;
-  font-size: .85rem; padding: 13px 12px;
-}
+/* Waze: Cancel (ghost) | Go now (solid cyan pill) */
+#preview-actions { display: flex; gap: 10px; }
 #cancel-route-btn {
-  background: rgba(255,255,255,0.06); border: none; border-radius: 14px;
-  color: var(--muted); cursor: pointer; font-size: .95rem; padding: 13px 12px;
+  flex: 1; padding: 15px; border-radius: 99px;
+  background: rgba(255,255,255,.08); border: none;
+  color: var(--muted); cursor: pointer; font-size: .95rem; font-weight: 600;
 }
+#start-nav-btn {
+  flex: 2; padding: 15px; border-radius: 99px;
+  background: #00cfff; border: none;
+  color: #000; cursor: pointer; font-size: 1rem; font-weight: 900;
+  letter-spacing: .02em; white-space: nowrap;
+  box-shadow: 0 2px 16px rgba(0,207,255,.4);
+  transition: filter .15s, transform .1s;
+}
+#start-nav-btn:active { transform: scale(.97); }
 
 /* ── Sheet scrollable content (chips + profile + steps) ── */
 #sheet-content {
@@ -204,16 +217,19 @@ body {
 #directions-list {}
 .dir-step {
   display: flex; align-items: center; gap: 12px;
-  padding: 11px 16px; border-bottom: 1px solid rgba(255,255,255,.04);
+  padding: 10px 16px; border-bottom: 1px solid rgba(255,255,255,.04);
 }
 .dir-step:last-child { border-bottom: none; padding-bottom: 16px; }
 .dir-step.dir-arrive { color: var(--green); }
-.dir-arrow { font-size: 1.25rem; min-width: 26px; text-align: center; line-height: 1; }
-.dir-info { flex: 1; min-width: 0; }
-.dir-street { font-size: .88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dir-instr  { font-size: .72rem; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dir-speed  { font-size: .72rem; color: var(--accent); white-space: nowrap; min-width: 34px; text-align: right; }
-.dir-dist   { font-size: .8rem; color: var(--muted); white-space: nowrap; min-width: 44px; text-align: right; }
+.dir-arrow { font-size: 1.1rem; min-width: 24px; text-align: center; line-height: 1; flex-shrink:0; }
+.dir-info {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 2px; /* FIX: stack name above instruction */
+}
+.dir-street { font-size: .88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dir-instr  { font-size: .72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dir-speed  { font-size: .7rem; color: var(--accent); white-space: nowrap; flex-shrink:0; }
+.dir-dist   { font-size: .78rem; color: var(--muted); white-space: nowrap; min-width: 40px; text-align: right; flex-shrink:0; }
 
 /* ── Nav instruction ──────────────────────────── */
 #nav-instruction {
