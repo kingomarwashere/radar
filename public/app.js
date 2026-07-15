@@ -415,6 +415,8 @@ function fmtSpeed(ms) {
 }
 function fmtDist(m) { return m<1000?`${Math.round(m/10)*10}m`:`${(m/1000).toFixed(1)}km`; }
 function fmtTime(s) { const m=Math.round(s/60); return m<60?`${m} min`:`${Math.floor(m/60)}h ${m%60}m`; }
+// routePoints are [lat,lng] arrays; MapLibre/GeoJSON needs [lng,lat] — declare early to avoid TDZ
+const toGL = pts => pts.map(p=>[p[1],p[0]]);
 function fmtETA(s)  { return new Date(Date.now()+s*1000).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -1436,19 +1438,42 @@ function parseShareHash(){
 parseShareHash();
 
 /* ── Keep planner above keyboard on iOS ───────────────────────────────────── */
-// visualViewport.height shrinks to the space above the keyboard; vh/dvh don't.
-// We also listen to scroll (older iOS scrolls the page instead of shrinking).
+// With bottom:0 positioning, we need to shift the sheet UP when the keyboard
+// appears so it sits in the visible area above the keyboard.
 const _syncPlannerH=(()=>{
   const pl=$$('route-planner');
   function sync(){
     const vv=window.visualViewport;
-    const h=vv?vv.height:window.innerHeight;
-    // Use almost full visual height — let the results scroll within
-    pl.style.maxHeight=Math.max(180, h-12)+'px';
+    if(!vv){ pl.style.maxHeight='80dvh'; pl.style.bottom='0'; return; }
+    // offsetTop from the visual viewport gives keyboard height
+    const kbH=Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+    pl.style.bottom=kbH+'px';
+    pl.style.maxHeight=(vv.height-12)+'px';
   }
   const vv=window.visualViewport;
   if(vv){ vv.addEventListener('resize',sync); vv.addEventListener('scroll',sync); }
   return sync;
+})();
+
+/* ── Drag-to-dismiss on the planner handle ──────────────────────────────── */
+(()=>{
+  const pl=$$('route-planner'), handle=pl.querySelector('.handle-row');
+  if(!handle) return;
+  let startY=0, startT=0, dragging=false;
+  handle.addEventListener('touchstart',e=>{ startY=e.touches[0].clientY; startT=Date.now(); dragging=true; pl.style.transition='none'; },{passive:true});
+  handle.addEventListener('touchmove',e=>{
+    if(!dragging) return;
+    const dy=e.touches[0].clientY-startY;
+    if(dy>0) pl.style.transform=`translateY(${dy}px)`;
+  },{passive:true});
+  handle.addEventListener('touchend',e=>{
+    if(!dragging) return; dragging=false;
+    pl.style.transition='';
+    const dy=e.changedTouches[0].clientY-startY;
+    const vel=(dy)/(Date.now()-startT); // px/ms
+    if(dy>80||vel>0.4){ pl.style.transform=''; closePlanner(); }
+    else pl.style.transform='';
+  });
 })();
 
 /* ═══════════════════════════════════════════════
@@ -1711,8 +1736,7 @@ function onGPS(pos){
   }
 }
 
-// Helper: routePoints [lat,lng] → MapLibre GeoJSON [lng,lat]
-const toGL = pts => pts.map(p=>[p[1],p[0]]);
+// toGL declared earlier to avoid temporal dead zone
 
 function updateRouteGeoJSON(){
   if(!routePoints.length) return;
