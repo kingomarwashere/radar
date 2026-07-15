@@ -14,7 +14,7 @@ function $$(id){return document.getElementById(id);}
    SETTINGS — persisted to localStorage
 ═══════════════════════════════════════════════ */
 const PREF_KEY = 'radar_prefs';
-const DEFAULT_PREFS = { voice:true, cameraAlerts:true, policeAlerts:true, haptic:true, unit:'kmh', mapStyle:'voyager', lighting:'auto' };
+const DEFAULT_PREFS = { voice:true, cameraAlerts:true, policeAlerts:true, haptic:true, unit:'kmh', mapStyle:'voyager', lighting:'auto', styleOverride:false };
 const prefs = { ...DEFAULT_PREFS, ...JSON.parse(localStorage.getItem(PREF_KEY) ?? '{}') };
 const savePrefs = () => localStorage.setItem(PREF_KEY, JSON.stringify(prefs));
 
@@ -45,7 +45,7 @@ const routeOpts = { avoidTolls: false, avoidHighways: false };
 /* ═══════════════════════════════════════════════
    AUTO NIGHT MODE
 ═══════════════════════════════════════════════ */
-let userPickedStyle = false;
+// styleOverride is now persisted via prefs.styleOverride (see DEFAULT_PREFS)
 const LIGHT_STYLES = new Set(['light','voyager','terrain','satellite']);
 const DARK_STYLES  = new Set(['dark']);
 
@@ -65,7 +65,7 @@ function isDark(lat, lng) {
 }
 
 function autoNightCheck() {
-  if (userPickedStyle && prefs.lighting === 'auto') return;
+  if (prefs.styleOverride && prefs.lighting === 'auto') return;
   const c = map.getCenter();
   if(prefs.lighting === 'night'){
     if(!DARK_STYLES.has(prefs.mapStyle)) setTile('dark', true);
@@ -198,9 +198,11 @@ function setupMapLayers(){
   ['route-main','route-traveled','route-alts'].forEach(id=>{
     if(!map.getSource(id)) map.addSource(id,{type:'geojson',data:emptyFC()});
   });
-  if(!map.getLayer('route-alts'))    map.addLayer({id:'route-alts',type:'line',source:'route-alts',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#336677','line-width':4,'line-opacity':0.6}});
-  if(!map.getLayer('route-traveled'))map.addLayer({id:'route-traveled',type:'line',source:'route-traveled',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#0a3547','line-width':8,'line-opacity':0.8}});
-  if(!map.getLayer('route-main'))    map.addLayer({id:'route-main',type:'line',source:'route-main',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#00cfff','line-width':8,'line-opacity':0.95}});
+  if(!map.getLayer('route-alts'))     map.addLayer({id:'route-alts',type:'line',source:'route-alts',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#336677','line-width':4,'line-opacity':0.6}});
+  if(!map.getLayer('route-traveled')) map.addLayer({id:'route-traveled',type:'line',source:'route-traveled',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#0a3547','line-width':8,'line-opacity':0.8}});
+  // Glow pass — white halo behind the cyan route for dark-map visibility
+  if(!map.getLayer('route-glow'))     map.addLayer({id:'route-glow',type:'line',source:'route-main',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#ffffff','line-width':14,'line-opacity':0.18}});
+  if(!map.getLayer('route-main'))     map.addLayer({id:'route-main',type:'line',source:'route-main',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#00cfff','line-width':8,'line-opacity':1}});
   // Heatmap
   if(!map.getSource('heatmap-src')){
     map.addSource('heatmap-src',{type:'geojson',data:emptyFC()});
@@ -253,7 +255,7 @@ function setTile(style, isAuto=false){
   if(!s) return;
   map.setStyle(s); // triggers style.load → fixPalestineLabels + setupMapLayers
   prefs.mapStyle=style; savePrefs();
-  if(!isAuto) userPickedStyle=true;
+  if(!isAuto){ prefs.styleOverride=true; savePrefs(); }
   document.querySelectorAll('.style-btn').forEach(b=>b.classList.toggle('active',b.dataset.style===style));
 }
 // initial setTile handled by map construction style — just sync UI
@@ -695,7 +697,7 @@ document.querySelectorAll('.lighting-btn').forEach(btn=>{
   btn.classList.toggle('active',btn.dataset.lighting===(prefs.lighting??'auto'));
   btn.addEventListener('click',()=>{
     prefs.lighting=btn.dataset.lighting; savePrefs();
-    userPickedStyle=false; // allow auto-night to override style now
+    prefs.styleOverride=false; savePrefs(); // allow auto-night to override style now
     document.querySelectorAll('.lighting-btn').forEach(b=>b.classList.toggle('active',b.dataset.lighting===prefs.lighting));
     autoNightCheck();
   });
@@ -862,7 +864,7 @@ plannerBack.addEventListener('click', closePlanner);
    so the car doesn't teleport between 1-2 second position updates.
 ═══════════════════════════════════════════════ */
 let _mFrom=null, _mTo=null, _mHdgFrom=0, _mHdgTo=0;
-let _mStart=0, _mDur=1000, _mRaf=null, _mCurHdg=0;
+let _mStart=0, _mDur=1000, _mRaf=null, _mCurHdg=0, _mLastSpeedMs=0;
 const _easeIO=t=>t<0.5?2*t*t:-1+(4-2*t)*t;
 const _arc=(a,b)=>((b-a)%360+540)%360-180;
 
@@ -887,6 +889,17 @@ function _stepMarker(ts){
     userMarker.setLngLat([lng,lat]);
     const svg=userMarker.getElement()?.querySelector('svg');
     if(svg) svg.style.transform=`rotate(${_mCurHdg-map.getBearing()}deg)`;
+  }
+  // Drive the map camera at 60fps from the same loop — silky bearing-up following
+  if(navState==='navigating' && !userPanning){
+    if(perspective3D){
+      const zoom=map.getZoom();
+      const lookM=Math.min(LOOK_CAP[zoom]??90,Math.max(60,_mLastSpeedMs*12));
+      const [aLat,aLng]=aheadPoint(lat,lng,_mCurHdg,lookM);
+      map.jumpTo({center:[aLng,aLat],bearing:_mCurHdg,pitch:65,zoom:16});
+    } else {
+      map.jumpTo({center:[lng,lat],bearing:headingUpMode?_mCurHdg:map.getBearing(),pitch:0,zoom:targetNavZoom(_mLastSpeedMs)});
+    }
   }
   _mRaf=t<1?requestAnimationFrame(_stepMarker):null;
 }
@@ -1502,27 +1515,18 @@ function onGPS(pos){
     hdg=applySmoothing(rawHdg);
   }
 
+  _mLastSpeedMs=speedMs; // expose speed to rAF camera loop
+
   if(!userMarker){
     userMarker=makeUserMarker(lat,lng,hdg).addTo(map);
     _mCurHdg=hdg; _mHdgTo=hdg;
     _mFrom={lat,lng}; _mTo={lat,lng};
   } else {
-    // Smooth interpolation over the GPS interval rather than instant jump
+    // Smooth interpolation over the GPS interval — camera follows from _stepMarker rAF
     const gpsMs=prevPos?Math.min(Math.max(pos.timestamp-prevPos.ts,400),2000):800;
     animateMarkerTo(lat,lng,hdg,gpsMs);
   }
-
-  if(navState==='navigating'&&!userPanning){
-    // MapLibre easeTo combines center+bearing+pitch+zoom in one smooth WebGL frame
-    if(perspective3D){
-      const zoom=map.getZoom();
-      const lookM=Math.min(LOOK_CAP[zoom]??90,Math.max(60,speedMs*12));
-      const [aLat,aLng]=aheadPoint(lat,lng,hdg,lookM);
-      map.easeTo({center:[aLng,aLat],bearing:hdg,pitch:65,duration:220,easing:t=>t});
-    } else {
-      map.easeTo({center:[lng,lat],bearing:headingUpMode?hdg:map.getBearing(),pitch:0,zoom:targetNavZoom(speedMs),duration:220,easing:t=>t});
-    }
-  }
+  // Camera follow is driven by _stepMarker at 60fps — no easeTo here during nav
 
   if(navState==='navigating'){
     currentSpeedEl.innerHTML=fmtSpeed(speedMs);
@@ -1574,7 +1578,12 @@ function onGPS(pos){
 const toGL = pts => pts.map(p=>[p[1],p[0]]);
 
 function updateRouteGeoJSON(){
-  map.getSource('route-main')?.setData({type:'Feature',geometry:{type:'LineString',coordinates:toGL(routePoints)}});
+  // If the source was lost (e.g. style swap timing), recreate everything first
+  if(!map.getSource('route-main') || !map.getLayer('route-main')){
+    try{ setupMapLayers(); }catch(_){}
+  }
+  const data={type:'Feature',geometry:{type:'LineString',coordinates:toGL(routePoints)}};
+  map.getSource('route-main')?.setData(data);
 }
 
 function updateRouteStyling(idx){
