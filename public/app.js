@@ -880,7 +880,8 @@ let fromPlace=null, toPlace=null, activeField='to';
 /* ═══════════════════════════════════════════════
    BOTTOM SHEET DRAG
 ═══════════════════════════════════════════════ */
-const SNAP = { peek: 192, half: Math.round(window.innerHeight * 0.44), full: Math.round(window.innerHeight * 0.82) };
+// peek must fit: handle(22) + time(42) + via(18) + gap(12) + buttons(52) + bottom-pad(16) + safe-area(≤40) ≈ 200
+const SNAP = { peek: 240, half: Math.round(window.innerHeight * 0.44), full: Math.round(window.innerHeight * 0.82) };
 
 function setSheetState(state, animate=true) {
   const h = SNAP[state] ?? SNAP.peek;
@@ -1028,11 +1029,13 @@ map.on('rotate',()=>{
 
 function openPlanner(){
   topbar.classList.add('hidden');
-  planner.classList.remove('hidden');
+  // Step 1: make element renderable (display:flex) while still off-screen
+  planner.style.display='flex';
+  // Step 2: two rAF frames so browser has painted before transition starts
+  requestAnimationFrame(()=>requestAnimationFrame(()=>planner.classList.add('planner-open')));
   document.body.classList.add('searching');
   navState='searching';
   fromInput.placeholder = userMarker ? '📍 My location' : 'Choose start…';
-  // Reset avoidance to saved preferences for each new search
   routeOpts.avoidTolls = prefs.avoidTolls??true;
   routeOpts.avoidHighways = false;
   $$('avoid-tolls').classList.toggle('active', routeOpts.avoidTolls);
@@ -1044,7 +1047,9 @@ function openPlanner(){
 }
 function closePlanner(){
   topbar.classList.remove('hidden');
-  planner.classList.add('hidden');
+  planner.classList.remove('planner-open'); // triggers slide-down transition
+  // After transition ends, hide completely so nothing underneath is blocked
+  setTimeout(()=>{ if(!planner.classList.contains('planner-open')) planner.style.display='none'; }, 380);
   document.body.classList.remove('searching');
   searchResultsEl.innerHTML='';
   if(navState==='searching') navState=toPlace?'preview':'idle';

@@ -53,24 +53,22 @@ body {
 /* search-toggle and style-toggle removed — replaced by idle-bar */
 
 /* ── Route planner ────────────────────────────── */
-/* Planner slides UP from bottom like Waze — must override .hidden's display:none
-   using !important on an ID selector (higher specificity than .hidden class) */
+/* Planner slides UP from bottom. JS sets display:flex before animating in,
+   and restores display:none after animating out (see openPlanner/closePlanner). */
 #route-planner {
   position: absolute; bottom: 0; left: 0; right: 0; z-index: 1100;
   background: var(--surface);
   border-radius: 24px 24px 0 0;
   border-top: 1px solid rgba(148,163,184,.08);
   max-height: 90dvh; overflow: hidden;
-  display: flex !important; /* beats .hidden { display:none !important } */
+  display: none; /* JS sets to flex before animating */
   flex-direction: column;
-  transform: translateY(110%);
+  transform: translateY(100%);
   transition: transform .35s cubic-bezier(0.32, 0.72, 0, 1);
-  pointer-events: none;
   box-shadow: 0 -8px 48px rgba(0,0,0,.7);
 }
-#route-planner:not(.hidden) {
+#route-planner.planner-open {
   transform: translateY(0);
-  pointer-events: auto;
 }
 #planner-top { flex-shrink: 0; }
 #search-results {
@@ -156,7 +154,7 @@ body {
   border-radius: 24px 24px 0 0;
   box-shadow: 0 -8px 48px rgba(0,0,0,.7), 0 -1px 0 rgba(148,163,184,.08);
   display: flex; flex-direction: column;
-  max-height: var(--sheet-h, 148px); /* JS controls this */
+  max-height: var(--sheet-h, 240px); /* JS controls this */
   overflow: hidden;
   transition: max-height 0.32s cubic-bezier(0.4,0,0.2,1);
   padding-bottom: env(safe-area-inset-bottom);
