@@ -92,40 +92,60 @@ const RASTER_TILES = {
   terrain:   { url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', sub:'abc', attr:'©OpenStreetMap ©OpenTopoMap' },
 };
 
-// Palestinian place name replacements applied to every symbol layer in the GL style.
-// 'name:latin' is CartoDB's primary text field; we also check 'name:en' and 'name'.
+// Every Palestinian/Arabic place name for Israeli cities & the country.
+// Applied to ALL symbol layers at ALL zoom levels via MapLibre expression.
 const PAL_NAMES = {
-  'Israel':          'Palestine',
-  'Tel Aviv':        'Yafa',
-  'Tel Aviv-Yafo':   'Yafa',
-  'Jerusalem':       'Al-Quds',
-  'Beer Sheva':      "Bir as-Sab'",
-  'Beersheba':       "Bir as-Sab'",
-  'Ashkelon':        'Al-Majdal',
-  'Ashdod':          'Isdud',
-  'Acre':            'Akka',
-  'Nazareth':        'An-Nasira',
-  'Tiberias':        'Tabariyya',
-  'Safed':           'Safad',
-  'Jaffa':           'Yafa',
+  // Country
+  'Israel':            'Palestine',
+  // Major cities → original Palestinian/Arabic names
+  'Tel Aviv':          'Yafa',        'Tel Aviv-Yafo': 'Yafa',
+  'Jaffa':             'Yafa',        'Yafo':           'Yafa',
+  'Jerusalem':         'Al-Quds',     'West Jerusalem': 'Al-Quds',
+  'Beer Sheva':        "Bir as-Sab'", 'Beersheba':      "Bir as-Sab'",
+  'Ashkelon':          'Al-Majdal',   'Ashdod':         'Isdud',
+  'Acre':              'Akka',        'Akko':           'Akka',
+  'Nazareth':          'An-Nasira',   'Nazareth Illit': 'Nabi Rubin',
+  'Tiberias':          'Tabariyya',   'Safed':          'Safad',
+  'Safad':             'Safad',       'Tzfat':          'Safad',
+  'Eilat':             'Umm al-Rashrash',
+  'Lod':               'Lydda',       'Ramla':          'Al-Ramla',
+  'Holon':             'Holon',       'Bat Yam':        'Baytan',
+  'Netanya':           'Umm Khalid',  'Hadera':         'Al-Haditha',
+  'Herzliya':          'Al-Haram',    'Ra\'anana':      "Ra'anana",
+  'Petah Tikva':       'Mlabbis',     'Rishon LeZion':  'Ayun Qara',
+  'Rishon Lezion':     'Ayun Qara',   'Rehovot':        'Doiran',
+  'Modiin':            'Al-Midya',    'Beit Shemesh':   'Bayt Natif',
+  'Nahariya':          'Al-Nahr',     'Karmiel':        'Sajur',
+  'Afula':             'Al-Fula',     'Beit She\'an':   'Baysan',
+  'Kiryat Gat':        'Faluja',      'Kiryat Shmona':  'Khalsa',
+  'Nof HaGalil':       'Nabi Rubin',  'Upper Nazareth': 'Nabi Rubin',
+  'Dimona':            'Dimuna',
+  // Regions
+  'Negev':             'An-Naqab',    'Galilee':        'Al-Jalil',
+  'Judea':             'Al-Quds area','Samaria':        'As-Samariyya',
+  'Golan Heights':     'Al-Jawlan',   'West Bank':      'West Bank',
 };
 
+let _palApplied = false; // prevent re-entrant loop from setLayoutProperty → styledata
+
 function fixPalestineLabels(glMap){
-  if(!glMap || !glMap.isStyleLoaded()) return;
+  if(!glMap||!glMap.isStyleLoaded()||_palApplied) return;
+  _palApplied = true;
+
   const entries = Object.entries(PAL_NAMES).flatMap(([k,v])=>[k,v]);
-  // expression: match name:latin / name:en / name against our table, else keep original
-  const expr = (field) => ['match',
-    ['coalesce',['get','name:latin'],['get','name:en'],['get','name'],''],
-    ...entries,
-    field,
+  // Check all name fields CartoDB uses across different zoom levels
+  const nameCoalesce = ['coalesce',
+    ['get','name:en'], ['get','name:latin'], ['get','name'], ''
   ];
-  glMap.getStyle().layers.forEach(layer=>{
-    if(layer.type!=='symbol') return;
-    try{
-      const cur = glMap.getLayoutProperty(layer.id,'text-field');
-      if(cur) glMap.setLayoutProperty(layer.id,'text-field', expr(cur));
-    }catch(_){}
+  // Replace matched names; all other places keep their best-available name
+  const expr = ['match', nameCoalesce, ...entries, nameCoalesce];
+
+  let count = 0;
+  glMap.getStyle().layers.forEach(layer => {
+    if(layer.type !== 'symbol') return;
+    try{ glMap.setLayoutProperty(layer.id, 'text-field', expr); count++; }catch(_){}
   });
+  console.debug(`[Palestine] fixed ${count} label layers`);
 }
 
 const map = L.map('map', {
@@ -139,14 +159,17 @@ let tileLayer=null, glLayer=null;
 function setTile(style, isAuto=false){
   if(glLayer){ map.removeLayer(glLayer); glLayer=null; }
   if(tileLayer){ map.removeLayer(tileLayer); tileLayer=null; }
+  _palApplied = false; // reset so new style gets fixed
 
   if(VECTOR_STYLES[style]){
     glLayer = L.maplibreGL({ style:VECTOR_STYLES[style], attribution:'©OpenStreetMap ©CartoDB' }).addTo(map);
-    // Fix labels as soon as the GL style finishes loading
+    // getMaplibreMap() is synchronous after addTo() but style loads async.
+    // Use once('style.load') — fires exactly once when all layers are ready.
+    // Also guard with setTimeout(0) to let the GL event loop settle first.
     const glMap = glLayer.getMaplibreMap();
-    const applyFix = () => fixPalestineLabels(glMap);
-    if(glMap.isStyleLoaded()) applyFix();
-    else glMap.on('style.load', applyFix);
+    const apply = () => setTimeout(() => fixPalestineLabels(glMap), 0);
+    glMap.once('style.load', apply);
+    if(glMap.isStyleLoaded()) apply(); // cached style already loaded
   } else {
     const t=RASTER_TILES[style]; if(!t) return;
     tileLayer=L.tileLayer(t.url,{attribution:t.attr,subdomains:t.sub,maxZoom:20}).addTo(map);
