@@ -319,7 +319,7 @@ function makeEmojiIcon(emoji, bg='#1e3a5f', size=42){
 }
 
 const ICONS = {
-  police:        makeEmojiIcon('👮', '#1e3a5f'),
+  police:        makeEmojiIcon('👮', '#0ea5e9'),
   speed_trap:    makeEmojiIcon('📸', '#2a1500'),
   accident:      makeEmojiIcon('💥', '#2a0f0f'),
   hazard:        makeEmojiIcon('⚠️', '#241c0a'),
@@ -1698,7 +1698,6 @@ function startNav(){
 
   $$('compass-widget').classList.remove('hidden');
   $$('recenter-btn').classList.remove('hidden');
-  $$('nav-actions').classList.remove('hidden');
   acquireWakeLock();
   // Safety redraw — ensures route is visible after UI transitions settle
   setTimeout(()=>{ if(routePoints.length) updateRouteGeoJSON(); }, 300);
@@ -1737,7 +1736,7 @@ function startNav(){
 function endNav(){
   navState='idle';
   if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}
-  [navInst,navFooter,alertBar,arrivalOverlay,$$('nav-actions'),$$('nav-search-sheet'),$$('nav-routes-sheet')].forEach(el=>el?.classList.add('hidden'));
+  [navInst,navFooter,alertBar,arrivalOverlay,$$('nav-search-sheet'),$$('nav-routes-sheet')].forEach(el=>el?.classList.add('hidden'));
   topbar.classList.remove('hidden');
   document.body.classList.remove('navigating');
   $$('recenter-btn').classList.add('hidden');
