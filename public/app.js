@@ -514,7 +514,107 @@ function placeLabel(r){
 // Sanitise any text from third-party data sources
 function san(s){ return s ? String(s).replace(/\bisrael\b/gi, 'Palestine') : s; }
 
-// ── Photon geocoder — AU bbox ensures Australian results are prioritised ──
+// ── POI category → Overpass filter + emoji ──────────────────────────────────
+const OVERPASS_CAT = {
+  // Fuel / Petrol
+  petrol:           ['[amenity=fuel]','⛽'],
+  fuel:             ['[amenity=fuel]','⛽'],
+  servo:            ['[amenity=fuel]','⛽'],
+  'service station':['[amenity=fuel]','⛽'],
+  'gas station':    ['[amenity=fuel]','⛽'],
+  bp:               ['[amenity=fuel][name~"BP",i]','⛽'],
+  shell:            ['[amenity=fuel][name~"Shell",i]','⛽'],
+  caltex:           ['[amenity=fuel][name~"Caltex|Ampol",i]','⛽'],
+  ampol:            ['[amenity=fuel][name~"Ampol",i]','⛽'],
+  united:           ['[amenity=fuel][name~"United",i]','⛽'],
+  'seven eleven':   ['[amenity=fuel][name~"7-Eleven",i]','⛽'],
+  '7-eleven':       ['[amenity=fuel][name~"7-Eleven",i]','⛽'],
+  // Food / Drink
+  food:             ['[amenity~"restaurant|fast_food|cafe|food_court"]','🍽️'],
+  restaurant:       ['[amenity=restaurant]','🍽️'],
+  cafe:             ['[amenity=cafe]','☕'],
+  coffee:           ['[amenity=cafe]','☕'],
+  'fast food':      ['[amenity=fast_food]','🍔'],
+  mcdonalds:        ['[amenity=fast_food][name~"McDonald",i]','🍔'],
+  "mcdonald's":     ['[amenity=fast_food][name~"McDonald",i]','🍔'],
+  kfc:              ['[amenity=fast_food][name~"KFC|Kentucky",i]','🍗'],
+  subway:           ['[amenity=fast_food][name~"Subway",i]','🥖'],
+  'hungry jacks':   ['[amenity=fast_food][name~"Hungry",i]','🍔'],
+  pizza:            ['[amenity~"restaurant|fast_food"][name~"Pizza|Domino|Pizzeria",i]','🍕'],
+  pub:              ['[amenity~"pub|bar"]','🍺'],
+  bar:              ['[amenity~"pub|bar"]','🍺'],
+  // Medical
+  hospital:         ['[amenity=hospital]','🏥'],
+  pharmacy:         ['[amenity=pharmacy]','💊'],
+  chemist:          ['[amenity=pharmacy]','💊'],
+  'chemist warehouse':['[amenity=pharmacy][name~"Chemist Warehouse",i]','💊'],
+  priceline:        ['[amenity=pharmacy][name~"Priceline",i]','💊'],
+  medical:          ['[amenity~"hospital|clinic|doctors|pharmacy"]','🏥'],
+  doctor:           ['[amenity~"clinic|doctors"]','🩺'],
+  clinic:           ['[amenity~"clinic|doctors"]','🩺'],
+  // Parking
+  parking:          ['[amenity=parking]','🅿️'],
+  'car park':       ['[amenity=parking]','🅿️'],
+  // Supermarkets
+  supermarket:      ['[shop=supermarket]','🛒'],
+  woolworths:       ['[shop=supermarket][name~"Woolworths",i]','🛒'],
+  coles:            ['[shop=supermarket][name~"Coles",i]','🛒'],
+  aldi:             ['[shop~"supermarket|discount"][name~"ALDI",i]','🛒'],
+  iga:              ['[shop=supermarket][name~"IGA",i]','🛒'],
+  // Banking
+  atm:              ['[amenity=atm]','🏧'],
+  bank:             ['[amenity=bank]','🏦'],
+  // Other
+  police:           ['[amenity=police]','👮'],
+  gym:              ['[leisure~"fitness_centre|gym"]','🏋️'],
+  hotel:            ['[tourism~"hotel|motel|guest_house"]','🏨'],
+  motel:            ['[tourism~"hotel|motel"]','🏨'],
+  park:             ['[leisure=park]','🌳'],
+  school:           ['[amenity~"school|primary|secondary"]','🏫'],
+  library:          ['[amenity=library]','📚'],
+  airport:          ['[aeroway=aerodrome]','✈️'],
+  mechanic:         ['[shop~"car_repair|tyres|tyre"]','🔧'],
+  car wash:         ['[amenity=car_wash]','🚿'],
+  'car wash':       ['[amenity=car_wash]','🚿'],
+};
+
+// Detect if a query is a known POI category (returns [filter, emoji] or null)
+function detectCategory(q){
+  const ql = q.toLowerCase().trim();
+  // exact match first, then prefix match
+  if(OVERPASS_CAT[ql]) return OVERPASS_CAT[ql];
+  for(const [k,v] of Object.entries(OVERPASS_CAT)){
+    if(ql.startsWith(k+' ')||ql.endsWith(' '+k)) return v;
+  }
+  return null;
+}
+
+// ── Overpass API — comprehensive OSM POI search ──────────────────────────────
+async function overpassSearch(filter, emoji, lat, lng, radius=6000){
+  const q=`[out:json][timeout:10];(node${filter}(around:${radius},${lat},${lng});way${filter}(around:${radius},${lat},${lng}););out center 25;`;
+  try{
+    const resp=await fetch('https://overpass-api.de/api/interpreter',{method:'POST',body:'data='+encodeURIComponent(q)});
+    if(!resp.ok) return [];
+    const data=await resp.json();
+    return (data.elements??[]).map(el=>{
+      const t=el.tags??{};
+      const elLat=el.lat??el.center?.lat;
+      const elLng=el.lon??el.center?.lon;
+      if(!elLat||!elLng) return null;
+      const name=san(t.name||t.brand||t['name:en']||t.operator||'Unknown');
+      const dist=haversine(lat,lng,elLat,elLng);
+      const distStr=dist<1000?`${Math.round(dist)}m`:`${(dist/1000).toFixed(1)}km`;
+      const addrParts=[
+        t['addr:housenumber']?`${t['addr:housenumber']} ${t['addr:street']||''}`.trim():t['addr:street'],
+        t['addr:suburb']||t['addr:city'],
+      ].filter(Boolean);
+      const sub=san(addrParts.length?addrParts.join(', ')+' · '+distStr:distStr);
+      return {lat:elLat,lng:elLng,name,sub,dist,_emoji:emoji};
+    }).filter(Boolean).sort((a,b)=>a.dist-b.dist);
+  }catch{return [];}
+}
+
+// ── Photon geocoder — address / place-name search ────────────────────────────
 async function geocode(q, nearLat, nearLng){
   const params = new URLSearchParams({ q, limit:'10', lang:'en' });
   const gps = userMarker ? userMarker.getLngLat() : null;
@@ -523,7 +623,6 @@ async function geocode(q, nearLat, nearLng){
   params.set('lat', bLat);
   params.set('lon', bLng);
   params.set('zoom', '12');
-  // Hard-constrain to Australia — this app's primary market
   params.set('bbox', '113.3,-43.6,153.6,-10.4');
   try {
     const res = await fetch(`https://photon.komoot.io/api/?${params}`);
@@ -534,11 +633,10 @@ async function geocode(q, nearLat, nearLng){
       return {
         lat, lng,
         name: san(p.name || p.street || p.city || p.county || 'Place'),
-        // prefer suburb/town over city (LGA) to show e.g. "Punchbowl" not "Canterbury-Bankstown"
         sub:  san([p.housenumber ? `${p.housenumber} ${p.street||''}`.trim() : p.street,
                    p.suburb || p.district || p.town || p.village || p.city,
                    p.state].filter(Boolean).join(', ')),
-        osmKey: p.osm_key   ?? '',
+        osmKey: p.osm_key ?? '',
         osmVal: p.osm_value ?? '',
       };
     });
@@ -1181,10 +1279,14 @@ function showSuggestions(){
   const gps=userMarker?userMarker.getLngLat():null;
   let html='';
   html+=`<div id="nearme-chips">
-    <button class="nearme-chip" data-q="petrol station" data-lat="${gps?.lat??''}" data-lng="${gps?.lng??''}">⛽ Petrol</button>
-    <button class="nearme-chip" data-q="restaurant" data-lat="${gps?.lat??''}" data-lng="${gps?.lng??''}">🍔 Food</button>
-    <button class="nearme-chip" data-q="hospital" data-lat="${gps?.lat??''}" data-lng="${gps?.lng??''}">🏥 Hospital</button>
-    <button class="nearme-chip" data-q="parking" data-lat="${gps?.lat??''}" data-lng="${gps?.lng??''}">🅿️ Parking</button>
+    <button class="nearme-chip" data-q="petrol">⛽ Petrol</button>
+    <button class="nearme-chip" data-q="food">🍔 Food</button>
+    <button class="nearme-chip" data-q="hospital">🏥 Hospital</button>
+    <button class="nearme-chip" data-q="parking">🅿️ Parking</button>
+    <button class="nearme-chip" data-q="cafe">☕ Coffee</button>
+    <button class="nearme-chip" data-q="supermarket">🛒 Supermarket</button>
+    <button class="nearme-chip" data-q="pharmacy">💊 Pharmacy</button>
+    <button class="nearme-chip" data-q="atm">🏧 ATM</button>
   </div>`;
   if(favs.length){
     html+=`<div class="results-section-label">⭐ Saved</div>`;
@@ -1199,15 +1301,20 @@ function showSuggestions(){
   searchResultsEl.querySelectorAll('.nearme-chip').forEach(chip=>{
     chip.addEventListener('click',async()=>{
       const q=chip.dataset.q;
-      const lat=chip.dataset.lat?parseFloat(chip.dataset.lat):null;
-      const lng=chip.dataset.lng?parseFloat(chip.dataset.lng):null;
+      const gpsPos=userMarker?userMarker.getLngLat():null;
+      const lat=gpsPos?.lat??map.getCenter().lat, lng=gpsPos?.lng??map.getCenter().lng;
       searchResultsEl.innerHTML=`<div class="no-results">Searching nearby…</div>`;
-      const results=await geocode(q, lat, lng);
-      if(!results.length){searchResultsEl.innerHTML=`<div class="no-results">None found nearby</div>`;return;}
-      searchResultsEl.innerHTML=results.map(r=>resultRow(
-        {lat:parseFloat(r.lat),lng:parseFloat(r.lon),name:placeName(r),sub:placeSub(r)},
-        isFav(placeName(r)), true, placeEmoji(r), placeLabel(r)
-      )).join('');
+      const cat=detectCategory(q);
+      if(cat){
+        let results=await overpassSearch(cat[0],cat[1],lat,lng,6000);
+        if(results.length<4) results=await overpassSearch(cat[0],cat[1],lat,lng,15000);
+        if(!results.length){searchResultsEl.innerHTML=`<div class="no-results">None found nearby</div>`;return;}
+        searchResultsEl.innerHTML=results.slice(0,20).map(r=>resultRow(r,isFav(r.name),true,r._emoji)).join('');
+      } else {
+        const results=await geocode(q,lat,lng);
+        if(!results.length){searchResultsEl.innerHTML=`<div class="no-results">None found nearby</div>`;return;}
+        searchResultsEl.innerHTML=results.map(r=>resultRow(r,isFav(r.name),true,placeEmoji(r),placeLabel(r))).join('');
+      }
       bindResultClicks();
     });
   });
@@ -1250,10 +1357,21 @@ swapBtn.addEventListener('click',()=>{
 
 async function doSearch(q){
   searchResultsEl.innerHTML=`<div class="no-results">Searching…</div>`;
-  // Photon returns already-parsed place objects {lat,lng,name,sub,osmKey,osmVal}
-  const results = await geocode(q);
+  const gps=userMarker?userMarker.getLngLat():null;
+  const lat=gps?.lat??map.getCenter().lat, lng=gps?.lng??map.getCenter().lng;
+  const cat=detectCategory(q);
+  if(cat){
+    let results=await overpassSearch(cat[0],cat[1],lat,lng,6000);
+    // Expand radius if sparse
+    if(results.length<4) results=await overpassSearch(cat[0],cat[1],lat,lng,15000);
+    if(!results.length){searchResultsEl.innerHTML=`<div class="no-results">None found nearby</div>`;return;}
+    searchResultsEl.innerHTML=results.slice(0,20).map(r=>resultRow(r,isFav(r.name),true,r._emoji)).join('');
+    bindResultClicks();
+    return;
+  }
+  const results=await geocode(q);
   if(!results.length){searchResultsEl.innerHTML=`<div class="no-results">No places found for "${escHtml(q)}"</div>`;return;}
-  searchResultsEl.innerHTML=results.map(r=>resultRow(r, isFav(r.name), true, placeEmoji(r), placeLabel(r))).join('');
+  searchResultsEl.innerHTML=results.map(r=>resultRow(r,isFav(r.name),true,placeEmoji(r),placeLabel(r))).join('');
   bindResultClicks();
 }
 
@@ -2372,14 +2490,25 @@ $$('nss-input').addEventListener('input',e=>{
 
 async function doNavSearch(q){
   const gps=prevPos??(userMarker?{lat:userMarker.getLngLat().lat,lng:userMarker.getLngLat().lng}:null);
-  const results=await geocode(q,gps?.lat,gps?.lng);
+  const lat=gps?.lat??map.getCenter().lat, lng=gps?.lng??map.getCenter().lng;
   const el=$$('nss-results');
-  if(!results.length){el.innerHTML='<div class="nss-empty">No results found</div>';return;}
+  el.innerHTML='<div class="nss-empty">Searching…</div>';
+  const cat=detectCategory(q);
+  let places=[];
+  if(cat){
+    places=await overpassSearch(cat[0],cat[1],lat,lng,6000);
+    if(places.length<4) places=await overpassSearch(cat[0],cat[1],lat,lng,15000);
+  } else {
+    places=await geocode(q,lat,lng);
+  }
+  if(!places.length){el.innerHTML='<div class="nss-empty">No results found</div>';return;}
   el.innerHTML='';
-  for(const r of results){
+  for(const r of places.slice(0,20)){
     const div=document.createElement('div');
     div.className='nss-result';
-    div.innerHTML=`<div class="nss-result-name">${san(r.name)}</div>${r.sub?`<div class="nss-result-sub">${san(r.sub)}</div>`:''}`;
+    const emoji=r._emoji??placeEmoji(r);
+    div.innerHTML=`<span style="margin-right:8px;font-size:1.1rem">${emoji}</span><span><div class="nss-result-name">${san(r.name)}</div>${r.sub?`<div class="nss-result-sub">${san(r.sub)}</div>`:''}</span>`;
+    div.style.display='flex';div.style.alignItems='center';
     div.addEventListener('click',()=>applyNavSearch(r));
     el.appendChild(div);
   }
