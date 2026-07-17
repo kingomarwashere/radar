@@ -195,7 +195,7 @@ map.on('style.load', () => {
 });
 
 // Custom layer IDs — never touched by hideNavClutter
-const CUSTOM_LAYERS = new Set(['route-main','route-traveled','route-alts','heatmap-layer','3d-buildings']);
+const CUSTOM_LAYERS = new Set(['route-main','route-traveled','route-alts','route-warn','heatmap-layer','3d-buildings']);
 
 function setupMapLayers(){
   // Route line sources
@@ -215,6 +215,11 @@ function setupMapLayers(){
     map.addLayer({id:'route-main',type:'line',source:'route-main',
       layout:{'line-cap':'round','line-join':'round','visibility':'visible'},
       paint:{'line-color':'#00cfff','line-width':10,'line-opacity':1}});
+  // Warning flash overlay — same source as route-main, drawn on top
+  if(!map.getLayer('route-warn'))
+    map.addLayer({id:'route-warn',type:'line',source:'route-main',
+      layout:{'line-cap':'round','line-join':'round','visibility':'visible'},
+      paint:{'line-color':'#f59e0b','line-width':12,'line-opacity':0}});
   // Heatmap
   if(!map.getSource('heatmap-src')){
     map.addSource('heatmap-src',{type:'geojson',data:emptyFC()});
@@ -1838,6 +1843,7 @@ function endNav(){
   navState='idle';
   if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}
   [navInst,navFooter,alertBar,arrivalOverlay,$$('nav-search-sheet'),$$('nav-routes-sheet')].forEach(el=>el?.classList.add('hidden'));
+  updateRouteWarn(null);
   topbar.classList.remove('hidden');
   document.body.classList.remove('navigating');
   $$('recenter-btn').classList.add('hidden');
@@ -2337,6 +2343,31 @@ async function loadNearReports(){
   try{nearReports=await fetch(`/api/reports?${p}`).then(r=>r.json());}catch{}
 }
 
+/* ── Route warning flash (camera approach) ──────────────────────────────── */
+let _routeWarnState=null, _routeWarnRaf=null;
+function updateRouteWarn(state){
+  if(state===_routeWarnState) return;
+  _routeWarnState=state;
+  if(_routeWarnRaf){cancelAnimationFrame(_routeWarnRaf);_routeWarnRaf=null;}
+  if(!state){
+    try{map.setPaintProperty('route-warn','line-opacity',0);}catch{}
+    return;
+  }
+  const period={far:700,mid:360,near:160}[state];
+  const color={far:'#f59e0b',mid:'#f97316',near:'#ef4444'}[state];
+  try{map.setPaintProperty('route-warn','line-color',color);}catch{}
+  let lastToggle=0,on=false;
+  function tick(t){
+    if(_routeWarnState!==state) return;
+    if(t-lastToggle>period){
+      on=!on; lastToggle=t;
+      try{map.setPaintProperty('route-warn','line-opacity',on?0.85:0);}catch{}
+    }
+    _routeWarnRaf=requestAnimationFrame(tick);
+  }
+  _routeWarnRaf=requestAnimationFrame(tick);
+}
+
 function checkProximityAlerts(lat,lng,userHeading){
   // Live-update distance on active alert; dismiss once we've passed the hazard
   if(activeAlert){
@@ -2432,6 +2463,23 @@ function checkProximityAlerts(lat,lng,userHeading){
       }
       if(d>400)alertedIds.delete(key);
     }
+  }
+
+  // Drive route flash based on closest approaching camera
+  if(prefs.cameraAlerts){
+    let minD=Infinity;
+    for(const cam of nearCameras){
+      const d=haversine(lat,lng,cam.lat,cam.lng);
+      // respect direction filter
+      if(cam.direction!=null&&userHeading!=null){
+        const diff=Math.abs(((userHeading-cam.direction+180+360)%360)-180);
+        if(diff>=90) continue;
+      }
+      if(d<400) minD=Math.min(minD,d);
+    }
+    updateRouteWarn(minD<80?'near':minD<200?'mid':minD<400?'far':null);
+  } else {
+    updateRouteWarn(null);
   }
 }
 
