@@ -187,7 +187,7 @@ map.on('style.load', () => {
     // Initial location + auto-night
     navigator.geolocation.getCurrentPosition(pos=>{
       autoNightCheck();
-      map.flyTo({center:[pos.coords.longitude,pos.coords.latitude],zoom:14,duration:1500});
+      if(navState==='idle') map.flyTo({center:[pos.coords.longitude,pos.coords.latitude],zoom:14,duration:1500});
     }, null, {enableHighAccuracy:false,timeout:8000,maximumAge:60000});
     scheduleFetch();
     setInterval(autoNightCheck, 10*60*1000);
@@ -1068,8 +1068,8 @@ function onUserPan(){
     // recenter-btn stays visible during nav — don't hide it here
   }, 4000);
 }
-map.on('dragstart',onUserPan);
-map.on('zoomstart',onUserPan);
+map.on('dragstart',e=>{ if(e.originalEvent) onUserPan(); });
+map.on('zoomstart',e=>{ if(e.originalEvent) onUserPan(); });
 
 /* ── Long-press on map → "Drive here" ──────────────────────────────────────
    600 ms hold on the map canvas opens a popup at the tapped location with
@@ -1189,11 +1189,7 @@ function _stepMarker(ts){
   if(navState==='navigating' && !userPanning){
     if(perspective3D){
       const navZ=targetNavZoom(_mLastSpeedMs);
-      // Push camera centre well ahead so the car sits in the lower third of the screen.
-      // 250 m minimum; grows with speed so motorway driving shows more road ahead.
-      const lookM=Math.max(40,_mLastSpeedMs*18);
-      const [aLat,aLng]=aheadPoint(lat,lng,_mCurHdg,lookM);
-      map.jumpTo({center:[aLng,aLat],bearing:_mCurHdg,pitch:65,zoom:navZ});
+      map.jumpTo({center:[lng,lat],bearing:_mCurHdg,pitch:65,zoom:navZ});
     } else {
       map.jumpTo({center:[lng,lat],bearing:headingUpMode?_mCurHdg:map.getBearing(),pitch:0,zoom:targetNavZoom(_mLastSpeedMs)});
     }
@@ -2104,8 +2100,7 @@ $$('recenter-btn').addEventListener('click',()=>{
   if(prevPos && navState==='navigating'){
     const {lat,lng}=prevPos;
     if(perspective3D){
-      const [aLat,aLng]=aheadPoint(lat,lng,_mCurHdg,200);
-      map.easeTo({center:[aLng,aLat],bearing:_mCurHdg,pitch:65,zoom:targetNavZoom(_mLastSpeedMs),duration:400});
+      map.easeTo({center:[lng,lat],bearing:_mCurHdg,pitch:65,zoom:targetNavZoom(_mLastSpeedMs),duration:400});
     } else {
       map.easeTo({center:[lng,lat],bearing:headingUpMode?_mCurHdg:0,pitch:0,zoom:targetNavZoom(_mLastSpeedMs),duration:400});
     }
