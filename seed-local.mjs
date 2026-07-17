@@ -41,7 +41,7 @@ function chunkSQL(rows, tableCols, valuesFn) {
 /* ── OSM seed ──────────────────────────────────── */
 async function seedOSM() {
   console.log('Fetching AU camera data from Overpass API…');
-  const query = '[out:json][timeout:90];(node["highway"="speed_camera"](-44,112,-10,154);node["enforcement"="speed_camera"](-44,112,-10,154);node["enforcement"="traffic_signals"]["traffic_signals"="speed_camera"](-44,112,-10,154);way["highway"="speed_camera"](-44,112,-10,154););out center;';
+  const query = '[out:json][timeout:90];(node["highway"="speed_camera"](-44,112,-10,154);node["enforcement"="speed_camera"](-44,112,-10,154);node["enforcement"="traffic_signals"]["traffic_signals"="speed_camera"](-44,112,-10,154);way["highway"="speed_camera"](-44,112,-10,154);node["enforcement"="bus_lane"](-44,112,-10,154);node["enforcement"="no_stopping"](-44,112,-10,154););out center;';
 
   const resp = await fetch('https://overpass-api.de/api/interpreter', {
     method: 'POST',
@@ -62,7 +62,10 @@ async function seedOSM() {
     if (!lat || !lon) return null;
     const tags = el.tags ?? {};
     const enforcement = tags.enforcement ?? tags.highway ?? '';
-    const type = enforcement === 'traffic_signals' ? 'red_light' : 'speed';
+    const type = enforcement === 'traffic_signals' ? 'red_light'
+                : enforcement === 'bus_lane'       ? 'bus_lane'
+                : enforcement === 'no_stopping'    ? 'bus_lane'
+                : 'speed';
     const road = tags.name ?? tags['addr:street'] ?? null;
     const sl = tags['maxspeed'] ? parseInt(tags['maxspeed']) : null;
     const desc = tags['name'] ?? null;

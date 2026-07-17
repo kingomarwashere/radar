@@ -330,6 +330,7 @@ const ICONS = {
   accident:      makeEmojiIcon('💥', '#2a0f0f'),
   hazard:        makeEmojiIcon('⚠️', '#241c0a'),
   speed:         makeEmojiIcon('📷', '#0a1a2a'),
+  bus_lane:      makeEmojiIcon('🚌', '#92400e'),
   red_light:     makeEmojiIcon('🚦', '#1a0014'),
   average_speed: makeEmojiIcon('📡', '#150a2a'),
   traffic:       makeEmojiIcon('🚗', '#1a1408'),
@@ -497,67 +498,158 @@ function showToast(msg, dur=2800) {
 // Sanitise any text from third-party data sources
 function san(s){ return s ? String(s).replace(/\bisrael\b/gi, 'Palestine') : s; }
 
+// ── Overpass name-search: find any OSM POI whose name matches the query ─────
+async function overpassNameSearch(q, lat, lng, radius=8000){
+  // Search across all common POI-holding tag keys
+  const filter=`[name~"${q.replace(/"/g,'')}",i][~"^(amenity|shop|tourism|leisure|office|brand)$"~"."]`;
+  const results=await overpassSearch(filter,'📍',lat,lng,radius);
+  // Assign proper emoji based on OSM tags (best effort from name match)
+  return results.map(r=>({...r}));
+}
+
+// ── Merge & deduplicate results from multiple sources ────────────────────────
+function mergeResults(arrays, lat, lng){
+  const seen=new Set();
+  const out=[];
+  for(const r of arrays.flat()){
+    if(!r||!r.name) continue;
+    // Deduplicate by name+approximate coords
+    const key=`${r.name.toLowerCase().trim()}|${(r.lat??0).toFixed(3)}|${(r.lng??0).toFixed(3)}`;
+    if(seen.has(key)) continue;
+    seen.add(key);
+    // Attach distance if missing
+    if(r.dist==null&&lat&&lng) r.dist=haversine(lat,lng,r.lat,r.lng);
+    out.push(r);
+  }
+  return out.sort((a,b)=>(a.dist??9e9)-(b.dist??9e9));
+}
+
+// ── Photon results enriched with distance ────────────────────────────────────
+function enrichPhoton(results, lat, lng){
+  return results.map(r=>{
+    const dist=lat&&lng?haversine(lat,lng,r.lat,r.lng):null;
+    const distStr=dist!=null?(dist<1000?`${Math.round(dist)}m`:`${(dist/1000).toFixed(1)}km`):null;
+    return {
+      ...r,
+      dist,
+      sub: r.sub?(distStr?r.sub+' · '+distStr:r.sub):(distStr??''),
+      _emoji: placeEmoji(r),
+    };
+  });
+}
+
 // ── POI category → Overpass filter + emoji ──────────────────────────────────
 const OVERPASS_CAT = {
   // Fuel / Petrol
-  petrol:           ['[amenity=fuel]','⛽'],
-  fuel:             ['[amenity=fuel]','⛽'],
-  servo:            ['[amenity=fuel]','⛽'],
-  'service station':['[amenity=fuel]','⛽'],
-  'gas station':    ['[amenity=fuel]','⛽'],
-  bp:               ['[amenity=fuel][name~"BP",i]','⛽'],
-  shell:            ['[amenity=fuel][name~"Shell",i]','⛽'],
-  caltex:           ['[amenity=fuel][name~"Caltex|Ampol",i]','⛽'],
-  ampol:            ['[amenity=fuel][name~"Ampol",i]','⛽'],
-  united:           ['[amenity=fuel][name~"United",i]','⛽'],
-  'seven eleven':   ['[amenity=fuel][name~"7-Eleven",i]','⛽'],
-  '7-eleven':       ['[amenity=fuel][name~"7-Eleven",i]','⛽'],
+  petrol:              ['[amenity=fuel]','⛽'],
+  fuel:                ['[amenity=fuel]','⛽'],
+  servo:               ['[amenity=fuel]','⛽'],
+  'service station':   ['[amenity=fuel]','⛽'],
+  'gas station':       ['[amenity=fuel]','⛽'],
+  'petrol station':    ['[amenity=fuel]','⛽'],
+  bp:                  ['[amenity=fuel][name~"BP",i]','⛽'],
+  shell:               ['[amenity=fuel][name~"Shell",i]','⛽'],
+  caltex:              ['[amenity=fuel][name~"Caltex|Ampol",i]','⛽'],
+  ampol:               ['[amenity=fuel][name~"Ampol",i]','⛽'],
+  united:              ['[amenity=fuel][name~"United",i]','⛽'],
+  'seven eleven':      ['[amenity=fuel][name~"7-Eleven",i]','⛽'],
+  '7-eleven':          ['[amenity=fuel][name~"7-Eleven",i]','⛽'],
+  '7eleven':           ['[amenity=fuel][name~"7-Eleven",i]','⛽'],
+  metro:               ['[amenity=fuel][name~"Metro",i]','⛽'],
   // Food / Drink
-  food:             ['[amenity~"restaurant|fast_food|cafe|food_court"]','🍽️'],
-  restaurant:       ['[amenity=restaurant]','🍽️'],
-  cafe:             ['[amenity=cafe]','☕'],
-  coffee:           ['[amenity=cafe]','☕'],
-  'fast food':      ['[amenity=fast_food]','🍔'],
-  mcdonalds:        ['[amenity=fast_food][name~"McDonald",i]','🍔'],
-  "mcdonald's":     ['[amenity=fast_food][name~"McDonald",i]','🍔'],
-  kfc:              ['[amenity=fast_food][name~"KFC|Kentucky",i]','🍗'],
-  subway:           ['[amenity=fast_food][name~"Subway",i]','🥖'],
-  'hungry jacks':   ['[amenity=fast_food][name~"Hungry",i]','🍔'],
-  pizza:            ['[amenity~"restaurant|fast_food"][name~"Pizza|Domino|Pizzeria",i]','🍕'],
-  pub:              ['[amenity~"pub|bar"]','🍺'],
-  bar:              ['[amenity~"pub|bar"]','🍺'],
+  food:                ['[amenity~"restaurant|fast_food|cafe|food_court"]','🍽️'],
+  eat:                 ['[amenity~"restaurant|fast_food|cafe"]','🍽️'],
+  restaurant:          ['[amenity=restaurant]','🍽️'],
+  cafe:                ['[amenity=cafe]','☕'],
+  coffee:              ['[amenity=cafe]','☕'],
+  'flat white':        ['[amenity=cafe]','☕'],
+  'fast food':         ['[amenity=fast_food]','🍔'],
+  takeaway:            ['[amenity=fast_food]','🍔'],
+  takeout:             ['[amenity=fast_food]','🍔'],
+  mcdonalds:           ['[amenity=fast_food][name~"McDonald",i]','🍔'],
+  "mcdonald's":        ['[amenity=fast_food][name~"McDonald",i]','🍔'],
+  maccas:              ['[amenity=fast_food][name~"McDonald",i]','🍔'],
+  macca:               ['[amenity=fast_food][name~"McDonald",i]','🍔'],
+  kfc:                 ['[amenity=fast_food][name~"KFC|Kentucky",i]','🍗'],
+  subway:              ['[amenity=fast_food][name~"Subway",i]','🥖'],
+  'hungry jacks':      ['[amenity=fast_food][name~"Hungry",i]','🍔'],
+  'hungry jack':       ['[amenity=fast_food][name~"Hungry",i]','🍔'],
+  hj:                  ['[amenity=fast_food][name~"Hungry",i]','🍔'],
+  pizza:               ['[amenity~"restaurant|fast_food"][name~"Pizza|Domino|Pizzeria",i]','🍕'],
+  dominos:             ['[amenity~"restaurant|fast_food"][name~"Domino",i]','🍕'],
+  "domino's":          ['[amenity~"restaurant|fast_food"][name~"Domino",i]','🍕'],
+  "pizza hut":         ['[amenity~"restaurant|fast_food"][name~"Pizza Hut",i]','🍕'],
+  chippies:            ['[amenity~"restaurant|fast_food"][name~"fish|chip|chippery",i]','🐟'],
+  'fish and chips':    ['[amenity~"restaurant|fast_food"][name~"fish|chip",i]','🐟'],
+  sushi:               ['[amenity~"restaurant|fast_food"][name~"sushi|japanese",i]','🍣'],
+  thai:                ['[amenity=restaurant][cuisine=thai]','🍜'],
+  chinese:             ['[amenity=restaurant][cuisine~"chinese|asian",i]','🥢'],
+  indian:              ['[amenity=restaurant][cuisine=indian]','🍛'],
+  pub:                 ['[amenity~"pub|bar"]','🍺'],
+  bar:                 ['[amenity~"pub|bar"]','🍺'],
+  'bottle shop':       ['[amenity~"bar|pub"][shop~"alcohol|wine",i]|[shop=alcohol]','🍾'],
+  'bottle-o':          ['[shop=alcohol]','🍾'],
+  bottlo:              ['[shop=alcohol]','🍾'],
+  'dan murphys':       ['[shop=alcohol][name~"Dan Murphy",i]','🍾'],
+  'bws':               ['[shop=alcohol][name~"BWS",i]','🍾'],
   // Medical
-  hospital:         ['[amenity=hospital]','🏥'],
-  pharmacy:         ['[amenity=pharmacy]','💊'],
-  chemist:          ['[amenity=pharmacy]','💊'],
-  'chemist warehouse':['[amenity=pharmacy][name~"Chemist Warehouse",i]','💊'],
-  priceline:        ['[amenity=pharmacy][name~"Priceline",i]','💊'],
-  medical:          ['[amenity~"hospital|clinic|doctors|pharmacy"]','🏥'],
-  doctor:           ['[amenity~"clinic|doctors"]','🩺'],
-  clinic:           ['[amenity~"clinic|doctors"]','🩺'],
+  hospital:            ['[amenity=hospital]','🏥'],
+  pharmacy:            ['[amenity=pharmacy]','💊'],
+  chemist:             ['[amenity=pharmacy]','💊'],
+  'chemist warehouse': ['[amenity=pharmacy][name~"Chemist Warehouse",i]','💊'],
+  priceline:           ['[amenity=pharmacy][name~"Priceline",i]','💊'],
+  medical:             ['[amenity~"hospital|clinic|doctors|pharmacy"]','🏥'],
+  doctor:              ['[amenity~"clinic|doctors"]','🩺'],
+  gp:                  ['[amenity~"clinic|doctors"]','🩺'],
+  clinic:              ['[amenity~"clinic|doctors"]','🩺'],
+  dentist:             ['[amenity=dentist]','🦷'],
   // Parking
-  parking:          ['[amenity=parking]','🅿️'],
-  'car park':       ['[amenity=parking]','🅿️'],
-  // Supermarkets
-  supermarket:      ['[shop=supermarket]','🛒'],
-  woolworths:       ['[shop=supermarket][name~"Woolworths",i]','🛒'],
-  coles:            ['[shop=supermarket][name~"Coles",i]','🛒'],
-  aldi:             ['[shop~"supermarket|discount"][name~"ALDI",i]','🛒'],
-  iga:              ['[shop=supermarket][name~"IGA",i]','🛒'],
+  parking:             ['[amenity=parking]','🅿️'],
+  'car park':          ['[amenity=parking]','🅿️'],
+  carpark:             ['[amenity=parking]','🅿️'],
+  // Supermarkets / Shops
+  supermarket:         ['[shop=supermarket]','🛒'],
+  groceries:           ['[shop=supermarket]','🛒'],
+  woolworths:          ['[shop=supermarket][name~"Woolworths",i]','🛒'],
+  woolies:             ['[shop=supermarket][name~"Woolworths",i]','🛒'],
+  coles:               ['[shop=supermarket][name~"Coles",i]','🛒'],
+  aldi:                ['[shop~"supermarket|discount"][name~"ALDI",i]','🛒'],
+  iga:                 ['[shop=supermarket][name~"IGA",i]','🛒'],
+  harris:              ['[shop=supermarket][name~"Harris Farm",i]','🥦'],
+  newsagent:           ['[shop=newsagent]','📰'],
   // Banking
-  atm:              ['[amenity=atm]','🏧'],
-  bank:             ['[amenity=bank]','🏦'],
+  atm:                 ['[amenity=atm]','🏧'],
+  bank:                ['[amenity=bank]','🏦'],
+  commonwealth:        ['[amenity=bank][name~"Commonwealth|CBA",i]','🏦'],
+  westpac:             ['[amenity=bank][name~"Westpac",i]','🏦'],
+  anz:                 ['[amenity=bank][name~"ANZ",i]','🏦'],
+  nab:                 ['[amenity=bank][name~"NAB",i]','🏦'],
   // Other
-  police:           ['[amenity=police]','👮'],
-  gym:              ['[leisure~"fitness_centre|gym"]','🏋️'],
-  hotel:            ['[tourism~"hotel|motel|guest_house"]','🏨'],
-  motel:            ['[tourism~"hotel|motel"]','🏨'],
-  park:             ['[leisure=park]','🌳'],
-  school:           ['[amenity~"school|primary|secondary"]','🏫'],
-  library:          ['[amenity=library]','📚'],
-  airport:          ['[aeroway=aerodrome]','✈️'],
-  mechanic:         ['[shop~"car_repair|tyres|tyre"]','🔧'],
-  'car wash':       ['[amenity=car_wash]','🚿'],
+  police:              ['[amenity=police]','👮'],
+  gym:                 ['[leisure~"fitness_centre|gym"]','🏋️'],
+  fitness:             ['[leisure~"fitness_centre|gym"]','🏋️'],
+  'anytime fitness':   ['[leisure=fitness_centre][name~"Anytime",i]','🏋️'],
+  'f45':               ['[leisure=fitness_centre][name~"F45",i]','🏋️'],
+  hotel:               ['[tourism~"hotel|motel|guest_house"]','🏨'],
+  motel:               ['[tourism~"hotel|motel"]','🏨'],
+  accommodation:       ['[tourism~"hotel|motel|guest_house|hostel"]','🏨'],
+  park:                ['[leisure=park]','🌳'],
+  playground:          ['[leisure=playground]','🛝'],
+  school:              ['[amenity~"school|primary|secondary"]','🏫'],
+  library:             ['[amenity=library]','📚'],
+  airport:             ['[aeroway=aerodrome]','✈️'],
+  mechanic:            ['[shop~"car_repair|tyres|tyre"]','🔧'],
+  'car wash':          ['[amenity=car_wash]','🚿'],
+  carwash:             ['[amenity=car_wash]','🚿'],
+  pool:                ['[leisure~"swimming_pool|water_park"]','🏊'],
+  'swimming pool':     ['[leisure=swimming_pool]','🏊'],
+  toilet:              ['[amenity=toilets]','🚻'],
+  toilets:             ['[amenity=toilets]','🚻'],
+  'public toilet':     ['[amenity=toilets]','🚻'],
+  ev:                  ['[amenity=charging_station]','⚡'],
+  'ev charger':        ['[amenity=charging_station]','⚡'],
+  'charging station':  ['[amenity=charging_station]','⚡'],
+  tesla:               ['[amenity=charging_station][name~"Tesla|Supercharger",i]','⚡'],
 };
 
 // Detect if a query is a known POI category (returns [filter, emoji] or null)
@@ -693,9 +785,9 @@ async function loadCameras(){
     cameraMarkerEls.clear();
     for(const cam of data){
       if(cam.type==='speed'&&!visibleLayers.speed) continue;
-      if((cam.type==='red_light'||cam.type==='average_speed')&&!visibleLayers.red_light) continue;
+      if((cam.type==='red_light'||cam.type==='average_speed'||cam.type==='bus_lane')&&!visibleLayers.red_light) continue;
       const icon=ICONS[cam.type]??ICONS.speed;
-      const label={speed:'📷 Speed camera',red_light:'🔴 Red light camera',average_speed:'📡 Avg speed'}[cam.type]??cam.type;
+      const label={speed:'📷 Speed camera',red_light:'🔴 Red light camera',average_speed:'📡 Avg speed',bus_lane:'🚌 Bus lane camera'}[cam.type]??cam.type;
       const popupHtml=`<strong>${label}</strong>${cam.road?`<p>📍 ${escHtml(cam.road)}</p>`:''} ${cam.speed_limit?`<p>⚡ ${cam.speed_limit} km/h zone</p>`:''} ${cam.state?`<p>📌 ${cam.state}</p>`:''}<p style="color:#555;font-size:.7rem">Source: ${cam.source.toUpperCase()}</p>`;
       const popup=new maplibregl.Popup({offset:24,maxWidth:'260px'}).setHTML(popupHtml);
       // Wrap in a ripple container so we can add CSS classes as user approaches
@@ -1347,19 +1439,27 @@ async function doSearch(q){
   searchResultsEl.innerHTML=`<div class="no-results">Searching…</div>`;
   const gps=userMarker?userMarker.getLngLat():null;
   const lat=gps?.lat??map.getCenter().lat, lng=gps?.lng??map.getCenter().lng;
+
+  // Known category → Overpass only
   const cat=detectCategory(q);
   if(cat){
     let results=await overpassSearch(cat[0],cat[1],lat,lng,6000);
-    // Expand radius if sparse
-    if(results.length<4) results=await overpassSearch(cat[0],cat[1],lat,lng,15000);
+    if(results.length<4) results=await overpassSearch(cat[0],cat[1],lat,lng,20000);
     if(!results.length){searchResultsEl.innerHTML=`<div class="no-results">None found nearby</div>`;return;}
-    searchResultsEl.innerHTML=results.slice(0,20).map(r=>resultRow(r,isFav(r.name),true,r._emoji)).join('');
+    searchResultsEl.innerHTML=results.slice(0,25).map(r=>resultRow(r,isFav(r.name),true,r._emoji)).join('');
     bindResultClicks();
     return;
   }
-  const results=await geocode(q);
-  if(!results.length){searchResultsEl.innerHTML=`<div class="no-results">No places found for "${escHtml(q)}"</div>`;return;}
-  searchResultsEl.innerHTML=results.map(r=>resultRow(r,isFav(r.name),true,placeEmoji(r),placeLabel(r))).join('');
+
+  // Free-text: run Photon + Overpass name-search in parallel
+  const [photon, overpassByName] = await Promise.all([
+    geocode(q),
+    overpassNameSearch(q, lat, lng, 8000),
+  ]);
+  const enriched = enrichPhoton(photon, lat, lng);
+  const merged = mergeResults([overpassByName, enriched], lat, lng);
+  if(!merged.length){searchResultsEl.innerHTML=`<div class="no-results">No results for "${escHtml(q)}"</div>`;return;}
+  searchResultsEl.innerHTML=merged.slice(0,25).map(r=>resultRow(r,isFav(r.name),true,r._emoji??placeEmoji(r),placeLabel(r))).join('');
   bindResultClicks();
 }
 
@@ -2404,7 +2504,7 @@ function checkProximityAlerts(lat,lng,userHeading){
         wrap.classList.toggle('cam-critical',    d<80);
       }
 
-      const label={speed:'Speed camera',red_light:'Red light camera',average_speed:'Average speed camera'}[cam.type]??'Camera';
+      const label={speed:'Speed camera',red_light:'Red light camera',average_speed:'Average speed camera',bus_lane:'Bus lane camera'}[cam.type]??'Camera';
       const limitStr=cam.speed_limit?` · ${cam.speed_limit} km/h`:'';
       const spokenLimit=cam.speed_limit?`, ${cam.speed_limit} kilometre hour zone`:'';
 
@@ -2413,21 +2513,21 @@ function checkProximityAlerts(lat,lng,userHeading){
         alertedIds.add(`c-${camId}-near`);
         cameraChimeNear();
         if(prefs.haptic&&navigator.vibrate) navigator.vibrate([300,80,300,80,300]);
-        showAlert(cam.type==='red_light'?'🚦':'📷',`⚠️ ${label}${limitStr} — SLOW DOWN`,fmtDist(d),false,cam.lat,cam.lng,400);
+        showAlert({red_light:'🚦',bus_lane:'🚌'}[cam.type]??'📷',`⚠️ ${label}${limitStr} — SLOW DOWN`,fmtDist(d),false,cam.lat,cam.lng,400);
       } else if(d<200&&!alertedIds.has(`c-${camId}-mid`)){
         // Stage 2 — close approach
         alertedIds.add(`c-${camId}-mid`);
         cameraChimeMid();
         if(prefs.haptic&&navigator.vibrate) navigator.vibrate([200,60,200]);
         speak(`${label}${spokenLimit}`);
-        showAlert(cam.type==='red_light'?'🚦':'📷',`${label}${limitStr}`,fmtDist(d),false,cam.lat,cam.lng,400);
+        showAlert({red_light:'🚦',bus_lane:'🚌'}[cam.type]??'📷',`${label}${limitStr}`,fmtDist(d),false,cam.lat,cam.lng,400);
       } else if(d<400&&!alertedIds.has(`c-${camId}-far`)){
         // Stage 1 — early warning
         alertedIds.add(`c-${camId}-far`);
         cameraChimeFar();
         if(prefs.haptic&&navigator.vibrate) navigator.vibrate(120);
         speak(`${label} ahead${spokenLimit}, in ${Math.round(d/50)*50} metres`);
-        showAlert(cam.type==='red_light'?'🚦':'📷',`${label}${limitStr}`,fmtDist(d),false,cam.lat,cam.lng,400);
+        showAlert({red_light:'🚦',bus_lane:'🚌'}[cam.type]??'📷',`${label}${limitStr}`,fmtDist(d),false,cam.lat,cam.lng,400);
       }
 
       if(d>600){
@@ -2556,9 +2656,10 @@ async function doNavSearch(q){
   let places=[];
   if(cat){
     places=await overpassSearch(cat[0],cat[1],lat,lng,6000);
-    if(places.length<4) places=await overpassSearch(cat[0],cat[1],lat,lng,15000);
+    if(places.length<4) places=await overpassSearch(cat[0],cat[1],lat,lng,20000);
   } else {
-    places=await geocode(q,lat,lng);
+    const [photon, overpassByName]=await Promise.all([geocode(q,lat,lng), overpassNameSearch(q,lat,lng,8000)]);
+    places=mergeResults([overpassByName, enrichPhoton(photon,lat,lng)], lat, lng);
   }
   if(!places.length){el.innerHTML='<div class="nss-empty">No results found</div>';return;}
   el.innerHTML='';
