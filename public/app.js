@@ -657,7 +657,7 @@ function placeSub(r) { return r.sub || r.display_name?.split(',').slice(1,3).joi
 let visibleLayers={police:true,speed:true,red_light:true}, fetchTmr=null;
 
 async function loadReports(){
-  if(map.getZoom()<10) return;
+  if(map.getZoom()<14){clearMarkers(reportMarkers);return;}
   const b=map.getBounds();
   const p=new URLSearchParams({swlat:b.getSouth(),swlng:b.getWest(),nelat:b.getNorth(),nelng:b.getEast()});
   try{
@@ -2109,7 +2109,7 @@ $$('recenter-btn').addEventListener('click',()=>{
     const {lat,lng}=prevPos;
     if(perspective3D){
       const [aLat,aLng]=aheadPoint(lat,lng,_mCurHdg,200);
-      map.easeTo({center:[aLng,aLat],bearing:_mCurHdg,pitch:65,zoom:16,duration:400});
+      map.easeTo({center:[aLng,aLat],bearing:_mCurHdg,pitch:65,zoom:targetNavZoom(_mLastSpeedMs),duration:400});
     } else {
       map.easeTo({center:[lng,lat],bearing:headingUpMode?_mCurHdg:0,pitch:0,zoom:targetNavZoom(_mLastSpeedMs),duration:400});
     }
