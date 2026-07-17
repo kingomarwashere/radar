@@ -313,13 +313,14 @@ function makeSvgIcon(paths, bg, size=42){
   const html=`<div style="width:${size}px;height:${size}px;border-radius:13px;background:${bg};display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18);cursor:pointer"><svg viewBox="0 0 20 20" width="22" height="22" xmlns="http://www.w3.org/2000/svg">${paths}</svg></div>`;
   return { el:()=>{ const d=document.createElement('div'); d.innerHTML=html; return d.firstChild; } };
 }
+function makeEmojiIcon(emoji, bg='#1e3a5f', size=42){
+  const html=`<div style="width:${size}px;height:${size}px;border-radius:13px;background:${bg};display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.18);cursor:pointer;font-size:24px;line-height:1;user-select:none">${emoji}</div>`;
+  return { el:()=>{ const d=document.createElement('div'); d.innerHTML=html; return d.firstChild; } };
+}
 
 const ICONS = {
-  // Shield badge — police
-  police: makeSvgIcon(
-    `<path d="M10 1.5L3 4.5V9c0 4.2 3 7.8 7 8.8 4-1 7-4.6 7-8.8V4.5L10 1.5z" fill="white" fill-opacity=".95"/>
-     <path d="M7.5 9.5l2 2 3-3" stroke="#ff0099" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`,
-    '#ff0099'),
+  // Police officer face emoji
+  police: makeEmojiIcon('👮', '#1e3a5f'),
 
   // Camera + lightning flash — speed trap
   speed_trap: makeSvgIcon(
