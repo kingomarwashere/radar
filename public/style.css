@@ -738,11 +738,6 @@ body:not(.nav-3d) #street-labels-overlay { display: none; }
 }
 
 /* ── North-up button (in nav footer) ────────────── */
-#north-up-btn {
-  background: rgba(255,0,153,.18); border: 1px solid rgba(255,0,153,.4);
-  border-radius: 10px; color: var(--accent); cursor: pointer;
-  font-size: .73rem; font-weight: 700; padding: 10px 10px; white-space: nowrap;
-}
 
 /* ── Toast ───────────────────────────────────────── */
 #toast {

@@ -1816,7 +1816,6 @@ function endNav(){
   headingUpMode=false;
   disable3DView(); // sets pitch:0 via easeTo
   map.easeTo({bearing:0,pitch:0,duration:400});
-  $$('north-up-btn').classList.add('hidden');
   $$('compass-widget').classList.add('hidden');
 
   releaseWakeLock();
@@ -2001,7 +2000,6 @@ function onGPS(pos){
 
   if(!headingUpMode&&speedMs>2){
     headingUpMode=true;
-    $$('north-up-btn').classList.remove('hidden');
   }
 
   if((nextM.type>=4&&nextM.type<=6)&&distToTurn<25){
@@ -2089,7 +2087,6 @@ function updateCompass(){
   if(dial) dial.style.transform=`rotate(${bearing}deg)`;
   const off=Math.abs(bearing%360)>0.5;
   $$('compass-widget').classList.toggle('hidden',!off);
-  $$('north-up-btn').classList.toggle('hidden',!off);
   // Update car rotation when bearing changes
   if(userMarker&&prevPos){
     const svg=userMarker.getElement()?.querySelector('svg');
@@ -2101,7 +2098,6 @@ function updateCompass(){
 map.on('rotate', updateCompass);
 
 $$('compass-widget').addEventListener('click', resetNorthUp);
-$$('north-up-btn').addEventListener('click', resetNorthUp);
 $$('recenter-btn').addEventListener('click',()=>{
   userPanning=false;
   clearTimeout(pausePanTimer);
