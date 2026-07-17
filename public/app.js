@@ -1001,7 +1001,7 @@ function onUserPan(){
   pausePanTimer=setTimeout(()=>{
     userPanning=false;
     // recenter-btn stays visible during nav — don't hide it here
-  }, 4000);
+  }, 5000);
 }
 map.on('dragstart',e=>{ if(e.originalEvent) onUserPan(); });
 map.on('zoomstart',e=>{ if(e.originalEvent) onUserPan(); });
