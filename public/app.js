@@ -1191,7 +1191,7 @@ function _stepMarker(ts){
       const navZ=targetNavZoom(_mLastSpeedMs);
       // Push camera centre well ahead so the car sits in the lower third of the screen.
       // 250 m minimum; grows with speed so motorway driving shows more road ahead.
-      const lookM=Math.max(70,_mLastSpeedMs*18);
+      const lookM=Math.max(40,_mLastSpeedMs*18);
       const [aLat,aLng]=aheadPoint(lat,lng,_mCurHdg,lookM);
       map.jumpTo({center:[aLng,aLat],bearing:_mCurHdg,pitch:65,zoom:navZ});
     } else {
@@ -1833,7 +1833,7 @@ function gpsErr(e){console.warn('GPS',e.code,e.message);}
 /* ── Auto-zoom + look-ahead per zoom level ──────── */
 function targetNavZoom(speedMs){
   const kmh=speedMs*3.6;
-  if(perspective3D) return kmh>70?18:19;
+  if(perspective3D) return kmh>70?18:20;
   if(kmh>75) return 16;
   if(kmh>35) return 17;
   return 18;
@@ -2191,7 +2191,8 @@ function refreshStreetLabels(){
   if(!perspective3D||navState!=='navigating'||!maneuvers.length) return;
   const vw=window.innerWidth, vh=window.innerHeight;
   const seen=new Set();
-  for(let i=currentMidx;i<Math.min(maneuvers.length,currentMidx+8);i++){
+  // Start from currentMidx+1 — current road is shown in the street pill; don't render on the car
+  for(let i=currentMidx+1;i<Math.min(maneuvers.length,currentMidx+8);i++){
     const m=maneuvers[i];
     const name=(m.street_names??[])[0];
     if(!name||seen.has(name)) continue;
@@ -2199,12 +2200,20 @@ function refreshStreetLabels(){
     const pt=routePoints[m.begin_shape_index]; if(!pt) continue;
     // MapLibre project([lng,lat]) → {x,y} screen coords, pitch-aware
     const sp=map.project([pt[1],pt[0]]);
-    if(sp.x<-60||sp.x>vw+60||sp.y<0||sp.y>vh) continue;
+    if(sp.x<-60||sp.x>vw+60||sp.y<-30||sp.y>vh) continue;
+    // Compute road bearing at this maneuver to offset label perpendicular (left of road)
+    const ptNext=routePoints[m.begin_shape_index+1]??pt;
+    const brg=(bearing(pt[0],pt[1],ptNext[0],ptNext[1])-map.getBearing()+360)%360;
+    // Left-perpendicular in screen space: road bearing rotated -90°, converted to screen offsets
+    const brgRad=(brg-90)*Math.PI/180;
+    const OFFSET=72; // px offset from route line
+    const ox=Math.sin(brgRad)*OFFSET;
+    const oy=-Math.cos(brgRad)*OFFSET;
     const el=document.createElement('div');
     el.className='street-label';
     el.textContent=san(name);
-    el.style.left=sp.x+'px';
-    el.style.top=sp.y+'px';
+    el.style.left=(sp.x+ox)+'px';
+    el.style.top=(sp.y+oy)+'px';
     overlay.appendChild(el);
   }
 }
