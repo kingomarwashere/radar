@@ -1806,51 +1806,113 @@ async function reroute(lat,lng){
 
 function makeUserIcon(gpsHdg=0){
   const iconRot = gpsHdg - map.getBearing();
-  return { html:`<svg class="user-arrow" style="transform:rotate(${iconRot}deg)" viewBox="0 0 52 76" width="52" height="76" xmlns="http://www.w3.org/2000/svg">
-    <!-- drop shadow -->
-    <ellipse cx="26" cy="73" rx="16" ry="3.5" fill="rgba(0,0,0,0.25)"/>
-    <!-- body -->
-    <path d="M10 24 C10 13 17 8 26 8 C35 8 42 13 42 24 L42 60 C42 67 35 70 26 70 C17 70 10 67 10 60 Z" fill="#ff0099"/>
-    <!-- racing stripe -->
-    <rect x="23.5" y="8" width="5" height="62" rx="2.5" fill="rgba(255,255,255,0.12)"/>
-    <!-- front windshield -->
-    <path d="M16 24 C16 17 20 14 26 14 C32 14 36 17 36 24 L34 32 L18 32 Z" fill="rgba(160,230,255,0.88)"/>
-    <!-- windshield glare -->
-    <path d="M19 16 C21 14 23 14 25 15 L22 22 Z" fill="rgba(255,255,255,0.35)"/>
-    <!-- googly eyes on windshield -->
-    <circle cx="21" cy="23" r="3.2" fill="white"/>
-    <circle cx="31" cy="23" r="3.2" fill="white"/>
-    <circle cx="22" cy="24" r="1.6" fill="#1e293b"/>
-    <circle cx="32" cy="24" r="1.6" fill="#1e293b"/>
-    <circle cx="22.6" cy="23.3" r=".6" fill="white"/>
-    <circle cx="32.6" cy="23.3" r=".6" fill="white"/>
-    <!-- cheeky smile -->
-    <path d="M21 29 Q26 33 31 29" stroke="#1e293b" stroke-width="1.4" stroke-linecap="round" fill="none"/>
-    <!-- rear window -->
-    <path d="M18 48 L34 48 L33 58 C33 62 30 64 26 64 C22 64 19 62 19 58 Z" fill="rgba(160,230,255,0.6)"/>
+  return { html:`<svg class="user-arrow" style="transform:rotate(${iconRot}deg)" viewBox="0 0 90 120" width="90" height="120" xmlns="http://www.w3.org/2000/svg">
+    <!-- ground shadow -->
+    <ellipse cx="45" cy="116" rx="30" ry="5" fill="rgba(0,0,0,0.28)"/>
+
+    <!-- exhaust pipes (rear, bottom of svg = back of kart) -->
+    <rect x="24" y="100" width="10" height="16" rx="5" fill="#555"/>
+    <rect x="56" y="100" width="10" height="16" rx="5" fill="#555"/>
+    <circle cx="29" cy="100" r="5" fill="#333"/>
+    <circle cx="61" cy="100" r="5" fill="#333"/>
+
+    <!-- kart body — green go-kart frame -->
+    <path d="M18 42 C18 24 28 16 45 16 C62 16 72 24 72 42 L74 92 C74 100 62 106 45 106 C28 106 16 100 16 92 Z" fill="#29a329"/>
+    <!-- body side highlight -->
+    <path d="M24 44 C24 30 32 24 45 24 C58 24 66 30 66 44 L67 88" stroke="rgba(255,255,255,.2)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <!-- rear spoiler bar -->
+    <rect x="14" y="98" width="62" height="7" rx="3.5" fill="#1a7a1a"/>
+    <!-- front yellow bumper -->
+    <rect x="20" y="14" width="50" height="10" rx="5" fill="#f59e0b"/>
+    <rect x="26" y="15" width="20" height="4" rx="2" fill="rgba(255,255,255,.3)"/>
+
+    <!-- cockpit cutout (darker oval) -->
+    <ellipse cx="45" cy="64" rx="20" ry="26" fill="#1a7a1a"/>
+
+    <!-- rear wheels (big, cartoonish) -->
+    <rect x="1" y="74" width="18" height="28" rx="9" fill="#1e293b"/>
+    <rect x="71" y="74" width="18" height="28" rx="9" fill="#1e293b"/>
+    <rect x="4" y="80" width="8" height="12" rx="4" fill="rgba(255,255,255,.15)"/>
+    <rect x="78" y="80" width="8" height="12" rx="4" fill="rgba(255,255,255,.15)"/>
+
     <!-- front wheels -->
-    <rect x="1" y="22" width="11" height="17" rx="5" fill="#1e293b"/>
-    <rect x="40" y="22" width="11" height="17" rx="5" fill="#1e293b"/>
-    <!-- rear wheels -->
-    <rect x="1" y="50" width="11" height="17" rx="5" fill="#1e293b"/>
-    <rect x="40" y="50" width="11" height="17" rx="5" fill="#1e293b"/>
-    <!-- wheel shine -->
-    <rect x="3" y="26" width="5" height="5" rx="2.5" fill="rgba(255,255,255,0.15)"/>
-    <rect x="44" y="26" width="5" height="5" rx="2.5" fill="rgba(255,255,255,0.15)"/>
-    <!-- headlights -->
-    <rect x="13" y="10" width="8" height="5" rx="2.5" fill="#fef08a"/>
-    <rect x="31" y="10" width="8" height="5" rx="2.5" fill="#fef08a"/>
-    <!-- headlight glow -->
-    <rect x="13" y="10" width="8" height="2" rx="1" fill="rgba(255,255,200,0.6)"/>
-    <rect x="31" y="10" width="8" height="2" rx="1" fill="rgba(255,255,200,0.6)"/>
-    <!-- tail lights -->
-    <rect x="13" y="65" width="8" height="5" rx="2.5" fill="#ef4444"/>
-    <rect x="31" y="65" width="8" height="5" rx="2.5" fill="#ef4444"/>
+    <rect x="1" y="28" width="18" height="24" rx="9" fill="#1e293b"/>
+    <rect x="71" y="28" width="18" height="24" rx="9" fill="#1e293b"/>
+    <rect x="4" y="34" width="8" height="10" rx="4" fill="rgba(255,255,255,.15)"/>
+    <rect x="78" y="34" width="8" height="10" rx="4" fill="rgba(255,255,255,.15)"/>
+
+    <!-- Luigi overalls (blue, visible below head) -->
+    <ellipse cx="45" cy="80" rx="14" ry="11" fill="#1a52c8"/>
+    <rect x="40" y="68" width="5" height="14" rx="2.5" fill="#1a52c8"/>
+    <rect x="50" y="68" width="5" height="14" rx="2.5" fill="#1a52c8"/>
+
+    <!-- neck -->
+    <rect x="41" y="60" width="8" height="7" rx="3.5" fill="#fde8c8"/>
+
+    <!-- face (peach) -->
+    <circle cx="45" cy="50" r="17" fill="#fde8c8"/>
+    <ellipse cx="45" cy="61" rx="12" ry="6" fill="#f5d5b0"/>
+    <!-- ears -->
+    <circle cx="28" cy="50" r="5" fill="#fde8c8"/>
+    <circle cx="62" cy="50" r="5" fill="#fde8c8"/>
+
+    <!-- GREEN HAT — Luigi's most iconic feature -->
+    <!-- hat brim (wide ellipse) -->
+    <ellipse cx="45" cy="38" rx="20" ry="8" fill="#29a329"/>
+    <!-- hat dome -->
+    <path d="M30 38 C30 24 36 17 45 17 C54 17 60 24 60 38 Z" fill="#29a329"/>
+    <!-- brim underside shadow -->
+    <ellipse cx="45" cy="38" rx="20" ry="4.5" fill="#1a7a1a"/>
+    <!-- hat top highlight -->
+    <ellipse cx="41" cy="26" rx="7" ry="5" fill="rgba(255,255,255,.18)"/>
+    <!-- white circle badge on hat -->
+    <circle cx="45" cy="29" r="9" fill="white"/>
+    <!-- "L" drawn geometrically inside badge -->
+    <rect x="42" y="22" width="4" height="12" rx="2" fill="#29a329"/>
+    <rect x="42" y="31.5" width="9" height="4" rx="2" fill="#29a329"/>
+
+    <!-- eyebrows (thick, expressive) -->
+    <path d="M34 43 C36 40 40 40 43 43" stroke="#2c1810" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <path d="M47 43 C50 40 54 40 56 43" stroke="#2c1810" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+    <!-- eyes -->
+    <circle cx="38" cy="48" r="4.5" fill="white"/>
+    <circle cx="52" cy="48" r="4.5" fill="white"/>
+    <circle cx="39" cy="49" r="2.6" fill="#2c1810"/>
+    <circle cx="53" cy="49" r="2.6" fill="#2c1810"/>
+    <circle cx="40" cy="47.5" r="1" fill="white"/>
+    <circle cx="54" cy="47.5" r="1" fill="white"/>
+
+    <!-- nose (round, pink-ish) -->
+    <circle cx="45" cy="54" r="4" fill="#f0b090"/>
+
+    <!-- Luigi mustache — thick black double-bump -->
+    <ellipse cx="37" cy="59" rx="7.5" ry="5" fill="#111"/>
+    <ellipse cx="53" cy="59" rx="7.5" ry="5" fill="#111"/>
+    <!-- mustache shine -->
+    <ellipse cx="35" cy="57" rx="3.5" ry="2" fill="rgba(255,255,255,.12)"/>
+    <ellipse cx="51" cy="57" rx="3.5" ry="2" fill="rgba(255,255,255,.12)"/>
+
+    <!-- headlights (yellow) -->
+    <rect x="23" y="14" width="14" height="7" rx="3.5" fill="#fef08a"/>
+    <rect x="53" y="14" width="14" height="7" rx="3.5" fill="#fef08a"/>
+    <rect x="23" y="14" width="14" height="3" rx="1.5" fill="rgba(255,255,200,.5)"/>
+    <rect x="53" y="14" width="14" height="3" rx="1.5" fill="rgba(255,255,200,.5)"/>
+
+    <!-- tail lights (red) -->
+    <rect x="23" y="100" width="12" height="6" rx="3" fill="#ef4444"/>
+    <rect x="55" y="100" width="12" height="6" rx="3" fill="#ef4444"/>
+
+    <!-- star sparkle (Mario theme) -->
+    <circle cx="10" cy="68" r="2.5" fill="#fde68a" opacity=".7"/>
+    <circle cx="80" cy="62" r="2" fill="#fde68a" opacity=".6"/>
+    <circle cx="13" cy="80" r="1.5" fill="#fde68a" opacity=".5"/>
   </svg>` };
 }
 function makeUserMarker(lat,lng,gpsHdg=0){
   const el=document.createElement('div');
   el.innerHTML=makeUserIcon(gpsHdg).html;
+  el.style.zIndex='9999';
   return new maplibregl.Marker({element:el,anchor:'center'}).setLngLat([lng,lat]);
 }
 
