@@ -484,33 +484,6 @@ function showToast(msg, dur=2800) {
 /* ═══════════════════════════════════════════════
    GEOCODING helpers
 ═══════════════════════════════════════════════ */
-function placeEmoji(r){
-  const c=r.category??r.class,t=r.type;
-  if(c==='railway') return t==='tram_stop'?'🚋':'🚆';
-  if(c==='public_transport') return t==='stop_area'?'🚉':'🚌';
-  if(c==='aeroway') return '✈️';
-  if(c==='amenity'){const m={hospital:'🏥',clinic:'🏥',pharmacy:'💊',fuel:'⛽',restaurant:'🍽️',cafe:'☕',fast_food:'🍔',bar:'🍺',bank:'🏦',school:'🏫',university:'🎓',library:'📚',police:'👮',fire_station:'🚒',post_office:'📮',cinema:'🎬',theatre:'🎭',place_of_worship:'⛪'};return m[t]||'📍';}
-  if(c==='tourism'){const m={hotel:'🏨',motel:'🏨',museum:'🏛️',attraction:'⭐',viewpoint:'🔭',beach:'🏖️',zoo:'🦁',theme_park:'🎡'};return m[t]||'⭐';}
-  if(c==='shop') return '🛍️';
-  if(c==='leisure'){const m={park:'🌳',sports_centre:'🏋️',stadium:'🏟️',golf_course:'⛳',swimming_pool:'🏊'};return m[t]||'🌿';}
-  if(c==='natural') return t==='beach'?'🏖️':'🌿';
-  if(t==='city'||t==='town') return '🏙️';
-  if(t==='suburb'||t==='neighbourhood'||t==='quarter') return '🏘️';
-  if(t==='road'||t==='residential'||t==='street') return '🛣️';
-  return '📍';
-}
-function placeLabel(r){
-  const c=r.category??r.class,t=r.type;
-  if(c==='railway'&&t==='station') return 'Train Station';
-  if(c==='railway'&&t==='halt') return 'Train Halt';
-  if(c==='railway'&&t==='tram_stop') return 'Tram Stop';
-  if(c==='public_transport'&&t==='stop_area') return 'Transit Hub';
-  if(c==='aeroway'&&t==='aerodrome') return 'Airport';
-  if(c==='amenity'&&t==='hospital') return 'Hospital';
-  if(c==='amenity'&&t==='university') return 'University';
-  if(t==='city') return 'City'; if(t==='town') return 'Town'; if(t==='suburb') return 'Suburb';
-  return null;
-}
 // Sanitise any text from third-party data sources
 function san(s){ return s ? String(s).replace(/\bisrael\b/gi, 'Palestine') : s; }
 
@@ -574,7 +547,6 @@ const OVERPASS_CAT = {
   library:          ['[amenity=library]','📚'],
   airport:          ['[aeroway=aerodrome]','✈️'],
   mechanic:         ['[shop~"car_repair|tyres|tyre"]','🔧'],
-  car wash:         ['[amenity=car_wash]','🚿'],
   'car wash':       ['[amenity=car_wash]','🚿'],
 };
 
