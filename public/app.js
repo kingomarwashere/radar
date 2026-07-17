@@ -1191,7 +1191,7 @@ function _stepMarker(ts){
       const navZ=targetNavZoom(_mLastSpeedMs);
       // Push camera centre well ahead so the car sits in the lower third of the screen.
       // 250 m minimum; grows with speed so motorway driving shows more road ahead.
-      const lookM=Math.max(120,_mLastSpeedMs*18);
+      const lookM=Math.max(70,_mLastSpeedMs*18);
       const [aLat,aLng]=aheadPoint(lat,lng,_mCurHdg,lookM);
       map.jumpTo({center:[aLng,aLat],bearing:_mCurHdg,pitch:65,zoom:navZ});
     } else {
@@ -1787,10 +1787,10 @@ function startNav(){
   navigator.geolocation.getCurrentPosition(pos=>{
     userPanning=false;
     const {latitude:lat,longitude:lng}=pos.coords;
-    map.easeTo({center:[lng,lat],zoom:19,pitch:65,bearing:initBrg,duration:700});
+    map.easeTo({center:[lng,lat],zoom:20,pitch:65,bearing:initBrg,duration:700});
   }, ()=>{
     const k=userMarker?userMarker.getLngLat():prevPos?{lng:prevPos.lng,lat:prevPos.lat}:null;
-    if(k) map.easeTo({center:[k.lng,k.lat],zoom:19,pitch:65,bearing:initBrg,duration:700});
+    if(k) map.easeTo({center:[k.lng,k.lat],zoom:20,pitch:65,bearing:initBrg,duration:700});
   }, {enableHighAccuracy:true,timeout:8000,maximumAge:10000});
 
   loadNearCameras();
@@ -1833,7 +1833,7 @@ function gpsErr(e){console.warn('GPS',e.code,e.message);}
 /* ── Auto-zoom + look-ahead per zoom level ──────── */
 function targetNavZoom(speedMs){
   const kmh=speedMs*3.6;
-  if(perspective3D) return kmh>70?17:18;
+  if(perspective3D) return kmh>70?18:19;
   if(kmh>75) return 16;
   if(kmh>35) return 17;
   return 18;
