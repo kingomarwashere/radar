@@ -660,7 +660,8 @@ body.previewing #report-btn { display: none; }
 .user-arrow {
   display: block; transform-origin: center;
   filter: drop-shadow(0 4px 16px rgba(0,0,0,.9));
-  width: 68px; height: 90px;
+  width: auto; height: auto;
+  max-width: 72px; max-height: 106px;
 }
 
 /* Palestine labels are now handled at the vector tile render level via

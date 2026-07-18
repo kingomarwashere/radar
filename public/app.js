@@ -2309,6 +2309,293 @@ function makeGtaTaxiIcon(gpsHdg=0){ // Yellow Cabbie
   </svg>`};
 }
 
+/* ═══════════════════════════════════════════════
+   REALISTIC CAR SVGS
+   All top-down, 90×140 viewBox, front faces up.
+═══════════════════════════════════════════════ */
+function _realCar(body, rot){
+  return {html:`<svg class="user-arrow" style="transform:rotate(${rot}deg)" viewBox="0 0 90 140" width="90" height="140" xmlns="http://www.w3.org/2000/svg">${body}</svg>`};
+}
+// Shared wheel set — 4 realistic tyres
+function _wheels(col='#1a1a1a', hubCol='#555'){
+  return `
+  <rect x="1" y="26" width="15" height="22" rx="7.5" fill="${col}"/>
+  <rect x="74" y="26" width="15" height="22" rx="7.5" fill="${col}"/>
+  <rect x="1" y="92" width="15" height="22" rx="7.5" fill="${col}"/>
+  <rect x="74" y="92" width="15" height="22" rx="7.5" fill="${col}"/>
+  <circle cx="8.5" cy="37" r="5.5" fill="${hubCol}"/><circle cx="8.5" cy="37" r="2.5" fill="${col}"/><circle cx="8.5" cy="37" r="1" fill="${hubCol}"/>
+  <circle cx="81.5" cy="37" r="5.5" fill="${hubCol}"/><circle cx="81.5" cy="37" r="2.5" fill="${col}"/><circle cx="81.5" cy="37" r="1" fill="${hubCol}"/>
+  <circle cx="8.5" cy="103" r="5.5" fill="${hubCol}"/><circle cx="8.5" cy="103" r="2.5" fill="${col}"/><circle cx="8.5" cy="103" r="1" fill="${hubCol}"/>
+  <circle cx="81.5" cy="103" r="5.5" fill="${hubCol}"/><circle cx="81.5" cy="103" r="2.5" fill="${col}"/><circle cx="81.5" cy="103" r="1" fill="${hubCol}"/>`;
+}
+
+// 1. Black Mercedes / BMW sedan
+function makeRealSedanIcon(gpsHdg=0){
+  const r=gpsHdg-map.getBearing();
+  return _realCar(`
+  <defs><linearGradient id="sg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(255,255,255,.0)"/><stop offset="30%" stop-color="rgba(255,255,255,.12)"/><stop offset="100%" stop-color="rgba(255,255,255,.0)"/></linearGradient></defs>
+  <ellipse cx="45" cy="136" rx="36" ry="5" fill="rgba(0,0,0,.35)"/>
+  <!-- body -->
+  <path d="M16 14 Q45 9 74 14 L78 24 L78 116 Q78 126 45 128 Q12 126 12 116 L12 24 Z" fill="#1a1a1a"/>
+  <!-- paint sheen -->
+  <rect x="16" y="14" width="18" height="114" rx="4" fill="url(#sg1)"/>
+  <!-- front grille area -->
+  <path d="M24 9 Q45 6 66 9 L70 14 Q45 11 20 14 Z" fill="#111"/>
+  <rect x="30" y="10" width="30" height="4" rx="2" fill="#333"/>
+  <!-- windshield -->
+  <path d="M22 32 Q45 27 68 32 L66 54 Q45 49 24 54 Z" fill="rgba(155,200,230,.78)"/>
+  <path d="M26 33 L34 33 L32 52 L25 51 Z" fill="rgba(255,255,255,.14)"/>
+  <!-- roof -->
+  <rect x="22" y="54" width="46" height="32" rx="3" fill="#141414"/>
+  <!-- rear window -->
+  <path d="M24 88 L66 88 L64 106 Q45 110 26 106 Z" fill="rgba(120,160,200,.62)"/>
+  <!-- door gap lines -->
+  <line x1="15" y1="72" x2="75" y2="72" stroke="rgba(0,0,0,.55)" stroke-width="1.2"/>
+  <!-- mirrors -->
+  <path d="M12 38 L7 40 L7 48 L12 48" fill="#1e1e1e" stroke="#111" stroke-width=".6"/>
+  <path d="M78 38 L83 40 L83 48 L78 48" fill="#1e1e1e" stroke="#111" stroke-width=".6"/>
+  <!-- headlights -->
+  <path d="M20 10 L36 10 L36 16 L20 16 Z" fill="rgba(240,245,255,.95)" rx="2"/>
+  <path d="M54 10 L70 10 L70 16 L54 16 Z" fill="rgba(240,245,255,.95)" rx="2"/>
+  <rect x="22" y="11" width="8" height="3" rx="1" fill="rgba(180,200,255,.8)"/>
+  <rect x="60" y="11" width="8" height="3" rx="1" fill="rgba(180,200,255,.8)"/>
+  <!-- tail lights -->
+  <path d="M18 118 L36 118 L36 124 L18 124 Z" fill="#ef4444" rx="2"/>
+  <path d="M54 118 L72 118 L72 124 L54 124 Z" fill="#ef4444" rx="2"/>
+  <rect x="20" y="119" width="6" height="4" rx="1" fill="rgba(255,200,200,.6)"/>
+  <rect x="64" y="119" width="6" height="4" rx="1" fill="rgba(255,200,200,.6)"/>
+  ${_wheels('#111','#3a3a3a')}`,r);
+}
+
+// 2. White SUV (Range Rover style)
+function makeRealSuvIcon(gpsHdg=0){
+  const r=gpsHdg-map.getBearing();
+  return _realCar(`
+  <defs><linearGradient id="sg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(0,0,0,.08)"/><stop offset="40%" stop-color="rgba(255,255,255,.18)"/><stop offset="100%" stop-color="rgba(0,0,0,.1)"/></linearGradient></defs>
+  <ellipse cx="45" cy="136" rx="38" ry="5" fill="rgba(0,0,0,.3)"/>
+  <!-- wide boxy body -->
+  <path d="M12 16 Q45 11 78 16 L80 22 L80 118 Q80 128 45 130 Q10 128 10 118 L10 22 Z" fill="#e8e8e8"/>
+  <rect x="14" y="16" width="22" height="112" rx="3" fill="url(#sg2)"/>
+  <!-- cladding lower body -->
+  <rect x="10" y="100" width="70" height="18" rx="4" fill="#ccc"/>
+  <!-- front grille (black mesh look) -->
+  <path d="M22 11 Q45 7 68 11 L70 16 Q45 12 20 16 Z" fill="#2a2a2a"/>
+  <rect x="26" y="12" width="38" height="4" rx="2" fill="#444"/>
+  <!-- roof rack lines -->
+  <rect x="24" y="44" width="42" height="2" rx="1" fill="#ccc"/>
+  <rect x="24" y="50" width="42" height="2" rx="1" fill="#ccc"/>
+  <rect x="24" y="56" width="42" height="2" rx="1" fill="#ccc"/>
+  <!-- windshield -->
+  <path d="M20 30 Q45 24 70 30 L68 50 Q45 45 22 50 Z" fill="rgba(140,185,220,.8)"/>
+  <path d="M24 31 L34 31 L32 48 L23 47 Z" fill="rgba(255,255,255,.16)"/>
+  <!-- flat roof panel -->
+  <rect x="20" y="50" width="50" height="42" rx="2" fill="#dcdcdc"/>
+  <rect x="22" y="52" width="46" height="38" rx="2" fill="#d4d4d4"/>
+  <!-- rear window -->
+  <path d="M22 94 L68 94 L66 110 Q45 114 24 110 Z" fill="rgba(130,175,210,.72)"/>
+  <!-- door lines -->
+  <line x1="12" y1="72" x2="78" y2="72" stroke="rgba(180,180,180,.5)" stroke-width="1.2"/>
+  <!-- B-pillars -->
+  <rect x="22" y="52" width="4" height="42" rx="1" fill="rgba(0,0,0,.15)"/>
+  <rect x="64" y="52" width="4" height="42" rx="1" fill="rgba(0,0,0,.15)"/>
+  <!-- mirrors (wide) -->
+  <path d="M10 34 L4 36 L4 46 L10 46" fill="#d8d8d8" stroke="#bbb" stroke-width=".8"/>
+  <path d="M80 34 L86 36 L86 46 L80 46" fill="#d8d8d8" stroke="#bbb" stroke-width=".8"/>
+  <!-- headlights (split LED look) -->
+  <rect x="18" y="11" width="18" height="5" rx="2.5" fill="rgba(240,248,255,.95)"/>
+  <rect x="54" y="11" width="18" height="5" rx="2.5" fill="rgba(240,248,255,.95)"/>
+  <rect x="20" y="12" width="10" height="2" rx="1" fill="rgba(200,220,255,.9)"/>
+  <rect x="58" y="12" width="10" height="2" rx="1" fill="rgba(200,220,255,.9)"/>
+  <!-- tail lights (wide) -->
+  <rect x="16" y="120" width="20" height="8" rx="3" fill="#dc2626"/>
+  <rect x="54" y="120" width="20" height="8" rx="3" fill="#dc2626"/>
+  <rect x="18" y="121" width="8" height="5" rx="1.5" fill="rgba(255,160,160,.6)"/>
+  ${_wheels('#222','#888')}`,r);
+}
+
+// 3. Deep red sports coupe (Porsche 911 style)
+function makeRealCoupeIcon(gpsHdg=0){
+  const r=gpsHdg-map.getBearing();
+  return _realCar(`
+  <defs><linearGradient id="sg3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(255,255,255,.0)"/><stop offset="35%" stop-color="rgba(255,80,80,.2)"/><stop offset="100%" stop-color="rgba(255,255,255,.0)"/></linearGradient></defs>
+  <ellipse cx="45" cy="136" rx="34" ry="4.5" fill="rgba(0,0,0,.28)"/>
+  <!-- sleek tapered body — wider at rear (rear-engine) -->
+  <path d="M20 18 Q45 13 70 18 L76 28 L78 106 Q78 120 45 124 Q12 120 12 106 L14 28 Z" fill="#c0392b"/>
+  <rect x="18" y="18" width="14" height="104" rx="3" fill="url(#sg3)"/>
+  <!-- wide rear haunches -->
+  <path d="M10 82 L2 86 L2 110 L12 112" fill="#a93226" stroke="none"/>
+  <path d="M80 82 L88 86 L88 110 L78 112" fill="#a93226" stroke="none"/>
+  <!-- front hood vents -->
+  <rect x="34" y="24" width="22" height="3" rx="1.5" fill="rgba(0,0,0,.4)"/>
+  <rect x="36" y="29" width="18" height="2" rx="1" fill="rgba(0,0,0,.3)"/>
+  <!-- low wide windshield -->
+  <path d="M22 36 Q45 30 68 36 L66 56 Q45 50 24 56 Z" fill="rgba(150,210,235,.82)"/>
+  <path d="M25 37 L36 37 L34 54 L24 53 Z" fill="rgba(255,255,255,.18)"/>
+  <!-- fastback roofline (slopes steeply) -->
+  <path d="M24 56 L66 56 L62 96 L28 96 Z" fill="#a93226"/>
+  <!-- rear window (wrap-around fastback) -->
+  <path d="M28 96 L62 96 L60 112 Q45 116 30 112 Z" fill="rgba(110,160,200,.7)"/>
+  <!-- door line (2-door coupe, one long line) -->
+  <line x1="14" y1="78" x2="76" y2="78" stroke="rgba(0,0,0,.35)" stroke-width="1"/>
+  <!-- small side intakes rear -->
+  <rect x="10" y="88" width="6" height="12" rx="3" fill="#8b1c1c"/>
+  <rect x="74" y="88" width="6" height="12" rx="3" fill="#8b1c1c"/>
+  <!-- thin mirrors -->
+  <path d="M16 44 L10 46 L10 54 L16 54" fill="#b03a2e" stroke="#8b1c1c" stroke-width=".6"/>
+  <path d="M74 44 L80 46 L80 54 L74 54" fill="#b03a2e" stroke="#8b1c1c" stroke-width=".6"/>
+  <!-- quad circular headlights (911 style) -->
+  <circle cx="27" cy="16" r="6" fill="rgba(240,248,255,.9)"/>
+  <circle cx="27" cy="16" r="3" fill="rgba(220,235,255,.7)"/>
+  <circle cx="63" cy="16" r="6" fill="rgba(240,248,255,.9)"/>
+  <circle cx="63" cy="16" r="3" fill="rgba(220,235,255,.7)"/>
+  <!-- tail lights (wide strip) -->
+  <rect x="18" y="116" width="54" height="6" rx="3" fill="#c0392b"/>
+  <rect x="20" y="117" width="50" height="3" rx="1.5" fill="#e74c3c"/>
+  ${_wheels('#1a1a1a','#5a5a5a')}`,r);
+}
+
+// 4. Silver pickup truck (Ford F-150 style)
+function makeRealPickupIcon(gpsHdg=0){
+  const r=gpsHdg-map.getBearing();
+  return _realCar(`
+  <defs><linearGradient id="sg4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(0,0,0,.1)"/><stop offset="40%" stop-color="rgba(255,255,255,.2)"/><stop offset="100%" stop-color="rgba(0,0,0,.1)"/></linearGradient></defs>
+  <ellipse cx="45" cy="136" rx="38" ry="5" fill="rgba(0,0,0,.28)"/>
+  <!-- truck cab -->
+  <path d="M14 14 Q45 9 76 14 L78 22 L78 82 L12 82 L12 22 Z" fill="#a0a8b0"/>
+  <rect x="16" y="14" width="18" height="68" rx="3" fill="url(#sg4)"/>
+  <!-- windshield (taller, truck-like) -->
+  <path d="M20 28 Q45 22 70 28 L68 52 Q45 47 22 52 Z" fill="rgba(150,200,230,.8)"/>
+  <path d="M24 29 L36 29 L34 50 L23 49 Z" fill="rgba(255,255,255,.16)"/>
+  <!-- roof -->
+  <rect x="20" y="52" width="50" height="28" rx="3" fill="#8a9098"/>
+  <!-- rear cab window -->
+  <path d="M22 82 L68 82 L68 74 L22 74 Z" fill="rgba(100,140,180,.55)"/>
+  <!-- truck bed (flat, textured) -->
+  <rect x="12" y="82" width="66" height="46" rx="4" fill="#787e86"/>
+  <rect x="14" y="84" width="62" height="42" rx="3" fill="#6a7078"/>
+  <!-- bed liner / ribs -->
+  <line x1="14" y1="94" x2="76" y2="94" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+  <line x1="14" y1="106" x2="76" y2="106" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+  <line x1="14" y1="118" x2="76" y2="118" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+  <!-- tailgate -->
+  <rect x="12" y="124" width="66" height="6" rx="2" fill="#909098"/>
+  <!-- cab door line -->
+  <line x1="14" y1="64" x2="76" y2="64" stroke="rgba(0,0,0,.3)" stroke-width="1.2"/>
+  <!-- A-pillar line -->
+  <line x1="20" y1="52" x2="20" y2="82" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+  <line x1="70" y1="52" x2="70" y2="82" stroke="rgba(0,0,0,.2)" stroke-width="1.5"/>
+  <!-- big mirrors (trucks have wide mirrors) -->
+  <path d="M12 30 L4 33 L4 50 L12 50" fill="#909098" stroke="#777" stroke-width=".8"/>
+  <path d="M78 30 L86 33 L86 50 L78 50" fill="#909098" stroke="#777" stroke-width=".8"/>
+  <!-- front grille (wide truck grille) -->
+  <rect x="18" y="9" width="54" height="6" rx="2" fill="#2a2a2a"/>
+  <line x1="22" y1="9" x2="22" y2="15" stroke="#444" stroke-width="1.5"/>
+  <line x1="30" y1="9" x2="30" y2="15" stroke="#444" stroke-width="1.5"/>
+  <line x1="38" y1="9" x2="38" y2="15" stroke="#444" stroke-width="1.5"/>
+  <line x1="52" y1="9" x2="52" y2="15" stroke="#444" stroke-width="1.5"/>
+  <line x1="60" y1="9" x2="60" y2="15" stroke="#444" stroke-width="1.5"/>
+  <line x1="68" y1="9" x2="68" y2="15" stroke="#444" stroke-width="1.5"/>
+  <!-- headlights (angular truck style) -->
+  <rect x="16" y="10" width="14" height="8" rx="2" fill="rgba(240,248,255,.92)"/>
+  <rect x="60" y="10" width="14" height="8" rx="2" fill="rgba(240,248,255,.92)"/>
+  <!-- tail lights -->
+  <rect x="14" y="124" width="12" height="8" rx="2" fill="#ef4444"/>
+  <rect x="64" y="124" width="12" height="8" rx="2" fill="#ef4444"/>
+  ${_wheels('#1c1c1c','#6a6a6a')}`,r);
+}
+
+// 5. Navy blue supercar (Lamborghini Huracán style — ultra wide, flat wedge)
+function makeRealSuper1Icon(gpsHdg=0){
+  const r=gpsHdg-map.getBearing();
+  return _realCar(`
+  <defs><linearGradient id="sg5" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(255,255,255,.0)"/><stop offset="40%" stop-color="rgba(100,150,255,.22)"/><stop offset="100%" stop-color="rgba(255,255,255,.0)"/></linearGradient></defs>
+  <ellipse cx="45" cy="136" rx="38" ry="4" fill="rgba(0,0,0,.3)"/>
+  <!-- ultra-wide angular body -->
+  <path d="M8 28 L22 10 L68 10 L82 28 L84 100 Q84 118 45 122 Q6 118 6 100 Z" fill="#1a2356"/>
+  <rect x="12" y="10" width="16" height="108" rx="3" fill="url(#sg5)"/>
+  <!-- sharp angular front -->
+  <path d="M22 10 L45 6 L68 10 L64 16 Q45 12 26 16 Z" fill="#131a42"/>
+  <!-- front splitter -->
+  <path d="M8 28 L2 30 L2 34 L8 34" fill="#0a1030"/>
+  <path d="M82 28 L88 30 L88 34 L82 34" fill="#0a1030"/>
+  <!-- low flat windshield (very raked) -->
+  <path d="M16 32 Q45 24 74 32 L70 50 Q45 44 20 50 Z" fill="rgba(140,180,230,.85)"/>
+  <path d="M20 33 L34 33 L30 48 L18 47 Z" fill="rgba(255,255,255,.2)"/>
+  <!-- flat roof -->
+  <path d="M20 50 L70 50 L68 84 L22 84 Z" fill="#141e4a"/>
+  <!-- engine vents (rear mid-engine) -->
+  <rect x="24" y="88" width="42" height="4" rx="2" fill="#0d1435"/>
+  <rect x="28" y="94" width="34" height="3" rx="1.5" fill="#0d1435"/>
+  <!-- rear window flat -->
+  <path d="M22 84 L68 84 L66 100 Q45 104 24 100 Z" fill="rgba(100,140,200,.7)"/>
+  <!-- side air intakes -->
+  <rect x="6" y="68" width="8" height="18" rx="4" fill="#0a1030"/>
+  <rect x="76" y="68" width="8" height="18" rx="4" fill="#0a1030"/>
+  <!-- scissor door hints (horizontal lines) -->
+  <line x1="8" y1="60" x2="82" y2="60" stroke="rgba(0,0,0,.4)" stroke-width="1"/>
+  <!-- ultra-thin mirrors (Lambo style) -->
+  <rect x="6" y="36" width="6" height="12" rx="3" fill="#1a2356" stroke="#0a1030" stroke-width=".8"/>
+  <rect x="78" y="36" width="6" height="12" rx="3" fill="#1a2356" stroke="#0a1030" stroke-width=".8"/>
+  <!-- angular LED headlights -->
+  <path d="M10 20 L28 10 L28 16 L12 24 Z" fill="rgba(230,245,255,.92)"/>
+  <path d="M80 20 L62 10 L62 16 L78 24 Z" fill="rgba(230,245,255,.92)"/>
+  <path d="M14 21 L22 14 L22 16 L14 22 Z" fill="rgba(180,210,255,.8)"/>
+  <path d="M76 21 L68 14 L68 16 L76 22 Z" fill="rgba(180,210,255,.8)"/>
+  <!-- tail lights (full-width LED strip) -->
+  <rect x="14" y="112" width="62" height="6" rx="3" fill="#1a2356"/>
+  <rect x="16" y="113" width="58" height="3" rx="1.5" fill="rgba(239,68,68,.9)"/>
+  ${_wheels('#0a0a14','#334')}`,r);
+}
+
+// 6. Matte white clean hypercar (McLaren / Ferrari SF90 vibe)
+function makeRealHyperIcon(gpsHdg=0){
+  const r=gpsHdg-map.getBearing();
+  return _realCar(`
+  <defs><linearGradient id="sg6" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="rgba(200,200,200,.0)"/><stop offset="35%" stop-color="rgba(255,255,255,.28)"/><stop offset="100%" stop-color="rgba(200,200,200,.0)"/></linearGradient></defs>
+  <ellipse cx="45" cy="136" rx="36" ry="4" fill="rgba(0,0,0,.25)"/>
+  <!-- ultra-low flat body -->
+  <path d="M12 32 L28 8 L62 8 L78 32 L80 104 Q80 122 45 126 Q10 122 10 104 Z" fill="#f0f0f0"/>
+  <rect x="16" y="8" width="16" height="116" rx="3" fill="url(#sg6)"/>
+  <!-- sharp nose -->
+  <path d="M28 8 L45 4 L62 8 L60 14 Q45 10 30 14 Z" fill="#e0e0e0"/>
+  <!-- side-pod lower body dark -->
+  <path d="M10 70 L2 72 L2 100 L10 104" fill="#d8d8d8"/>
+  <path d="M80 70 L88 72 L88 100 L80 104" fill="#d8d8d8"/>
+  <!-- front splitter (dark carbon) -->
+  <path d="M12 32 L4 34 L4 40 L12 40" fill="#2a2a2a"/>
+  <path d="M78 32 L86 34 L86 40 L78 40" fill="#2a2a2a"/>
+  <rect x="20" y="32" width="50" height="4" rx="2" fill="#222"/>
+  <!-- very raked windshield -->
+  <path d="M18 36 Q45 28 72 36 L68 54 Q45 48 22 54 Z" fill="rgba(150,210,240,.85)"/>
+  <path d="M22 37 L38 37 L34 52 L20 51 Z" fill="rgba(255,255,255,.22)"/>
+  <!-- ultraflat roof -->
+  <path d="M22 54 L68 54 L66 86 L24 86 Z" fill="#e4e4e4"/>
+  <!-- engine vents (visible mid-rear) -->
+  <rect x="28" y="90" width="34" height="5" rx="2.5" fill="#ccc"/>
+  <rect x="32" y="97" width="26" height="4" rx="2" fill="#ccc"/>
+  <!-- rear clip -->
+  <path d="M24 86 L66 86 L64 108 Q45 114 26 108 Z" fill="rgba(160,210,240,.75)"/>
+  <!-- dihedral door crease -->
+  <path d="M16 54 L74 54 L72 86 L18 86" stroke="rgba(0,0,0,.12)" stroke-width="1.5" fill="none"/>
+  <!-- thin carbon mirrors -->
+  <rect x="8" y="42" width="6" height="10" rx="3" fill="#ccc" stroke="#aaa" stroke-width=".6"/>
+  <rect x="76" y="42" width="6" height="10" rx="3" fill="#ccc" stroke="#aaa" stroke-width=".6"/>
+  <!-- sharp LED DRL headlights -->
+  <path d="M14 22 L32 8 L34 12 L18 26 Z" fill="rgba(230,245,255,.95)"/>
+  <path d="M76 22 L58 8 L56 12 L72 26 Z" fill="rgba(230,245,255,.95)"/>
+  <path d="M16 23 L26 10 L27 12 L18 24 Z" fill="rgba(200,220,255,.85)"/>
+  <!-- tail light (full-width thin strip) -->
+  <rect x="18" y="114" width="54" height="4" rx="2" fill="#f0f0f0"/>
+  <rect x="20" y="115" width="50" height="2" rx="1" fill="rgba(239,68,68,.9)"/>
+  <!-- diffuser -->
+  <rect x="22" y="120" width="46" height="5" rx="2" fill="#2a2a2a"/>
+  <line x1="28" y1="120" x2="28" y2="125" stroke="#333" stroke-width="1.5"/>
+  <line x1="38" y1="120" x2="38" y2="125" stroke="#333" stroke-width="1.5"/>
+  <line x1="52" y1="120" x2="52" y2="125" stroke="#333" stroke-width="1.5"/>
+  <line x1="62" y1="120" x2="62" y2="125" stroke="#333" stroke-width="1.5"/>
+  ${_wheels('#1a1a1a','#999')}`,r);
+}
+
 const CARS=[
   {id:'luigi',   name:'Luigi',    emoji:'🟢', fn:makeLuigiIcon},
   {id:'mario',   name:'Mario',    emoji:'🔴', fn:makeMarioIcon},
@@ -2320,6 +2607,12 @@ const CARS=[
   {id:'lowrider',name:'Lowrider', emoji:'🟣', fn:makeGtaLowriderIcon},
   {id:'police',  name:'LSPD',     emoji:'🚔', fn:makeGtaPoliceIcon},
   {id:'taxi',    name:'Cabbie',   emoji:'🟡', fn:makeGtaTaxiIcon},
+  {id:'sedan',   name:'Sedan',    emoji:'⬛', fn:makeRealSedanIcon},
+  {id:'suv',     name:'SUV',      emoji:'⬜', fn:makeRealSuvIcon},
+  {id:'coupe',   name:'Coupe',    emoji:'🔴', fn:makeRealCoupeIcon},
+  {id:'pickup',  name:'Pickup',   emoji:'🩶', fn:makeRealPickupIcon},
+  {id:'super1',  name:'Lambo',    emoji:'🔵', fn:makeRealSuper1Icon},
+  {id:'hyper',   name:'Hypercar', emoji:'⚪', fn:makeRealHyperIcon},
 ];
 let selectedCar=localStorage.getItem('selectedCar')??(CARS[0].id);
 function getCarFn(){ return CARS.find(c=>c.id===selectedCar)?.fn ?? makeLuigiIcon; }
