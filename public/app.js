@@ -446,28 +446,28 @@ function _navSvg(inner){
   return `<svg viewBox="0 0 28 28" width="36" height="36" fill="white" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
 }
 const NAV_SVG = {
-  // Straight up — thick upward arrow
-  straight:   _navSvg('<path d="M14 24V8M7 15l7-9 7 9z" stroke="white" stroke-width="1" fill="white" stroke-linejoin="round"/>'),
-  // Slight right — diagonal arrow NE
-  slightR:    _navSvg('<path d="M6 22L20 8M20 8h-8M20 8v8" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
-  // Hard right — right-pointing arrow
-  right:      _navSvg('<path d="M5 14h18M16 7l7 7-7 7" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
-  // Sharp right — hook
-  sharpR:     _navSvg('<path d="M9 4v10a5 5 0 005 5h5M15 14l4 5-4 5" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
-  // U-turn
-  uTurn:      _navSvg('<path d="M8 23V12a6 6 0 0112 0v2M15 9l5 5-5 5" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
-  // Hard left
-  left:       _navSvg('<path d="M23 14H5M12 7L5 14l7 7" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Straight — stem up, arrowhead at top
+  straight:   _navSvg('<line x1="14" y1="23" x2="14" y2="7" stroke="white" stroke-width="3.5" stroke-linecap="round"/><polyline points="9,12 14,6 19,12" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Slight right — gentle curve up-right
+  slightR:    _navSvg('<path d="M11 23 L11 15 Q11 7 20 7" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/><polyline points="16,4 21,7 18,11" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Right turn — stem up, curves sharply right
+  right:      _navSvg('<path d="M11 23 L11 13 Q11 7 17 7 L21 7" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/><polyline points="17,3 22,7 17,11" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Sharp right — tight hook right then down
+  sharpR:     _navSvg('<path d="M11 23 L11 16 Q11 7 18 7 L18 13" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/><polyline points="15,10 18,14 21,10" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // U-turn — up, arc right, back down
+  uTurn:      _navSvg('<path d="M9 23 L9 12 Q9 5 16 5 Q22 5 22 12 L22 20" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/><polyline points="19,16 22,21 25,16" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Left turn — stem up, curves sharply left
+  left:       _navSvg('<path d="M17 23 L17 13 Q17 7 11 7 L7 7" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/><polyline points="11,3 6,7 11,11" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
   // Slight left
-  slightL:    _navSvg('<path d="M22 22L8 8M8 8v8M8 8h8" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
-  // Arrive — pin drop
-  arrive:     _navSvg('<path d="M14 4a7 7 0 010 14c0 0-7-8-7-10A7 7 0 0114 4z" fill="white"/><circle cx="14" cy="11" r="3" fill="#ff0099" stroke="none"/>'),
+  slightL:    _navSvg('<path d="M17 23 L17 15 Q17 7 8 7" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/><polyline points="12,4 7,7 10,11" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  // Arrive
+  arrive:     _navSvg('<path d="M14 4a7 7 0 010 14c0 0-7-8-7-10A7 7 0 0114 4z" fill="white"/><circle cx="14" cy="11" r="3" fill="#ff0099"/>'),
   // Roundabout
-  roundabout: _navSvg('<circle cx="14" cy="14" r="7" stroke="white" stroke-width="2.5" fill="none"/><path d="M14 7l3 3-3 3" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
-  // Ramp / merge right
-  ramp:       _navSvg('<path d="M5 23V10M5 10Q5 5 12 5L23 5M18 3l5 2-5 2" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  roundabout: _navSvg('<circle cx="14" cy="13" r="6" stroke="white" stroke-width="3" fill="none"/><path d="M14 7 L14 4 M11 5 L14 4 L14 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/><line x1="14" y1="22" x2="14" y2="19" stroke="white" stroke-width="3" stroke-linecap="round"/>'),
+  // Ramp / merge
+  ramp:       _navSvg('<path d="M8 23 L8 13 Q8 7 16 7 L21 7" stroke="white" stroke-width="3.5" stroke-linecap="round" fill="none"/><polyline points="17,3 22,7 17,11" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
   // Ferry
-  ferry:      _navSvg('<path d="M4 17c3-3 7-4 10-4s7 1 10 4M14 5v8M9 9l5-5 5 5" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
+  ferry:      _navSvg('<path d="M5 17 Q14 12 23 17" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/><line x1="14" y1="5" x2="14" y2="15" stroke="white" stroke-width="3.5" stroke-linecap="round"/><polyline points="9,10 14,4 19,10" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>'),
 };
 const ARROW_SVG = {
   1:NAV_SVG.straight,2:NAV_SVG.straight,3:NAV_SVG.straight,
@@ -2172,9 +2172,13 @@ function onGPS(pos){
     _mCurHdg=dispHdg; _mHdgTo=dispHdg;
     _mFrom={lat:dispLat,lng:dispLng}; _mTo={lat:dispLat,lng:dispLng};
   } else {
-    // Smooth interpolation over the GPS interval — camera follows from _stepMarker rAF
-    const gpsMs=prevPos?Math.min(Math.max(pos.timestamp-prevPos.ts,400),2000):800;
-    animateMarkerTo(dispLat,dispLng,dispHdg,gpsMs);
+    const gpsInterval=prevPos?Math.min(Math.max(pos.timestamp-prevPos.ts,400),2000):800;
+    const cur=userMarker.getLngLat();
+    const jumpDist=haversine(cur.lat,cur.lng,dispLat,dispLng);
+    // For large GPS jumps slow down the catch-up to avoid a teleport snap;
+    // extend normal interval by 25% so adjacent animations always overlap.
+    const animMs = jumpDist>80 ? gpsInterval*2.5 : gpsInterval*1.25;
+    animateMarkerTo(dispLat,dispLng,dispHdg,animMs);
   }
   // Camera follow is driven by _stepMarker at 60fps — no easeTo here during nav
 
@@ -2228,27 +2232,29 @@ function onGPS(pos){
 
 // toGL declared earlier to avoid temporal dead zone
 
+let _lastRouteIdx=0; // track last GPS route index so style swaps don't reset the trimmed line
+
 function updateRouteGeoJSON(){
   if(!routePoints.length) return;
-  // Recreate layers if they were lost (e.g. style swap race)
   if(!map.getSource('route-main') || !map.getLayer('route-main')){
     try{ setupMapLayers(); }catch(_){}
   }
+  // During navigation always show only the remaining portion — never reset to full route
+  if(navState==='navigating'){ updateRouteStyling(_lastRouteIdx); return; }
   const coords = toGL(routePoints);
   const fc = {type:'FeatureCollection',features:[
     {type:'Feature',properties:{},geometry:{type:'LineString',coordinates:coords}}
   ]};
   try{ map.getSource('route-main')?.setData(fc); }catch(_){}
-  // Force layer visible in case it was hidden
   try{ map.setLayoutProperty('route-main','visibility','visible'); }catch(_){}
 }
 
 function updateRouteStyling(idx){
   if(!routePoints.length) return;
-  const rem = toGL(routePoints.slice(Math.max(0,idx-1)));
-  const trav = idx>1 ? toGL(routePoints.slice(0,idx+1)) : [];
+  _lastRouteIdx=idx;
+  const rem = toGL(routePoints.slice(Math.max(0,idx)));
   map.getSource('route-main')?.setData({type:'Feature',geometry:{type:'LineString',coordinates:rem}});
-  map.getSource('route-traveled')?.setData({type:'Feature',geometry:{type:'LineString',coordinates:trav}});
+  map.getSource('route-traveled')?.setData({type:'Feature',geometry:{type:'LineString',coordinates:[]}});
 }
 
 function updateNavPanel(distToTurn){
