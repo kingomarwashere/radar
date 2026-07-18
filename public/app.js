@@ -1904,6 +1904,7 @@ function startNav(){
 
   $$('compass-widget').classList.remove('hidden');
   $$('recenter-btn').classList.remove('hidden');
+  gtaStartNav();
   acquireWakeLock();
   // Safety redraw — ensures route is visible after UI transitions settle
   setTimeout(()=>{ if(routePoints.length) updateRouteGeoJSON(); }, 300);
@@ -1944,6 +1945,7 @@ function endNav(){
   if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}
   [navInst,navFooter,alertBar,arrivalOverlay,$$('nav-search-sheet'),$$('nav-routes-sheet')].forEach(el=>el?.classList.add('hidden'));
   updateRouteWarn(null);
+  gtaEndNav();
   topbar.classList.remove('hidden');
   document.body.classList.remove('navigating');
   $$('recenter-btn').classList.add('hidden');
@@ -2011,111 +2013,337 @@ async function reroute(lat,lng){
   }catch{showToast('Rerouting failed',3000);}
 }
 
-function makeUserIcon(gpsHdg=0){
-  const iconRot = gpsHdg - map.getBearing();
-  return { html:`<svg class="user-arrow" style="transform:rotate(${iconRot}deg)" viewBox="0 0 90 120" width="90" height="120" xmlns="http://www.w3.org/2000/svg">
-    <!-- ground shadow -->
+/* ═══════════════════════════════════════════════
+   CAR ROSTER + CAR PICKER
+═══════════════════════════════════════════════ */
+function _kart(body, driverContent, iconRot, opts={}){
+  const {bodyColor='#29a329', wheelColor='#1e293b', bumpColor='#f59e0b', tailColor='#ef4444', headColor='#fef08a'}=opts;
+  return `<svg class="user-arrow" style="transform:rotate(${iconRot}deg)" viewBox="0 0 90 120" width="90" height="120" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="45" cy="116" rx="30" ry="5" fill="rgba(0,0,0,0.28)"/>
+    <rect x="24" y="100" width="10" height="16" rx="5" fill="#555"/><rect x="56" y="100" width="10" height="16" rx="5" fill="#555"/>
+    <circle cx="29" cy="100" r="5" fill="#333"/><circle cx="61" cy="100" r="5" fill="#333"/>
+    <path d="M18 42 C18 24 28 16 45 16 C62 16 72 24 72 42 L74 92 C74 100 62 106 45 106 C28 106 16 100 16 92 Z" fill="${bodyColor}"/>
+    <path d="M24 44 C24 30 32 24 45 24 C58 24 66 30 66 44 L67 88" stroke="rgba(255,255,255,.18)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <rect x="14" y="98" width="62" height="7" rx="3.5" fill="${bodyColor}" opacity=".7"/>
+    <rect x="20" y="14" width="50" height="10" rx="5" fill="${bumpColor}"/>
+    <ellipse cx="45" cy="64" rx="20" ry="26" fill="${bodyColor}" opacity=".6"/>
+    <rect x="1" y="74" width="18" height="28" rx="9" fill="${wheelColor}"/><rect x="71" y="74" width="18" height="28" rx="9" fill="${wheelColor}"/>
+    <rect x="4" y="80" width="8" height="12" rx="4" fill="rgba(255,255,255,.15)"/><rect x="78" y="80" width="8" height="12" rx="4" fill="rgba(255,255,255,.15)"/>
+    <rect x="1" y="28" width="18" height="24" rx="9" fill="${wheelColor}"/><rect x="71" y="28" width="18" height="24" rx="9" fill="${wheelColor}"/>
+    <rect x="4" y="34" width="8" height="10" rx="4" fill="rgba(255,255,255,.15)"/><rect x="78" y="34" width="8" height="10" rx="4" fill="rgba(255,255,255,.15)"/>
+    ${driverContent}
+    <rect x="23" y="14" width="14" height="7" rx="3.5" fill="${headColor}"/><rect x="53" y="14" width="14" height="7" rx="3.5" fill="${headColor}"/>
+    <rect x="23" y="100" width="12" height="6" rx="3" fill="${tailColor}"/><rect x="55" y="100" width="12" height="6" rx="3" fill="${tailColor}"/>
+    <circle cx="10" cy="68" r="2.5" fill="#fde68a" opacity=".7"/><circle cx="80" cy="62" r="2" fill="#fde68a" opacity=".6"/>
+  </svg>`;
+}
 
-    <!-- exhaust pipes (rear, bottom of svg = back of kart) -->
-    <rect x="24" y="100" width="10" height="16" rx="5" fill="#555"/>
-    <rect x="56" y="100" width="10" height="16" rx="5" fill="#555"/>
-    <circle cx="29" cy="100" r="5" fill="#333"/>
-    <circle cx="61" cy="100" r="5" fill="#333"/>
-
-    <!-- kart body — green go-kart frame -->
-    <path d="M18 42 C18 24 28 16 45 16 C62 16 72 24 72 42 L74 92 C74 100 62 106 45 106 C28 106 16 100 16 92 Z" fill="#29a329"/>
-    <!-- body side highlight -->
-    <path d="M24 44 C24 30 32 24 45 24 C58 24 66 30 66 44 L67 88" stroke="rgba(255,255,255,.2)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-    <!-- rear spoiler bar -->
-    <rect x="14" y="98" width="62" height="7" rx="3.5" fill="#1a7a1a"/>
-    <!-- front yellow bumper -->
-    <rect x="20" y="14" width="50" height="10" rx="5" fill="#f59e0b"/>
-    <rect x="26" y="15" width="20" height="4" rx="2" fill="rgba(255,255,255,.3)"/>
-
-    <!-- cockpit cutout (darker oval) -->
-    <ellipse cx="45" cy="64" rx="20" ry="26" fill="#1a7a1a"/>
-
-    <!-- rear wheels (big, cartoonish) -->
-    <rect x="1" y="74" width="18" height="28" rx="9" fill="#1e293b"/>
-    <rect x="71" y="74" width="18" height="28" rx="9" fill="#1e293b"/>
-    <rect x="4" y="80" width="8" height="12" rx="4" fill="rgba(255,255,255,.15)"/>
-    <rect x="78" y="80" width="8" height="12" rx="4" fill="rgba(255,255,255,.15)"/>
-
-    <!-- front wheels -->
-    <rect x="1" y="28" width="18" height="24" rx="9" fill="#1e293b"/>
-    <rect x="71" y="28" width="18" height="24" rx="9" fill="#1e293b"/>
-    <rect x="4" y="34" width="8" height="10" rx="4" fill="rgba(255,255,255,.15)"/>
-    <rect x="78" y="34" width="8" height="10" rx="4" fill="rgba(255,255,255,.15)"/>
-
-    <!-- Luigi overalls (blue, visible below head) -->
-    <ellipse cx="45" cy="80" rx="14" ry="11" fill="#1a52c8"/>
-    <rect x="40" y="68" width="5" height="14" rx="2.5" fill="#1a52c8"/>
-    <rect x="50" y="68" width="5" height="14" rx="2.5" fill="#1a52c8"/>
-
-    <!-- neck -->
+// Shared face + hat helper
+function _marioFace(hatColor, hatBadgeColor, overallColor, badgeLetter){
+  return `
+    <ellipse cx="45" cy="80" rx="14" ry="11" fill="${overallColor}"/>
+    <rect x="40" y="68" width="5" height="14" rx="2.5" fill="${overallColor}"/>
+    <rect x="50" y="68" width="5" height="14" rx="2.5" fill="${overallColor}"/>
     <rect x="41" y="60" width="8" height="7" rx="3.5" fill="#fde8c8"/>
-
-    <!-- face (peach) -->
     <circle cx="45" cy="50" r="17" fill="#fde8c8"/>
     <ellipse cx="45" cy="61" rx="12" ry="6" fill="#f5d5b0"/>
-    <!-- ears -->
-    <circle cx="28" cy="50" r="5" fill="#fde8c8"/>
-    <circle cx="62" cy="50" r="5" fill="#fde8c8"/>
-
-    <!-- GREEN HAT — Luigi's most iconic feature -->
-    <!-- hat brim (wide ellipse) -->
-    <ellipse cx="45" cy="38" rx="20" ry="8" fill="#29a329"/>
-    <!-- hat dome -->
-    <path d="M30 38 C30 24 36 17 45 17 C54 17 60 24 60 38 Z" fill="#29a329"/>
-    <!-- brim underside shadow -->
-    <ellipse cx="45" cy="38" rx="20" ry="4.5" fill="#1a7a1a"/>
-    <!-- hat top highlight -->
+    <circle cx="28" cy="50" r="5" fill="#fde8c8"/><circle cx="62" cy="50" r="5" fill="#fde8c8"/>
+    <ellipse cx="45" cy="38" rx="20" ry="8" fill="${hatColor}"/>
+    <path d="M30 38 C30 24 36 17 45 17 C54 17 60 24 60 38 Z" fill="${hatColor}"/>
+    <ellipse cx="45" cy="38" rx="20" ry="4.5" fill="${hatColor}" opacity=".7"/>
     <ellipse cx="41" cy="26" rx="7" ry="5" fill="rgba(255,255,255,.18)"/>
-    <!-- white circle badge on hat -->
     <circle cx="45" cy="29" r="9" fill="white"/>
-    <!-- "L" drawn geometrically inside badge -->
-    <rect x="42" y="22" width="4" height="12" rx="2" fill="#29a329"/>
-    <rect x="42" y="31.5" width="9" height="4" rx="2" fill="#29a329"/>
-
-    <!-- eyebrows (thick, expressive) -->
+    <rect x="42" y="22" width="4" height="12" rx="2" fill="${hatBadgeColor}"/>
+    <rect x="42" y="31.5" width="9" height="4" rx="2" fill="${hatBadgeColor}"/>
     <path d="M34 43 C36 40 40 40 43 43" stroke="#2c1810" stroke-width="3" fill="none" stroke-linecap="round"/>
     <path d="M47 43 C50 40 54 40 56 43" stroke="#2c1810" stroke-width="3" fill="none" stroke-linecap="round"/>
-
-    <!-- eyes -->
-    <circle cx="38" cy="48" r="4.5" fill="white"/>
-    <circle cx="52" cy="48" r="4.5" fill="white"/>
-    <circle cx="39" cy="49" r="2.6" fill="#2c1810"/>
-    <circle cx="53" cy="49" r="2.6" fill="#2c1810"/>
-    <circle cx="40" cy="47.5" r="1" fill="white"/>
-    <circle cx="54" cy="47.5" r="1" fill="white"/>
-
-    <!-- nose (round, pink-ish) -->
+    <circle cx="38" cy="48" r="4.5" fill="white"/><circle cx="52" cy="48" r="4.5" fill="white"/>
+    <circle cx="39" cy="49" r="2.6" fill="#2c1810"/><circle cx="53" cy="49" r="2.6" fill="#2c1810"/>
+    <circle cx="40" cy="47.5" r="1" fill="white"/><circle cx="54" cy="47.5" r="1" fill="white"/>
     <circle cx="45" cy="54" r="4" fill="#f0b090"/>
-
-    <!-- Luigi mustache — thick black double-bump -->
     <ellipse cx="37" cy="59" rx="7.5" ry="5" fill="#111"/>
-    <ellipse cx="53" cy="59" rx="7.5" ry="5" fill="#111"/>
-    <!-- mustache shine -->
-    <ellipse cx="35" cy="57" rx="3.5" ry="2" fill="rgba(255,255,255,.12)"/>
-    <ellipse cx="51" cy="57" rx="3.5" ry="2" fill="rgba(255,255,255,.12)"/>
-
-    <!-- headlights (yellow) -->
-    <rect x="23" y="14" width="14" height="7" rx="3.5" fill="#fef08a"/>
-    <rect x="53" y="14" width="14" height="7" rx="3.5" fill="#fef08a"/>
-    <rect x="23" y="14" width="14" height="3" rx="1.5" fill="rgba(255,255,200,.5)"/>
-    <rect x="53" y="14" width="14" height="3" rx="1.5" fill="rgba(255,255,200,.5)"/>
-
-    <!-- tail lights (red) -->
-    <rect x="23" y="100" width="12" height="6" rx="3" fill="#ef4444"/>
-    <rect x="55" y="100" width="12" height="6" rx="3" fill="#ef4444"/>
-
-    <!-- star sparkle (Mario theme) -->
-    <circle cx="10" cy="68" r="2.5" fill="#fde68a" opacity=".7"/>
-    <circle cx="80" cy="62" r="2" fill="#fde68a" opacity=".6"/>
-    <circle cx="13" cy="80" r="1.5" fill="#fde68a" opacity=".5"/>
-  </svg>` };
+    <ellipse cx="53" cy="59" rx="7.5" ry="5" fill="#111"/>`;
 }
+
+function makeLuigiIcon(gpsHdg=0){
+  const iconRot=gpsHdg-map.getBearing();
+  return {html:_kart(_marioFace('#29a329','#29a329','#1a52c8','L'),iconRot,{bodyColor:'#29a329'})};
+}
+function makeMarioIcon(gpsHdg=0){
+  const iconRot=gpsHdg-map.getBearing();
+  return {html:_kart(_marioFace('#dc2626','#dc2626','#dc2626','M'),iconRot,{bodyColor:'#b91c1c',bumpColor:'#fbbf24',tailColor:'#fbbf24'})};
+}
+function makePikachuIcon(gpsHdg=0){
+  const iconRot=gpsHdg-map.getBearing();
+  const driver=`
+    <ellipse cx="45" cy="80" rx="14" ry="11" fill="#fbbf24"/>
+    <rect x="41" y="60" width="8" height="7" rx="3.5" fill="#fbbf24"/>
+    <circle cx="45" cy="49" r="17" fill="#fde68a"/>
+    <ellipse cx="45" cy="60" rx="12" ry="6" fill="#f5c842"/>
+    <!-- ears -->
+    <path d="M28 38 L24 16 L34 32 Z" fill="#fbbf24"/><path d="M26 18 L30 14 L33 26 Z" fill="#111"/>
+    <path d="M62 38 L66 16 L56 32 Z" fill="#fbbf24"/><path d="M64 18 L60 14 L57 26 Z" fill="#111"/>
+    <!-- cheeks -->
+    <circle cx="32" cy="52" r="6" fill="#ef4444" opacity=".8"/>
+    <circle cx="58" cy="52" r="6" fill="#ef4444" opacity=".8"/>
+    <!-- eyes -->
+    <circle cx="38" cy="46" r="4" fill="#111"/><circle cx="52" cy="46" r="4" fill="#111"/>
+    <circle cx="39.5" cy="44.5" r="1.5" fill="white"/><circle cx="53.5" cy="44.5" r="1.5" fill="white"/>
+    <!-- nose + mouth -->
+    <circle cx="45" cy="51" r="2.5" fill="#8B4513"/>
+    <path d="M41 55 Q45 59 49 55" stroke="#8B4513" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <!-- lightning bolt on body -->
+    <path d="M47 70 L43 80 L47 80 L43 90" stroke="#f59e0b" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return {html:_kart(driver,iconRot,{bodyColor:'#fbbf24',bumpColor:'#fbbf24',wheelColor:'#374151',tailColor:'#fbbf24',headColor:'#fde68a'})};
+}
+function makeBowserIcon(gpsHdg=0){
+  const iconRot=gpsHdg-map.getBearing();
+  const driver=`
+    <ellipse cx="45" cy="78" rx="15" ry="13" fill="#166534"/>
+    <rect x="41" y="60" width="8" height="8" rx="3" fill="#f97316"/>
+    <!-- spiky shell back -->
+    <ellipse cx="45" cy="72" rx="12" ry="8" fill="#15803d"/>
+    <path d="M33 68 L30 60 M39 65 L37 56 M45 64 L45 55 M51 65 L53 56 M57 68 L60 60" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+    <!-- head -->
+    <ellipse cx="45" cy="49" rx="16" ry="15" fill="#f97316"/>
+    <ellipse cx="45" cy="60" rx="12" ry="6" fill="#ea7730"/>
+    <!-- horns -->
+    <path d="M32 38 L28 28 L36 34 Z" fill="#fbbf24"/><path d="M58 38 L62 28 L54 34 Z" fill="#fbbf24"/>
+    <!-- angry eyes -->
+    <ellipse cx="38" cy="46" rx="5" ry="4" fill="#dc2626"/>
+    <ellipse cx="52" cy="46" rx="5" ry="4" fill="#dc2626"/>
+    <circle cx="39" cy="47" r="2.5" fill="#111"/><circle cx="53" cy="47" r="2.5" fill="#111"/>
+    <circle cx="40" cy="46" r="1" fill="white"/><circle cx="54" cy="46" r="1" fill="white"/>
+    <!-- thick brows -->
+    <path d="M32 41 L42 43" stroke="#111" stroke-width="3.5" stroke-linecap="round"/>
+    <path d="M48 43 L58 41" stroke="#111" stroke-width="3.5" stroke-linecap="round"/>
+    <!-- snout -->
+    <ellipse cx="45" cy="54" rx="7" ry="5" fill="#fdba74"/>
+    <circle cx="42.5" cy="54" r="2" fill="#9a5227"/><circle cx="47.5" cy="54" r="2" fill="#9a5227"/>
+    <!-- teeth -->
+    <rect x="39" y="58" width="5" height="4" rx="1" fill="white"/>
+    <rect x="46" y="58" width="5" height="4" rx="1" fill="white"/>`;
+  return {html:_kart(driver,iconRot,{bodyColor:'#15803d',bumpColor:'#fbbf24',wheelColor:'#292524',tailColor:'#dc2626',headColor:'#fde68a'})};
+}
+function makePeachIcon(gpsHdg=0){
+  const iconRot=gpsHdg-map.getBearing();
+  const driver=`
+    <ellipse cx="45" cy="80" rx="14" ry="11" fill="#f9a8d4"/>
+    <rect x="40" y="68" width="5" height="14" rx="2.5" fill="#f9a8d4"/>
+    <rect x="50" y="68" width="5" height="14" rx="2.5" fill="#f9a8d4"/>
+    <rect x="41" y="60" width="8" height="7" rx="3.5" fill="#fde8c8"/>
+    <circle cx="45" cy="49" r="17" fill="#fde8c8"/>
+    <ellipse cx="45" cy="60" rx="12" ry="6" fill="#f5d5b0"/>
+    <!-- blonde hair -->
+    <ellipse cx="45" cy="34" rx="18" ry="10" fill="#fde047"/>
+    <path d="M27 38 L24 55 L30 50 L28 60" stroke="#fde047" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <path d="M63 38 L66 55 L60 50 L62 60" stroke="#fde047" stroke-width="5" stroke-linecap="round" fill="none"/>
+    <!-- crown -->
+    <path d="M30 32 L32 22 L38 28 L45 20 L52 28 L58 22 L60 32 Z" fill="#fbbf24"/>
+    <circle cx="38" cy="24" r="3" fill="#ec4899"/><circle cx="45" cy="21" r="3" fill="#60a5fa"/><circle cx="52" cy="24" r="3" fill="#ec4899"/>
+    <!-- face -->
+    <circle cx="38" cy="48" r="4" fill="white"/><circle cx="52" cy="48" r="4" fill="white"/>
+    <circle cx="39" cy="49" r="2.3" fill="#1e3a5f"/><circle cx="53" cy="49" r="2.3" fill="#1e3a5f"/>
+    <circle cx="40" cy="47.5" r=".9" fill="white"/><circle cx="54" cy="47.5" r=".9" fill="white"/>
+    <circle cx="34" cy="53" r="4" fill="#fda4af" opacity=".7"/><circle cx="56" cy="53" r="4" fill="#fda4af" opacity=".7"/>
+    <circle cx="45" cy="53" r="2.5" fill="#f0a080"/>
+    <path d="M40 57 Q45 61 50 57" stroke="#b45309" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  return {html:_kart(driver,iconRot,{bodyColor:'#ec4899',bumpColor:'#fbbf24',tailColor:'#fda4af',headColor:'#fde047'})};
+}
+
+const CARS=[
+  {id:'luigi',  name:'Luigi',   emoji:'🟢', fn:makeLuigiIcon},
+  {id:'mario',  name:'Mario',   emoji:'🔴', fn:makeMarioIcon},
+  {id:'pikachu',name:'Pikachu', emoji:'⚡', fn:makePikachuIcon},
+  {id:'bowser', name:'Bowser',  emoji:'🐢', fn:makeBowserIcon},
+  {id:'peach',  name:'Peach',   emoji:'👸', fn:makePeachIcon},
+];
+let selectedCar=localStorage.getItem('selectedCar')??(CARS[0].id);
+function getCarFn(){ return CARS.find(c=>c.id===selectedCar)?.fn ?? makeLuigiIcon; }
+
+function makeUserIcon(gpsHdg=0){ return getCarFn()(gpsHdg); }
+
+/* ── Car picker ──────────────────────────────── */
+(()=>{
+  const grid=$$('car-grid'); if(!grid) return;
+  CARS.forEach(car=>{
+    const btn=document.createElement('button');
+    btn.className='car-pick-btn'+(car.id===selectedCar?' active':'');
+    btn.dataset.carid=car.id;
+    btn.innerHTML=`<div class="car-pick-preview">${car.emoji}</div><span>${car.name}</span>`;
+    btn.addEventListener('click',()=>{
+      selectedCar=car.id;
+      localStorage.setItem('selectedCar',car.id);
+      document.querySelectorAll('.car-pick-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      // Recreate marker with new car
+      if(userMarker&&prevPos){
+        const ll=userMarker.getLngLat();
+        userMarker.remove(); userMarker=null;
+        userMarker=makeUserMarker(ll.lat,ll.lng,_mCurHdg).addTo(map);
+      }
+    });
+    grid.appendChild(btn);
+  });
+})();
+
+/* ═══════════════════════════════════════════════
+   GTA MODE — points, wanted stars, overlays
+═══════════════════════════════════════════════ */
+const gta={score:0, stars:0, starsTarget:0, highStars:0, cooldownTimer:null, busted:false};
+
+function fmtScore(n){ return n>=1000?`${(n/1000).toFixed(1)}K`:String(n); }
+
+function renderGtaStars(stars){
+  document.querySelectorAll('.gta-star').forEach(el=>{
+    const i=parseInt(el.dataset.i);
+    el.classList.toggle('active', i<=stars);
+  });
+  $$('gta-score-val').textContent=fmtScore(Math.floor(gta.score));
+}
+
+function flashStar(i){
+  const el=document.querySelector(`.gta-star[data-i="${i}"]`);
+  if(!el) return;
+  el.classList.remove('pulse');
+  requestAnimationFrame(()=>{ el.classList.add('pulse'); });
+  el.addEventListener('animationend',()=>el.classList.remove('pulse'),{once:true});
+}
+
+function showGtaPopup(text, color, x, y){
+  const el=document.createElement('div');
+  el.className='gta-score-popup';
+  el.style.cssText=`color:${color};left:${x??16}px;top:${y??200}px`;
+  el.textContent=text;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1500);
+}
+
+function setGtaStars(newStars, prevStars){
+  if(newStars===prevStars) return;
+  gta.stars=newStars;
+  renderGtaStars(newStars);
+  const hud=$$('gta-hud');
+  if(newStars>prevStars){
+    // Stars going up — flash new stars, show WANTED banner
+    for(let i=prevStars+1;i<=newStars;i++) setTimeout(()=>flashStar(i),(i-prevStars-1)*120);
+    showWantedBanner(newStars);
+    gta.highStars=Math.max(gta.highStars,newStars);
+  } else if(newStars===0 && prevStars>=3){
+    // Evaded!
+    showEvaded();
+    gta.highStars=0;
+  } else if(newStars===0){
+    hideWantedBanner();
+    gta.highStars=0;
+  }
+}
+
+let _wantedBannerTimer=null;
+function showWantedBanner(stars){
+  const banner=$$('gta-wanted-banner'); if(!banner) return;
+  $$('gta-wanted-stars').textContent='★'.repeat(stars)+'☆'.repeat(5-stars);
+  banner.classList.remove('hidden');
+  clearTimeout(_wantedBannerTimer);
+  _wantedBannerTimer=setTimeout(hideWantedBanner, 3500);
+}
+function hideWantedBanner(){
+  $$('gta-wanted-banner')?.classList.add('hidden');
+}
+
+function showBusted(){
+  if(gta.busted) return; gta.busted=true;
+  hideWantedBanner();
+  const ov=$$('gta-busted-overlay'); if(!ov) return;
+  ov.classList.remove('hidden');
+  if(prefs.haptic&&navigator.vibrate) navigator.vibrate([500,200,500,200,500]);
+  speak('Busted!');
+  gta.score=Math.floor(gta.score*0.5); // penalty
+  showGtaPopup('BUSTED! Score ÷2','#ef4444',80,300);
+  setTimeout(()=>{ ov.classList.add('hidden'); gta.busted=false; setGtaStars(0,gta.stars); },2400);
+}
+function showEvaded(){
+  const ov=$$('gta-evaded-overlay'); if(!ov) return;
+  ov.classList.remove('hidden');
+  speak('Evaded!');
+  const bonus=gta.highStars*500;
+  gta.score+=bonus;
+  showGtaPopup(`EVADED! +${fmtScore(bonus)}`,'#4ade80',60,260);
+  hideWantedBanner();
+  setTimeout(()=>ov.classList.add('hidden'),2000);
+}
+
+// Main GTA update — called from onGPS during navigation
+function updateGta(speedMs, limitKmh, lat, lng){
+  if(navState!=='navigating'||gta.busted) return;
+  const speedKmh=speedMs*3.6;
+  const limit=limitKmh||60;
+  const excessKmh=speedKmh-limit;
+
+  // Points accumulation
+  const basePerSec=8;
+  const speedBonus=excessKmh>0?excessKmh*0.5:0;
+  const mult=[1,1.5,2,3.5,5,10][gta.stars]??1;
+  const gained=(basePerSec+speedBonus)*mult;
+  gta.score+=gained;
+  renderGtaStars(gta.stars);
+
+  // Score popups while speeding
+  if(excessKmh>10&&Math.random()<0.08){
+    const x=16+Math.random()*60;
+    const y=180+Math.random()*80;
+    showGtaPopup(`+${Math.round(gained*8)}`,excessKmh>30?'#f97316':'#fbbf24',x,y);
+  }
+
+  // Calculate target wanted stars
+  let target=0;
+  if(excessKmh>=10) target=1;
+  if(excessKmh>=20) target=2;
+  if(excessKmh>=30) target=3;
+  if(excessKmh>=45) target=4;
+  if(excessKmh>=60) target=5;
+
+  // Police nearby bumps stars
+  const closestCop=nearReports.filter(r=>r.type==='police'||r.type==='speed_trap')
+    .map(r=>haversine(lat,lng,r.lat,r.lng)).sort((a,b)=>a-b)[0]??Infinity;
+  if(closestCop<120&&excessKmh>5) target=Math.min(5,target+2);
+  else if(closestCop<250&&excessKmh>5) target=Math.min(5,target+1);
+
+  gta.starsTarget=target;
+
+  // Stars go up immediately, cool down via timer
+  if(target>gta.stars){
+    clearTimeout(gta.cooldownTimer);
+    gta.cooldownTimer=null;
+    setGtaStars(target,gta.stars);
+  } else if(target===0 && gta.stars>0 && !gta.cooldownTimer){
+    gta.cooldownTimer=setTimeout(()=>{
+      gta.cooldownTimer=null;
+      if(gta.starsTarget===0) setGtaStars(Math.max(0,gta.stars-1),gta.stars);
+    },7000);
+  }
+
+  // BUSTED! condition: 5 stars + police very close
+  if(gta.stars>=4 && closestCop<80 && excessKmh>15) showBusted();
+}
+
+/* ── Wire GTA HUD into startNav / endNav ─── */
+function gtaStartNav(){
+  gta.score=0; gta.stars=0; gta.starsTarget=0; gta.highStars=0; gta.busted=false;
+  clearTimeout(gta.cooldownTimer); gta.cooldownTimer=null;
+  const hud=$$('gta-hud');
+  if(hud){ hud.classList.remove('hidden'); hud.style.top=(navInst.offsetHeight+10)+'px'; }
+  renderGtaStars(0);
+  hideWantedBanner();
+}
+function gtaEndNav(){
+  const hud=$$('gta-hud'); if(hud) hud.classList.add('hidden');
+  hideWantedBanner();
+  $$('gta-busted-overlay')?.classList.add('hidden');
+  $$('gta-evaded-overlay')?.classList.add('hidden');
+  clearTimeout(gta.cooldownTimer); gta.cooldownTimer=null;
+}
+
 function makeUserMarker(lat,lng,gpsHdg=0){
   const el=document.createElement('div');
   el.innerHTML=makeUserIcon(gpsHdg).html;
@@ -2218,6 +2446,8 @@ function onGPS(pos){
   updateNavPanel(distToTurn);
   checkVoice(currentMidx,distToTurn);
   checkProximityAlerts(lat,lng,hdg);
+  const _gtaLim=getSpeedLimit(lat,lng);
+  updateGta(speedMs,_gtaLim,lat,lng);
   if(perspective3D&&currentMidx!==lastRefreshedMidx){lastRefreshedMidx=currentMidx;refreshStreetLabels();}
   updateSpeedProfileCursor();
 

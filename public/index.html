@@ -137,6 +137,22 @@
   <span id="alert-dist">–</span>
 </div>
 
+<!-- ── GTA HUD (stars + score, nav only) ─────────────── -->
+<div id="gta-hud" class="hidden">
+  <div id="gta-stars-row">
+    <span class="gta-star" data-i="1">★</span><span class="gta-star" data-i="2">★</span><span class="gta-star" data-i="3">★</span><span class="gta-star" data-i="4">★</span><span class="gta-star" data-i="5">★</span>
+  </div>
+  <div id="gta-score-display">🏆 <span id="gta-score-val">0</span></div>
+</div>
+
+<!-- ── GTA overlays ───────────────────────────────────── -->
+<div id="gta-wanted-banner" class="hidden">
+  <span id="gta-wanted-text">WANTED</span>
+  <span id="gta-wanted-stars"></span>
+</div>
+<div id="gta-busted-overlay" class="hidden"><div id="gta-busted-text">BUSTED!</div></div>
+<div id="gta-evaded-overlay" class="hidden"><div>EVADED!</div></div>
+
 <!-- ── Floating speed display (map overlay during nav) ── -->
 <div id="nav-speed-float">
   <div id="speed-limit-sign" class="hidden"><span id="speed-limit-val">–</span></div>
@@ -217,6 +233,9 @@
       <label class="setting-row"><span>🚫 Avoid tolls by default</span><input type="checkbox" id="s-tolls" checked></label>
       <label class="setting-row"><span>📍 Choose custom start point</span><input type="checkbox" id="s-choosestart"></label>
     </div>
+
+    <div class="settings-section-label" style="margin-top:18px">🏎️ Your ride</div>
+    <div id="car-grid"></div>
 
     <div class="settings-section-label" style="margin-top:18px">Units</div>
     <div id="unit-toggle">
