@@ -3670,8 +3670,7 @@ $$('score-modal').addEventListener('click',e=>{ if(e.target===$$('score-modal'))
     };
     reader.readAsDataURL(file);
   }
-  $$('cw-camera-btn').addEventListener('click',()=>$$('cw-camera-input').click());
-  $$('cw-gallery-btn').addEventListener('click',()=>$$('cw-gallery-input').click());
+  // Labels trigger inputs natively — just listen for change
   $$('cw-camera-input').addEventListener('change',e=>handlePhotoFile(e.target.files[0]));
   $$('cw-gallery-input').addEventListener('change',e=>handlePhotoFile(e.target.files[0]));
   $$('cw-photo-clear').addEventListener('click',()=>{

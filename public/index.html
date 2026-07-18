@@ -340,13 +340,15 @@
   <div class="cw-field">
     <label class="cw-label">Photo <span class="cw-optional">(+200 pts bonus!)</span></label>
     <div id="cw-photo-area">
-      <div id="cw-photo-preview" class="hidden"><img id="cw-preview-img" alt=""/><button id="cw-photo-clear">✕</button></div>
+      <div id="cw-photo-preview" class="hidden"><img id="cw-preview-img" alt=""/><button id="cw-photo-clear" type="button">✕</button></div>
       <div id="cw-photo-btns">
-        <button id="cw-camera-btn">📷 Take photo</button>
-        <button id="cw-gallery-btn">🖼️ Choose from gallery</button>
+        <label class="cw-photo-label" for="cw-camera-input">📷 Take photo
+          <input id="cw-camera-input" type="file" accept="image/*" capture="environment">
+        </label>
+        <label class="cw-photo-label" for="cw-gallery-input">🖼️ Gallery
+          <input id="cw-gallery-input" type="file" accept="image/*">
+        </label>
       </div>
-      <input id="cw-camera-input" type="file" accept="image/*" capture="environment" style="display:none">
-      <input id="cw-gallery-input" type="file" accept="image/*" style="display:none">
     </div>
   </div>
 
