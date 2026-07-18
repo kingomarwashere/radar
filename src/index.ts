@@ -26,6 +26,70 @@ app.route('/api/admin', adminApi);
 
 app.get('/api/health', (c) => c.json({ ok: true, ts: Date.now() }));
 
+// ── NSW Traffic Cameras ──────────────────────────────────────────────────────
+
+// GET /api/traffic-cams — camera metadata list (cached 1h at edge)
+app.get('/api/traffic-cams', async (c) => {
+  const resp = await fetch('https://www.livetraffic.com/datajson/all-feeds-web.json', {
+    headers: { 'User-Agent': 'radar/1.0', 'Accept': 'application/json' },
+    // @ts-ignore — CF-specific cache option
+    cf: { cacheTtl: 3600, cacheEverything: true },
+  });
+  if (!resp.ok) return c.json({ error: 'upstream error' }, 502);
+
+  const all = await resp.json() as Array<{
+    id: string; eventCategory: string;
+    geometry: { coordinates: [number, number] };
+    properties: { title: string; view: string; direction?: string; region?: string; path?: string; href: string };
+  }>;
+
+  const cameras = all
+    .filter(f => f.eventCategory === 'liveCams')
+    .map(f => ({
+      id:        f.id,
+      title:     f.properties.title,
+      view:      f.properties.view,
+      direction: f.properties.direction ?? '',
+      region:    f.properties.region ?? '',
+      path:      f.properties.path ?? '',
+      file:      f.properties.href.split('/').pop() ?? '',
+      lat:       f.geometry.coordinates[1],
+      lng:       f.geometry.coordinates[0],
+    }));
+
+  return c.json(cameras, 200, { 'Cache-Control': 'public, max-age=3600' });
+});
+
+// GET /api/traffic-cams/image?f=filename.jpeg — proxy JPEG with browser sec-fetch headers
+app.get('/api/traffic-cams/image', async (c) => {
+  const file = c.req.query('f');
+  if (!file || !/^[\w-]+\.jpeg$/.test(file)) return c.json({ error: 'invalid' }, 400);
+
+  const src = `https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/${file}?t=${Date.now()}`;
+  const resp = await fetch(src, {
+    headers: {
+      'User-Agent':      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+      'Referer':         'https://www.livetraffic.com/',
+      'Accept':          'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+      'Sec-Fetch-Dest':  'image',
+      'Sec-Fetch-Mode':  'no-cors',
+      'Sec-Fetch-Site':  'cross-site',
+    },
+  });
+
+  if (!resp.ok || !(resp.headers.get('content-type') ?? '').includes('image/jpeg')) {
+    return new Response(null, { status: 503 });
+  }
+
+  return new Response(resp.body, {
+    headers: {
+      'Content-Type':                'image/jpeg',
+      'Cache-Control':               'public, max-age=14',
+      'Access-Control-Allow-Origin': '*',
+    },
+  });
+});
+
 // POST /api/admin/sync/waze — manual trigger (CF cron)
 app.post('/api/admin/sync/waze', async (c) => {
   const key = c.req.header('x-admin-key');

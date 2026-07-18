@@ -3,6 +3,7 @@ export interface Env {
   ASSETS: Fetcher;
   PHOTOS: R2Bucket;
   ADMIN_KEY: string;
+  TFNSW_API_KEY?: string;
 }
 
 export interface User {

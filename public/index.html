@@ -44,6 +44,7 @@
     <button class="filter-btn active" data-layer="speed"  title="Cameras">📷</button>
     <button class="filter-btn active" data-layer="red_light" title="Red light">🔴</button>
     <button class="filter-btn" id="heatmap-btn" title="Report heatmap">🔥</button>
+    <button class="filter-btn" id="trafficcam-btn" title="Traffic cameras">📹</button>
   </div>
 </div>
 
@@ -481,7 +482,255 @@
   </div>
 </div>
 
+<!-- ── Traffic camera sheet ─────────────────────────── -->
+<div id="cam-sheet" class="hidden">
+  <div class="handle-row"><div class="handle-pill"></div></div>
+  <div id="cam-sheet-header">
+    <div id="cam-sheet-info">
+      <div id="cam-sheet-title">Camera</div>
+      <div id="cam-sheet-view"></div>
+    </div>
+    <button id="cam-grid-open-btn" title="Grid view">⊞</button>
+    <button id="cam-sheet-close">✕</button>
+  </div>
+  <div id="cam-img-wrap">
+    <img id="cam-img" src="" alt="Traffic camera" loading="lazy">
+    <div id="cam-unavail" class="hidden">Camera temporarily unavailable</div>
+  </div>
+  <div id="cam-refresh-bar">
+    <span id="cam-refresh-icon">🔄</span>
+    Refreshes every 15s · next in <span id="cam-countdown">15</span>s
+  </div>
+</div>
+
+<!-- ── Camera grid panel ────────────────────────────── -->
+<div id="cam-grid-panel" class="hidden">
+  <div id="cam-grid-header">
+    <span>Traffic Cameras <span id="cam-grid-count"></span></span>
+    <button id="cam-grid-close">✕</button>
+  </div>
+  <div id="cam-grid-scroll">
+    <div id="cam-grid-items"></div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="/app.js"></script>
+<script>
+// ── Traffic Camera Layer ─────────────────────────────────────────────
+(function(){
+  let cams = [];         // all 197 cameras
+  let camVisible = false;
+  let camPopup = null;
+  let activeCam = null;
+  let countdownTimer = null;
+  let refreshTimer = null;
+  const REFRESH_MS = 15_000;
+  const CAM_CACHE_KEY = 'radar_trafficcams_v1';
+  const CAM_CACHE_TTL = 3_600_000; // 1h
+
+  // ── Load camera metadata ──────────────────────────────────────────
+  async function loadCamMeta() {
+    try {
+      const cached = JSON.parse(localStorage.getItem(CAM_CACHE_KEY) || 'null');
+      if (cached && Date.now() - cached.ts < CAM_CACHE_TTL) {
+        cams = cached.data;
+        return;
+      }
+      const r = await fetch('/api/traffic-cams');
+      if (!r.ok) return;
+      cams = await r.json();
+      localStorage.setItem(CAM_CACHE_KEY, JSON.stringify({ ts: Date.now(), data: cams }));
+    } catch {}
+  }
+
+  // ── Image URL ────────────────────────────────────────────────────
+  function imgUrl(file) {
+    return `/api/traffic-cams/image?f=${encodeURIComponent(file)}&_t=${Date.now()}`;
+  }
+
+  // ── MapLibre layer ────────────────────────────────────────────────
+  function addCamLayer() {
+    if (map.getSource('traffic-cams')) return;
+    map.addSource('traffic-cams', {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: [] },
+    });
+    map.addLayer({
+      id: 'traffic-cams-circle',
+      type: 'circle',
+      source: 'traffic-cams',
+      layout: { visibility: 'none' },
+      paint: {
+        'circle-radius': 10,
+        'circle-color': '#0f172a',
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#38bdf8',
+      },
+    });
+    map.addLayer({
+      id: 'traffic-cams-label',
+      type: 'symbol',
+      source: 'traffic-cams',
+      layout: {
+        visibility: 'none',
+        'text-field': '📹',
+        'text-size': 14,
+        'text-allow-overlap': true,
+      },
+    });
+    map.on('click', 'traffic-cams-circle', e => {
+      const props = e.features[0].properties;
+      openCamSheet(props.id);
+    });
+    map.on('mouseenter', 'traffic-cams-circle', () => map.getCanvas().style.cursor = 'pointer');
+    map.on('mouseleave', 'traffic-cams-circle', () => map.getCanvas().style.cursor = '');
+  }
+
+  function setCamLayerData() {
+    if (!map.getSource('traffic-cams')) return;
+    map.getSource('traffic-cams').setData({
+      type: 'FeatureCollection',
+      features: cams.map(c => ({
+        type: 'Feature',
+        geometry: { type: 'Point', coordinates: [c.lng, c.lat] },
+        properties: { id: c.id, title: c.title, file: c.file },
+      })),
+    });
+  }
+
+  function setCamLayerVisibility(visible) {
+    if (!map.getLayer('traffic-cams-circle')) return;
+    const v = visible ? 'visible' : 'none';
+    map.setLayoutProperty('traffic-cams-circle', 'visibility', v);
+    map.setLayoutProperty('traffic-cams-label', 'visibility', v);
+  }
+
+  // ── Camera sheet ──────────────────────────────────────────────────
+  function openCamSheet(camId) {
+    const cam = cams.find(c => c.id === camId);
+    if (!cam) return;
+    activeCam = cam;
+
+    document.getElementById('cam-sheet-title').textContent = cam.title;
+    document.getElementById('cam-sheet-view').textContent = cam.view;
+    document.getElementById('cam-unavail').classList.add('hidden');
+
+    document.getElementById('cam-sheet').classList.remove('hidden');
+    loadCamImage(cam);
+    startCountdown();
+  }
+
+  function loadCamImage(cam) {
+    const img = document.getElementById('cam-img');
+    const unavail = document.getElementById('cam-unavail');
+    img.classList.add('hidden');
+    const fresh = new Image();
+    fresh.onload = () => {
+      img.src = fresh.src;
+      img.classList.remove('hidden');
+      unavail.classList.add('hidden');
+    };
+    fresh.onerror = () => {
+      unavail.classList.remove('hidden');
+    };
+    fresh.src = imgUrl(cam.file);
+  }
+
+  function startCountdown() {
+    clearInterval(countdownTimer);
+    clearTimeout(refreshTimer);
+    let secs = 15;
+    document.getElementById('cam-countdown').textContent = secs;
+    countdownTimer = setInterval(() => {
+      secs--;
+      document.getElementById('cam-countdown').textContent = Math.max(secs, 0);
+      if (secs <= 0) {
+        clearInterval(countdownTimer);
+        if (activeCam) {
+          loadCamImage(activeCam);
+          startCountdown();
+        }
+      }
+    }, 1000);
+  }
+
+  function closeCamSheet() {
+    document.getElementById('cam-sheet').classList.add('hidden');
+    clearInterval(countdownTimer);
+    clearTimeout(refreshTimer);
+    activeCam = null;
+  }
+
+  // ── Camera grid ───────────────────────────────────────────────────
+  function openGrid() {
+    const bounds = map.getBounds();
+    const inView = cams.filter(c =>
+      c.lat >= bounds.getSouth() && c.lat <= bounds.getNorth() &&
+      c.lng >= bounds.getWest()  && c.lng <= bounds.getEast()
+    );
+    document.getElementById('cam-grid-count').textContent = `(${inView.length})`;
+    const grid = document.getElementById('cam-grid-items');
+    grid.innerHTML = inView.map(c => `
+      <div class="cam-thumb" data-id="${c.id}">
+        <div class="cam-thumb-img-wrap">
+          <img class="cam-thumb-img" data-src="${imgUrl(c.file)}" src="" alt="">
+          <div class="cam-thumb-spinner">⏳</div>
+        </div>
+        <div class="cam-thumb-title">${c.title}</div>
+        <div class="cam-thumb-view">${c.view}</div>
+      </div>
+    `).join('');
+
+    // Lazy load via IntersectionObserver
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        const img = en.target;
+        img.src = img.dataset.src;
+        img.onload = () => img.previousElementSibling?.classList.add('hidden');
+        obs.unobserve(img);
+      });
+    }, { rootMargin: '100px' });
+
+    grid.querySelectorAll('.cam-thumb-img').forEach(img => obs.observe(img));
+
+    grid.addEventListener('click', e => {
+      const thumb = e.target.closest('.cam-thumb');
+      if (!thumb) return;
+      document.getElementById('cam-grid-panel').classList.add('hidden');
+      openCamSheet(thumb.dataset.id);
+    });
+
+    document.getElementById('cam-grid-panel').classList.remove('hidden');
+  }
+
+  // ── Toggle button ─────────────────────────────────────────────────
+  function toggleCamLayer() {
+    camVisible = !camVisible;
+    document.getElementById('trafficcam-btn').classList.toggle('active', camVisible);
+    setCamLayerVisibility(camVisible);
+    if (!camVisible) closeCamSheet();
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────
+  document.getElementById('trafficcam-btn').addEventListener('click', toggleCamLayer);
+  document.getElementById('cam-sheet-close').addEventListener('click', closeCamSheet);
+  document.getElementById('cam-grid-open-btn').addEventListener('click', openGrid);
+  document.getElementById('cam-grid-close').addEventListener('click', () =>
+    document.getElementById('cam-grid-panel').classList.add('hidden')
+  );
+
+  // Wait for map to be ready then set up camera layer
+  const waitForMap = setInterval(() => {
+    if (typeof map === 'undefined' || !map.isStyleLoaded()) return;
+    clearInterval(waitForMap);
+    loadCamMeta().then(() => {
+      addCamLayer();
+      setCamLayerData();
+    });
+  }, 200);
+})();
+</script>
 </body>
 </html>

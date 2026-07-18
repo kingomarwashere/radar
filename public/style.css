@@ -1330,3 +1330,78 @@ body.navigating #cw-fab { bottom: calc(158px + env(safe-area-inset-bottom)); }
   transition: transform .15s;
 }
 .cw-map-marker:active { transform: scale(.9); }
+
+/* ── Traffic camera sheet ───────────────────── */
+#cam-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 420;
+  background: var(--panel-bg, #13131f);
+  border-radius: 18px 18px 0 0;
+  border-top: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 -4px 32px rgba(0,0,0,.5);
+  padding: 0 0 env(safe-area-inset-bottom,12px);
+  max-height: 70vh; display: flex; flex-direction: column;
+}
+#cam-sheet-header {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 16px 8px; flex-shrink: 0;
+}
+#cam-sheet-info { flex: 1; min-width: 0; }
+#cam-sheet-title { font-size: 1rem; font-weight: 700; color: #e2e8f0; }
+#cam-sheet-view  { font-size: .78rem; color: #64748b; margin-top: 2px; }
+#cam-grid-open-btn, #cam-sheet-close {
+  background: rgba(255,255,255,.06); border: none; border-radius: 8px;
+  color: #94a3b8; font-size: 1rem; padding: 6px 10px; cursor: pointer; flex-shrink: 0;
+}
+#cam-grid-open-btn:hover, #cam-sheet-close:hover { background: rgba(255,255,255,.12); color: #e2e8f0; }
+#cam-img-wrap {
+  flex: 1; overflow: hidden; position: relative; background: #0a0a14;
+  min-height: 160px;
+}
+#cam-img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  max-height: calc(70vh - 120px);
+}
+#cam-unavail {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; color: #475569; font-size: .85rem;
+}
+#cam-refresh-bar {
+  flex-shrink: 0; padding: 8px 16px; font-size: .75rem; color: #475569;
+  border-top: 1px solid rgba(255,255,255,.05); background: rgba(0,0,0,.2);
+}
+#cam-refresh-icon { margin-right: 4px; }
+
+/* ── Camera grid panel ──────────────────────── */
+#cam-grid-panel {
+  position: fixed; inset: 0; z-index: 430;
+  background: #0a0a14; display: flex; flex-direction: column;
+}
+#cam-grid-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 12px; border-bottom: 1px solid rgba(255,255,255,.08);
+  font-size: 1rem; font-weight: 700; color: #e2e8f0; flex-shrink: 0;
+}
+#cam-grid-close {
+  background: rgba(255,255,255,.08); border: none; border-radius: 8px;
+  color: #94a3b8; font-size: 1rem; padding: 6px 12px; cursor: pointer;
+}
+#cam-grid-scroll { flex: 1; overflow-y: auto; padding: 12px; }
+#cam-grid-items {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+.cam-thumb {
+  background: #13131f; border: 1px solid rgba(255,255,255,.07);
+  border-radius: 10px; overflow: hidden; cursor: pointer; transition: border-color .15s;
+}
+.cam-thumb:hover { border-color: rgba(56,189,248,.4); }
+.cam-thumb-img-wrap {
+  position: relative; background: #0a0a14; aspect-ratio: 4/3; overflow: hidden;
+}
+.cam-thumb-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cam-thumb-spinner {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; font-size: 1.2rem; color: #334155;
+}
+.cam-thumb-spinner.hidden { display: none; }
+.cam-thumb-title { font-size: .75rem; font-weight: 600; color: #cbd5e1; padding: 6px 8px 2px; }
+.cam-thumb-view  { font-size: .65rem; color: #475569; padding: 0 8px 8px; line-height: 1.3; }
