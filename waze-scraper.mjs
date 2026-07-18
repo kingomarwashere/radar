@@ -69,14 +69,16 @@ function processResponse(data, seen) {
     });
   }
   for (const jam of data.jams ?? []) {
-    if (seen.has(jam.uuid)) continue;
     if ((jam.level ?? 0) < 3 || !jam.line?.length) continue;
     const mid    = jam.line[Math.floor(jam.line.length / 2)];
+    // Waze sometimes omits uuid on jams — fall back to stable coord-based ID
+    const id     = jam.uuid || `wj${Math.round(mid.y * 10000)}_${Math.round(mid.x * 10000)}`;
+    if (seen.has(id)) continue;
     const street = jam.street ? ` on ${jam.street}` : '';
     const sev    = jam.level >= 5 ? 'Road blocked' : jam.level === 4 ? 'Standstill' : 'Heavy traffic';
     const spd    = jam.speedKMH != null ? ` (${Math.round(jam.speedKMH)} km/h)` : '';
-    seen.set(jam.uuid, {
-      uuid: jam.uuid,
+    seen.set(id, {
+      uuid: id,
       lat:  mid.y,
       lng:  mid.x,
       type: 'traffic',
@@ -121,6 +123,7 @@ async function scrape() {
       process.stdout.write(`  ${label}… `);
       try {
         await page.goto(url, { waitUntil: 'networkidle', timeout: 20_000 });
+        await page.waitForTimeout(1500); // let any late tile requests fire
       } catch {
         // networkidle timeout is fine — we just want the initial tile burst
       }
@@ -131,17 +134,18 @@ async function scrape() {
     console.log(`Total: ${reports.length} unique reports from ${tileCount} tiles`);
 
     if (!reports.length) {
-      console.log('Nothing to ingest — Waze may still be blocking.');
+      console.log('Nothing to ingest — Waze may still be blocking or no NSW activity.');
       return;
     }
 
+    console.log('  Sample:', JSON.stringify(reports[0]));
     const res = await fetch(WORKER_INGEST, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-key': ADMIN_KEY },
       body: JSON.stringify({ reports }),
     });
     const result = await res.json();
-    console.log(`Ingested: ${result.upserted} (${new Date().toLocaleTimeString('en-AU')})`);
+    console.log(`Ingested: ${result.upserted ?? result.ok} — raw:`, JSON.stringify(result));
 
   } finally {
     await browser.close();
