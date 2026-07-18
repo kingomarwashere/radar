@@ -2155,44 +2155,38 @@ function makePeachIcon(gpsHdg=0){
 }
 
 /* ═══════════════════════════════════════════════
-   EMOJI CAR SYSTEM
-   Each car = large OS-rendered emoji (looks great)
-   inside a glowing circle with a direction notch.
-   On Apple devices emoji renders at native quality.
+   GTA CAR SYSTEM — Kenney CC0 top-down sprites
+   Sprites face UP in the PNG, so rotation is just
+   gpsHdg - mapBearing with no extra offset needed.
 ═══════════════════════════════════════════════ */
-function _emojiCar(emoji, glow, gpsHdg){
+function _pngCar(src, gpsHdg){
   const rot=gpsHdg-map.getBearing();
-  // Apple car emoji face RIGHT (→); rotate -90° so they face UP (direction of travel)
-  return {html:`<div class="user-arrow" style="transform:rotate(${rot}deg)">
-    <div class="emoji-car-wrap" style="--cg:${glow}">
-      <span class="emoji-car-face">${emoji}</span>
-    </div>
-  </div>`};
+  return {html:`<div class="user-arrow" style="transform:rotate(${rot}deg)"><img class="car-sprite" src="${src}" draggable="false"></div>`};
 }
-const _ec=(e,g)=>(h)=>_emojiCar(e,g,h);
+const _pc=(src)=>(h)=>_pngCar(src,h);
+const _pi=(src)=>`<img src="${src}" class="car-pick-img">`;
 
 const CARS=[
   // ── Mario Kart characters (SVG) ──────────────
-  {id:'luigi',   name:'Luigi',       icon:'🟢', fn:makeLuigiIcon},
-  {id:'mario',   name:'Mario',       icon:'🔴', fn:makeMarioIcon},
-  {id:'pikachu', name:'Pikachu',     icon:'⚡', fn:makePikachuIcon},
-  {id:'bowser',  name:'Bowser',      icon:'🐢', fn:makeBowserIcon},
-  {id:'peach',   name:'Peach',       icon:'👸', fn:makePeachIcon},
-  // ── Emoji cars ───────────────────────────────
-  {id:'hatch',   name:'Hatchback',   icon:'🚗', fn:_ec('🚗','#3b82f6')},
-  {id:'suv',     name:'SUV',         icon:'🚙', fn:_ec('🚙','#22c55e')},
-  {id:'sports',  name:'Sports',      icon:'🏎️', fn:_ec('🏎️','#f97316')},
-  {id:'pickup',  name:'Pickup',      icon:'🛻', fn:_ec('🛻','#94a3b8')},
-  {id:'taxi',    name:'Taxi',        icon:'🚕', fn:_ec('🚕','#fbbf24')},
-  {id:'police',  name:'Police',      icon:'🚓', fn:_ec('🚓','#818cf8')},
-  {id:'ambulance',name:'Ambulance',  icon:'🚑', fn:_ec('🚑','#ef4444')},
-  {id:'firetruck',name:'Fire Truck', icon:'🚒', fn:_ec('🚒','#dc2626')},
-  {id:'van',     name:'Van',         icon:'🚐', fn:_ec('🚐','#a855f7')},
-  {id:'bus',     name:'Bus',         icon:'🚌', fn:_ec('🚌','#f59e0b')},
-  {id:'truck',   name:'Semi Truck',  icon:'🚚', fn:_ec('🚚','#78716c')},
-  {id:'rocket',  name:'Rocket',      icon:'🚀', fn:_ec('🚀','#c084fc')},
-  {id:'tractor', name:'Tractor',     icon:'🚜', fn:_ec('🚜','#84cc16')},
-  {id:'moto',    name:'Motorcycle',  icon:'🏍️', fn:_ec('🏍️','#f43f5e')},
+  {id:'luigi',   name:'Luigi',   icon:'🟢', fn:makeLuigiIcon},
+  {id:'mario',   name:'Mario',   icon:'🔴', fn:makeMarioIcon},
+  {id:'pikachu', name:'Pikachu', icon:'⚡', fn:makePikachuIcon},
+  {id:'bowser',  name:'Bowser',  icon:'🐢', fn:makeBowserIcon},
+  {id:'peach',   name:'Peach',   icon:'👸', fn:makePeachIcon},
+  // ── GTA cars (Kenney CC0) ─────────────────────
+  {id:'muscle',  name:'Muscle',  icon:_pi('/cars/car_red_1.png'),    fn:_pc('/cars/car_red_1.png')},
+  {id:'blksuv',  name:'SUV',     icon:_pi('/cars/car_black_1.png'),  fn:_pc('/cars/car_black_1.png')},
+  {id:'bluesuv', name:'Cruiser', icon:_pi('/cars/car_blue_1.png'),   fn:_pc('/cars/car_blue_1.png')},
+  {id:'hatch',   name:'Hatch',   icon:_pi('/cars/car_red_2.png'),    fn:_pc('/cars/car_red_2.png')},
+  {id:'stealth', name:'Stealth', icon:_pi('/cars/car_black_2.png'),  fn:_pc('/cars/car_black_2.png')},
+  {id:'banshee', name:'Banshee', icon:_pi('/cars/car_blue_3.png'),   fn:_pc('/cars/car_blue_3.png')},
+  {id:'taxi',    name:'Taxi',    icon:_pi('/cars/car_yellow_3.png'), fn:_pc('/cars/car_yellow_3.png')},
+  {id:'sabre',   name:'Sabre',   icon:_pi('/cars/car_yellow_1.png'), fn:_pc('/cars/car_yellow_1.png')},
+  {id:'cruiser', name:'GT',      icon:_pi('/cars/car_blue_5.png'),   fn:_pc('/cars/car_blue_5.png')},
+  {id:'wagon',   name:'Wagon',   icon:_pi('/cars/car_green_3.png'),  fn:_pc('/cars/car_green_3.png')},
+  {id:'van',     name:'Van',     icon:_pi('/cars/car_green_4.png'),  fn:_pc('/cars/car_green_4.png')},
+  {id:'moto',    name:'Moto',    icon:_pi('/cars/motorcycle_red.png'),   fn:_pc('/cars/motorcycle_red.png')},
+  {id:'motob',   name:'Moto B',  icon:_pi('/cars/motorcycle_blue.png'),  fn:_pc('/cars/motorcycle_blue.png')},
 ];
 let selectedCar=localStorage.getItem('selectedCar')??(CARS[0].id);
 function getCarFn(){ return CARS.find(c=>c.id===selectedCar)?.fn ?? makeLuigiIcon; }
