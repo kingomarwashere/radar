@@ -1,98 +1,108 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
 <defs>
 <linearGradient id="pgmclaren720s" x1="0" y1="0" x2="0" y2="1">
-  <stop offset="0%"   stop-color="rgb(240,167,132)"/>
-  <stop offset="22%"  stop-color="rgb(224,72,0)"/>
-  <stop offset="60%"  stop-color="rgb(152,48,0)"/>
-  <stop offset="100%" stop-color="rgb(116,37,0)"/>
+  <stop offset="0%"   stop-color="rgb(241,172,140)"/>
+  <stop offset="15%"  stop-color="rgb(232,123,71)"/>
+  <stop offset="45%"  stop-color="rgb(224,72,0)"/>
+  <stop offset="78%"  stop-color="rgb(145,46,0)"/>
+  <stop offset="100%" stop-color="rgb(107,34,0)"/>
 </linearGradient>
 <linearGradient id="spmclaren720s" x1="0" y1="0" x2="1" y2="0">
-  <stop offset="0%"   stop-color="rgb(100,32,0)"/>
-  <stop offset="100%" stop-color="rgb(67,21,0)"/>
+  <stop offset="0%"   stop-color="rgb(94,30,0)"/>
+  <stop offset="60%"  stop-color="rgb(62,20,0)"/>
+  <stop offset="100%" stop-color="rgb(44,14,0)"/>
 </linearGradient>
 <linearGradient id="rgmclaren720s" x1="0" y1="0" x2="0" y2="1">
-  <stop offset="0%"   stop-color="rgb(51,51,51)"/>
-  <stop offset="50%"  stop-color="rgb(24,24,24)"/>
-  <stop offset="100%" stop-color="rgb(19,19,19)"/>
+  <stop offset="0%"   stop-color="rgb(70,70,70)"/>
+  <stop offset="40%"  stop-color="rgb(24,24,24)"/>
+  <stop offset="100%" stop-color="rgb(16,16,16)"/>
 </linearGradient>
 <linearGradient id="glmclaren720s" x1="0" y1="0" x2="1" y2="1">
-  <stop offset="0%"   stop-color="rgba(210,240,255,0.75)"/>
-  <stop offset="50%"  stop-color="rgba(130,190,230,0.60)"/>
-  <stop offset="100%" stop-color="rgba(80,140,190,0.70)"/>
+  <stop offset="0%"   stop-color="rgba(176,203,230,0.82)"/>
+  <stop offset="50%"  stop-color="rgba(80,140,200,0.60)"/>
+  <stop offset="100%" stop-color="rgba(60,105,150,0.72)"/>
 </linearGradient>
-<radialGradient id="wgmclaren720s" cx="42%" cy="38%" r="58%">
-  <stop offset="0%"   stop-color="#aaa"/>
-  <stop offset="45%"  stop-color="#555"/>
-  <stop offset="100%" stop-color="#181818"/>
+<radialGradient id="wgmclaren720s" cx="40%" cy="35%" r="55%">
+  <stop offset="0%"   stop-color="#c8c8cc"/>
+  <stop offset="35%"  stop-color="#666"/>
+  <stop offset="100%" stop-color="#111"/>
 </radialGradient>
+<filter id="sfmclaren720s" x="-30%" y="-30%" width="160%" height="160%">
+  <feGaussianBlur stdDeviation="8"/>
+</filter>
 </defs>
-<ellipse cx="141" cy="224" rx="100" ry="11" fill="rgba(0,0,0,0.22)"/>
-<polygon points="165,36 200,52 242,232 184,208" fill="url(#spmclaren720s)"/>
-<polygon points="59,36 165,36 184,208 40,208" fill="url(#pgmclaren720s)"/>
-<polygon points="59,36 165,36 171,97 52,97" fill="rgb(215,69,0)"/>
-<line x1="102" y1="41" x2="106" y2="91" stroke="rgb(240,167,132)" stroke-width="2" opacity="0.38"/>
-<line x1="112" y1="36" x2="112" y2="97" stroke="rgb(179,57,0)" stroke-width="0.8" opacity="0.55"/>
-<polygon points="42,189 181,189 184,208 40,208" fill="rgb(206,66,0)"/>
-<polygon points="52,97 171,97 140,102 84,102" fill="rgb(224,72,0)"/>
-<polygon points="84,102 140,102 151,164 73,164" fill="url(#rgmclaren720s)"/>
-<polygon points="140,102 164,115 171,177 151,164" fill="rgb(13,13,13)"/>
-<polygon points="90,106 130,106 137,159 78,159" fill="rgb(139,139,139)" opacity="0.28"/>
-<polygon points="84,102 140,102 171,99 52,99" fill="url(#glmclaren720s)"/>
-<polygon points="90,105 132,105 126,112 94,112" fill="rgba(255,255,255,0.20)"/>
-<polygon points="73,164 151,164 181,187 42,187" fill="url(#glmclaren720s)"/>
-<polygon points="140,102 164,115 171,177 151,164" fill="url(#glmclaren720s)" opacity="0.80"/>
-<line x1="50" y1="115" x2="173" y2="115" stroke="rgb(174,56,0)" stroke-width="0.7" opacity="0.6"/>
-<rect x="64" y="36" width="96" height="6" rx="3" fill="rgb(197,63,0)"/>
-<rect x="69" y="40" width="86" height="3" rx="1" fill="rgb(168,54,0)"/>
-<rect x="45" y="202" width="134" height="6" rx="3" fill="rgb(197,63,0)"/>
-<rect x="65" y="36" width="22" height="7" rx="2" fill="#fffce8" opacity="0.95"/>
-<rect x="137" y="36" width="22" height="7" rx="2" fill="#fffce8" opacity="0.95"/>
-<rect x="67" y="38" width="18" height="2" rx="1" fill="rgba(255,255,180,0.55)"/>
-<rect x="139" y="38" width="18" height="2" rx="1" fill="rgba(255,255,180,0.55)"/>
-<rect x="46" y="201" width="28" height="7" rx="2" fill="#cc1100" opacity="0.92"/>
-<rect x="150" y="201" width="28" height="7" rx="2" fill="#cc1100" opacity="0.92"/>
-<ellipse cx="46" cy="80" rx="21" ry="18" fill="#151515"/>
-<ellipse cx="45" cy="79" rx="19" ry="16" fill="#333" opacity="0.30"/>
-<ellipse cx="46" cy="80" rx="12" ry="10" fill="url(#wgmclaren720s)"/>
-<ellipse cx="46" cy="80" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
-<line x1="46" y1="80" x2="53.6" y2="82.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="46" y1="80" x2="46.1" y2="87.5" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="46" y1="80" x2="38.5" y2="82.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="46" y1="80" x2="41.4" y2="75.2" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="46" y1="80" x2="50.7" y2="75.2" stroke="#b0b0b4" stroke-width="1.5"/>
-<circle cx="46" cy="80" r="3" fill="#ddd"/>
-<ellipse cx="46" cy="80" rx="7" ry="6" fill="#222" opacity="0.6"/>
-<ellipse cx="177" cy="80" rx="21" ry="18" fill="#151515"/>
-<ellipse cx="176" cy="79" rx="19" ry="16" fill="#333" opacity="0.30"/>
-<ellipse cx="177" cy="80" rx="12" ry="10" fill="url(#wgmclaren720s)"/>
-<ellipse cx="177" cy="80" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
-<line x1="177" y1="80" x2="185.5" y2="82.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="177" y1="80" x2="177.9" y2="87.5" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="177" y1="80" x2="170.4" y2="82.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="177" y1="80" x2="173.3" y2="75.2" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="177" y1="80" x2="182.6" y2="75.2" stroke="#b0b0b4" stroke-width="1.5"/>
-<circle cx="177" cy="80" r="3" fill="#ddd"/>
-<ellipse cx="177" cy="80" rx="7" ry="6" fill="#222" opacity="0.6"/>
-<ellipse cx="37" cy="159" rx="21" ry="18" fill="#151515"/>
-<ellipse cx="36" cy="158" rx="19" ry="16" fill="#333" opacity="0.30"/>
-<ellipse cx="37" cy="159" rx="12" ry="10" fill="url(#wgmclaren720s)"/>
-<ellipse cx="37" cy="159" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
-<line x1="37" y1="159" x2="44.9" y2="161.9" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="37" y1="159" x2="37.3" y2="166.7" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="37" y1="159" x2="29.8" y2="161.9" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="37" y1="159" x2="32.7" y2="154.3" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="37" y1="159" x2="42.0" y2="154.3" stroke="#b0b0b4" stroke-width="1.5"/>
-<circle cx="37" cy="159" r="3" fill="#ddd"/>
-<ellipse cx="37" cy="159" rx="7" ry="6" fill="#222" opacity="0.6"/>
-<ellipse cx="186" cy="159" rx="21" ry="18" fill="#151515"/>
-<ellipse cx="185" cy="158" rx="19" ry="16" fill="#333" opacity="0.30"/>
-<ellipse cx="186" cy="159" rx="12" ry="10" fill="url(#wgmclaren720s)"/>
-<ellipse cx="186" cy="159" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
-<line x1="186" y1="159" x2="194.2" y2="161.9" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="186" y1="159" x2="186.7" y2="166.7" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="186" y1="159" x2="179.1" y2="161.9" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="186" y1="159" x2="182.0" y2="154.3" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="186" y1="159" x2="191.3" y2="154.3" stroke="#b0b0b4" stroke-width="1.5"/>
-<circle cx="186" cy="159" r="3" fill="#ddd"/>
-<ellipse cx="186" cy="159" rx="7" ry="6" fill="#222" opacity="0.6"/>
+<ellipse cx="140" cy="236" rx="108" ry="13" fill="rgba(0,0,0,0.30)" filter="url(#sfmclaren720s)"/>
+<path d="M176,50 C188,72 196,100 198,126 C200,150 198,170 192,186 C186,200 174,210 160,216 L172,226 C190,218 204,204 210,182 C216,160 216,132 214,104 C212,74 204,44 190,28Z" fill="url(#spmclaren720s)"/>
+<path d="M128,22 C112,22 88,34 80,50 C68,72 60,100 58,126 C56,150 58,170 64,186 C70,200 82,210 96,216 C108,220 118,224 128,224 C138,224 148,220 160,216 C174,210 186,200 192,186 C198,170 200,150 198,126 C196,100 188,72 176,50 C168,34 144,22 128,22Z" fill="url(#pgmclaren720s)"/>
+<path d="M112,46 L128,22 L144,46" stroke="rgb(241,172,140)" stroke-width="1.5" fill="none" opacity="0.45"/>
+<path d="M128,22 C112,22 88,34 80,50 C68,72 60,100 58,126 C56,150 58,170 64,186 C70,200 82,210 96,216 C108,220 118,224 128,224 C138,224 148,220 160,216 C174,210 186,200 192,186 C198,170 200,150 198,126 C196,100 188,72 176,50 C168,34 144,22 128,22Z" fill="none" stroke="rgb(241,172,140)" stroke-width="28" stroke-dasharray="40 200" stroke-dashoffset="60" opacity="0.12" stroke-linecap="round"/>
+<path d="M96,30 L160,30 L166,46 L90,46Z" fill="rgb(89,28,0)" rx="2"/>
+<line x1="100" y1="33" x2="156" y2="33" stroke="rgb(123,39,0)" stroke-width="1" opacity="0.7"/>
+<line x1="100" y1="37" x2="156" y2="37" stroke="rgb(123,39,0)" stroke-width="1" opacity="0.7"/>
+<line x1="100" y1="41" x2="156" y2="41" stroke="rgb(123,39,0)" stroke-width="1" opacity="0.7"/>
+<path d="M108,110 C112,99 120,93 128,93 C136,93 144,99 148,110 L149,166 C146,176 138,182 128,182 C118,182 110,176 107,166Z" fill="url(#rgmclaren720s)"/>
+<path d="M108,110 C112,99 120,93 128,93 C136,93 144,99 148,110 L149,166 C146,176 138,182 128,182 C118,182 110,176 107,166Z" fill="rgb(12,12,12)" transform="translate(12,4) scale(0.92,1)" opacity="0.85"/>
+<path d="M108,110 C112,99 120,93 128,93 C136,93 144,99 148,110 L149,166 C146,176 138,182 128,182 C118,182 110,176 107,166Z" fill="rgb(127,127,127)" opacity="0.22"/>
+<path d="M109,110 C113,99 120,93 128,93 C136,93 143,99 147,110 L148,122 C145,130 137,135 128,135 C119,135 111,130 108,122Z" fill="url(#glmclaren720s)"/>
+<path d="M109,110 C113,99 120,93 128,93 C136,93 143,99 147,110 L148,122 C145,130 137,135 128,135 C119,135 111,130 108,122Z" fill="rgba(202,220,238,0.18)" transform="translate(0,2)"/>
+<path d="M108,154 C111,145 119,140 128,140 C137,140 145,145 148,154 L149,165 C146,175 138,181 128,181 C118,181 110,175 107,165Z" fill="url(#glmclaren720s)"/>
+<path d="M107,134 Q128,130 149,134" stroke="rgb(161,51,0)" stroke-width="1" fill="none" opacity="0.7"/>
+<rect x="68" y="28" width="28" height="7" rx="3" fill="#fffce0" opacity="0.96"/>
+<rect x="70" y="29" width="24" height="3" rx="1" fill="#ffee88" opacity="0.5"/>
+<rect x="73"  y="30" width="18" height="2" rx="1" fill="rgba(255,250,200,0.7)"/>
+<rect x="156" y="28" width="28" height="7" rx="3" fill="#fffce0" opacity="0.96"/>
+<rect x="158" y="29" width="24" height="3" rx="1" fill="#ffee88" opacity="0.5"/>
+<rect x="161"  y="30" width="18" height="2" rx="1" fill="rgba(255,250,200,0.7)"/>
+<rect x="72" y="218" width="28" height="7" rx="3" fill="#cc1100" opacity="0.92"/>
+<rect x="76" y="219" width="20" height="3" rx="1" fill="#ff2200" opacity="0.45"/>
+<rect x="156" y="218" width="28" height="7" rx="3" fill="#cc1100" opacity="0.92"/>
+<rect x="160" y="219" width="20" height="3" rx="1" fill="#ff2200" opacity="0.45"/>
+<ellipse cx="64" cy="100" rx="23" ry="20" fill="#161616"/>
+<ellipse cx="63" cy="99" rx="21" ry="18" fill="#2a2a2a" opacity="0.5"/>
+<ellipse cx="64" cy="100" rx="13" ry="11" fill="url(#wgmclaren720s)"/>
+<ellipse cx="64" cy="100" rx="9" ry="7" fill="none" stroke="#b8b8be" stroke-width="2.2"/>
+<line x1="64" y1="100" x2="71.6" y2="102.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="64" y1="100" x2="64.0" y2="107.0" stroke="#aaaaae" stroke-width="2"/>
+<line x1="64" y1="100" x2="56.4" y2="102.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="64" y1="100" x2="59.3" y2="94.3" stroke="#aaaaae" stroke-width="2"/>
+<line x1="64" y1="100" x2="68.7" y2="94.3" stroke="#aaaaae" stroke-width="2"/>
+<circle cx="64" cy="100" r="4" fill="#d0d0d4"/>
+<circle cx="64" cy="100" r="2" fill="#888"/>
+<ellipse cx="64" cy="100" rx="7" ry="6" fill="#1e1e1e" opacity="0.7"/>
+<ellipse cx="192" cy="100" rx="23" ry="20" fill="#161616"/>
+<ellipse cx="191" cy="99" rx="21" ry="18" fill="#2a2a2a" opacity="0.5"/>
+<ellipse cx="192" cy="100" rx="13" ry="11" fill="url(#wgmclaren720s)"/>
+<ellipse cx="192" cy="100" rx="9" ry="7" fill="none" stroke="#b8b8be" stroke-width="2.2"/>
+<line x1="192" y1="100" x2="199.6" y2="102.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="192" y1="100" x2="192.0" y2="107.0" stroke="#aaaaae" stroke-width="2"/>
+<line x1="192" y1="100" x2="184.4" y2="102.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="192" y1="100" x2="187.3" y2="94.3" stroke="#aaaaae" stroke-width="2"/>
+<line x1="192" y1="100" x2="196.7" y2="94.3" stroke="#aaaaae" stroke-width="2"/>
+<circle cx="192" cy="100" r="4" fill="#d0d0d4"/>
+<circle cx="192" cy="100" r="2" fill="#888"/>
+<ellipse cx="192" cy="100" rx="7" ry="6" fill="#1e1e1e" opacity="0.7"/>
+<ellipse cx="60" cy="182" rx="23" ry="20" fill="#161616"/>
+<ellipse cx="59" cy="181" rx="21" ry="18" fill="#2a2a2a" opacity="0.5"/>
+<ellipse cx="60" cy="182" rx="13" ry="11" fill="url(#wgmclaren720s)"/>
+<ellipse cx="60" cy="182" rx="9" ry="7" fill="none" stroke="#b8b8be" stroke-width="2.2"/>
+<line x1="60" y1="182" x2="67.6" y2="184.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="60" y1="182" x2="60.0" y2="189.0" stroke="#aaaaae" stroke-width="2"/>
+<line x1="60" y1="182" x2="52.4" y2="184.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="60" y1="182" x2="55.3" y2="176.3" stroke="#aaaaae" stroke-width="2"/>
+<line x1="60" y1="182" x2="64.7" y2="176.3" stroke="#aaaaae" stroke-width="2"/>
+<circle cx="60" cy="182" r="4" fill="#d0d0d4"/>
+<circle cx="60" cy="182" r="2" fill="#888"/>
+<ellipse cx="60" cy="182" rx="7" ry="6" fill="#1e1e1e" opacity="0.7"/>
+<ellipse cx="196" cy="182" rx="23" ry="20" fill="#161616"/>
+<ellipse cx="195" cy="181" rx="21" ry="18" fill="#2a2a2a" opacity="0.5"/>
+<ellipse cx="196" cy="182" rx="13" ry="11" fill="url(#wgmclaren720s)"/>
+<ellipse cx="196" cy="182" rx="9" ry="7" fill="none" stroke="#b8b8be" stroke-width="2.2"/>
+<line x1="196" y1="182" x2="203.6" y2="184.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="196" y1="182" x2="196.0" y2="189.0" stroke="#aaaaae" stroke-width="2"/>
+<line x1="196" y1="182" x2="188.4" y2="184.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="196" y1="182" x2="191.3" y2="176.3" stroke="#aaaaae" stroke-width="2"/>
+<line x1="196" y1="182" x2="200.7" y2="176.3" stroke="#aaaaae" stroke-width="2"/>
+<circle cx="196" cy="182" r="4" fill="#d0d0d4"/>
+<circle cx="196" cy="182" r="2" fill="#888"/>
+<ellipse cx="196" cy="182" rx="7" ry="6" fill="#1e1e1e" opacity="0.7"/>
 </svg>

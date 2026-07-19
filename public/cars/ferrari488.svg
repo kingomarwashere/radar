@@ -1,98 +1,108 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
 <defs>
 <linearGradient id="pgferrari488" x1="0" y1="0" x2="0" y2="1">
-  <stop offset="0%"   stop-color="rgb(230,141,132)"/>
-  <stop offset="22%"  stop-color="rgb(204,18,0)"/>
-  <stop offset="60%"  stop-color="rgb(138,12,0)"/>
-  <stop offset="100%" stop-color="rgb(106,9,0)"/>
+  <stop offset="0%"   stop-color="rgb(232,148,140)"/>
+  <stop offset="15%"  stop-color="rgb(218,84,71)"/>
+  <stop offset="45%"  stop-color="rgb(204,18,0)"/>
+  <stop offset="78%"  stop-color="rgb(132,11,0)"/>
+  <stop offset="100%" stop-color="rgb(97,8,0)"/>
 </linearGradient>
 <linearGradient id="spferrari488" x1="0" y1="0" x2="1" y2="0">
-  <stop offset="0%"   stop-color="rgb(91,8,0)"/>
-  <stop offset="100%" stop-color="rgb(61,5,0)"/>
+  <stop offset="0%"   stop-color="rgb(85,7,0)"/>
+  <stop offset="60%"  stop-color="rgb(57,5,0)"/>
+  <stop offset="100%" stop-color="rgb(40,3,0)"/>
 </linearGradient>
 <linearGradient id="rgferrari488" x1="0" y1="0" x2="0" y2="1">
-  <stop offset="0%"   stop-color="rgb(191,44,30)"/>
-  <stop offset="50%"  stop-color="rgb(183,16,0)"/>
-  <stop offset="100%" stop-color="rgb(146,12,0)"/>
+  <stop offset="0%"   stop-color="rgb(200,63,51)"/>
+  <stop offset="40%"  stop-color="rgb(187,16,0)"/>
+  <stop offset="100%" stop-color="rgb(130,11,0)"/>
 </linearGradient>
 <linearGradient id="glferrari488" x1="0" y1="0" x2="1" y2="1">
-  <stop offset="0%"   stop-color="rgba(210,240,255,0.75)"/>
-  <stop offset="50%"  stop-color="rgba(130,190,230,0.60)"/>
-  <stop offset="100%" stop-color="rgba(80,140,190,0.70)"/>
+  <stop offset="0%"   stop-color="rgba(176,203,230,0.82)"/>
+  <stop offset="50%"  stop-color="rgba(80,140,200,0.60)"/>
+  <stop offset="100%" stop-color="rgba(60,105,150,0.72)"/>
 </linearGradient>
-<radialGradient id="wgferrari488" cx="42%" cy="38%" r="58%">
-  <stop offset="0%"   stop-color="#aaa"/>
-  <stop offset="45%"  stop-color="#555"/>
-  <stop offset="100%" stop-color="#181818"/>
+<radialGradient id="wgferrari488" cx="40%" cy="35%" r="55%">
+  <stop offset="0%"   stop-color="#c8c8cc"/>
+  <stop offset="35%"  stop-color="#666"/>
+  <stop offset="100%" stop-color="#111"/>
 </radialGradient>
+<filter id="sfferrari488" x="-30%" y="-30%" width="160%" height="160%">
+  <feGaussianBlur stdDeviation="8"/>
+</filter>
 </defs>
-<ellipse cx="139" cy="226" rx="100" ry="11" fill="rgba(0,0,0,0.22)"/>
-<polygon points="168,34 201,49 239,232 185,210" fill="url(#spferrari488)"/>
-<polygon points="56,34 168,34 185,210 39,210" fill="url(#pgferrari488)"/>
-<polygon points="56,34 168,34 173,86 50,86" fill="rgb(195,17,0)"/>
-<line x1="102" y1="39" x2="105" y2="80" stroke="rgb(230,141,132)" stroke-width="2" opacity="0.38"/>
-<line x1="112" y1="34" x2="112" y2="86" stroke="rgb(163,14,0)" stroke-width="0.8" opacity="0.55"/>
-<polygon points="41,185 182,185 185,210 39,210" fill="rgb(187,16,0)"/>
-<polygon points="50,86 173,86 143,96 81,96" fill="rgb(204,18,0)"/>
-<polygon points="81,96 143,96 154,166 70,166" fill="url(#rgferrari488)"/>
-<polygon points="143,96 165,108 173,178 154,166" fill="rgb(106,9,0)"/>
-<polygon points="87,100 133,100 140,161 75,161" fill="rgb(219,135,127)" opacity="0.28"/>
-<polygon points="81,96 143,96 173,88 50,88" fill="url(#glferrari488)"/>
-<polygon points="87,99 135,99 129,106 91,106" fill="rgba(255,255,255,0.20)"/>
-<polygon points="70,166 154,166 182,183 41,183" fill="url(#glferrari488)"/>
-<polygon points="143,96 165,108 173,178 154,166" fill="url(#glferrari488)" opacity="0.80"/>
-<line x1="48" y1="114" x2="175" y2="114" stroke="rgb(159,14,0)" stroke-width="0.7" opacity="0.6"/>
-<rect x="61" y="34" width="102" height="6" rx="3" fill="rgb(179,15,0)"/>
-<rect x="66" y="38" width="92" height="3" rx="1" fill="rgb(153,13,0)"/>
-<rect x="44" y="204" width="136" height="6" rx="3" fill="rgb(179,15,0)"/>
-<rect x="62" y="34" width="22" height="7" rx="2" fill="#fffce8" opacity="0.95"/>
-<rect x="140" y="34" width="22" height="7" rx="2" fill="#fffce8" opacity="0.95"/>
-<rect x="64" y="36" width="18" height="2" rx="1" fill="rgba(255,255,180,0.55)"/>
-<rect x="142" y="36" width="18" height="2" rx="1" fill="rgba(255,255,180,0.55)"/>
-<rect x="45" y="203" width="29" height="7" rx="2" fill="#cc1100" opacity="0.92"/>
-<rect x="150" y="203" width="29" height="7" rx="2" fill="#cc1100" opacity="0.92"/>
-<ellipse cx="43" cy="79" rx="21" ry="18" fill="#151515"/>
-<ellipse cx="42" cy="78" rx="19" ry="16" fill="#333" opacity="0.30"/>
-<ellipse cx="43" cy="79" rx="12" ry="10" fill="url(#wgferrari488)"/>
-<ellipse cx="43" cy="79" rx="8" ry="6" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
-<line x1="43" y1="79" x2="50.3" y2="81.6" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="43" y1="79" x2="43.6" y2="85.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="43" y1="79" x2="36.9" y2="81.6" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="43" y1="79" x2="39.4" y2="74.9" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="43" y1="79" x2="47.7" y2="74.9" stroke="#b0b0b4" stroke-width="1.5"/>
-<circle cx="43" cy="79" r="3" fill="#ddd"/>
-<ellipse cx="43" cy="79" rx="7" ry="6" fill="#222" opacity="0.6"/>
-<ellipse cx="180" cy="79" rx="21" ry="18" fill="#151515"/>
-<ellipse cx="179" cy="78" rx="19" ry="16" fill="#333" opacity="0.30"/>
-<ellipse cx="180" cy="79" rx="12" ry="10" fill="url(#wgferrari488)"/>
-<ellipse cx="180" cy="79" rx="8" ry="6" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
-<line x1="180" y1="79" x2="187.1" y2="81.6" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="180" y1="79" x2="180.4" y2="85.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="180" y1="79" x2="173.7" y2="81.6" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="180" y1="79" x2="176.3" y2="74.9" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="180" y1="79" x2="184.6" y2="74.9" stroke="#b0b0b4" stroke-width="1.5"/>
-<circle cx="180" cy="79" r="3" fill="#ddd"/>
-<ellipse cx="180" cy="79" rx="7" ry="6" fill="#222" opacity="0.6"/>
-<ellipse cx="35" cy="160" rx="21" ry="18" fill="#151515"/>
-<ellipse cx="34" cy="159" rx="19" ry="16" fill="#333" opacity="0.30"/>
-<ellipse cx="35" cy="160" rx="12" ry="10" fill="url(#wgferrari488)"/>
-<ellipse cx="35" cy="160" rx="8" ry="6" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
-<line x1="35" y1="160" x2="42.5" y2="162.6" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="35" y1="160" x2="35.8" y2="166.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="35" y1="160" x2="29.1" y2="162.6" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="35" y1="160" x2="31.6" y2="155.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="35" y1="160" x2="39.9" y2="155.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<circle cx="35" cy="160" r="3" fill="#ddd"/>
-<ellipse cx="35" cy="160" rx="7" ry="6" fill="#222" opacity="0.6"/>
-<ellipse cx="188" cy="160" rx="21" ry="18" fill="#151515"/>
-<ellipse cx="187" cy="159" rx="19" ry="16" fill="#333" opacity="0.30"/>
-<ellipse cx="188" cy="160" rx="12" ry="10" fill="url(#wgferrari488)"/>
-<ellipse cx="188" cy="160" rx="8" ry="6" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
-<line x1="188" y1="160" x2="194.9" y2="162.6" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="188" y1="160" x2="188.2" y2="166.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="188" y1="160" x2="181.5" y2="162.6" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="188" y1="160" x2="184.1" y2="155.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<line x1="188" y1="160" x2="192.4" y2="155.8" stroke="#b0b0b4" stroke-width="1.5"/>
-<circle cx="188" cy="160" r="3" fill="#ddd"/>
-<ellipse cx="188" cy="160" rx="7" ry="6" fill="#222" opacity="0.6"/>
+<ellipse cx="140" cy="236" rx="108" ry="13" fill="rgba(0,0,0,0.30)" filter="url(#sfferrari488)"/>
+<path d="M168,46 C178,60 186,88 190,110 C194,130 194,152 192,170 C188,186 178,200 164,210 L174,218 C190,208 202,190 206,168 C210,148 210,124 206,100 C202,76 194,50 182,36Z" fill="url(#spferrari488)"/>
+<path d="M128,22 C116,22 96,32 88,46 C78,64 70,88 66,110 C62,132 62,152 64,170 C68,186 78,200 92,210 C104,218 116,222 128,222 C140,222 152,218 164,210 C178,200 188,186 192,170 C194,152 194,132 190,110 C186,88 178,64 168,46 C160,32 140,22 128,22Z" fill="url(#pgferrari488)"/>
+<path d="M116,40 L128,22 L140,40" stroke="rgb(232,148,140)" stroke-width="1.5" fill="none" opacity="0.45"/>
+<path d="M128,22 C116,22 96,32 88,46 C78,64 70,88 66,110 C62,132 62,152 64,170 C68,186 78,200 92,210 C104,218 116,222 128,222 C140,222 152,218 164,210 C178,200 188,186 192,170 C194,152 194,132 190,110 C186,88 178,64 168,46 C160,32 140,22 128,22Z" fill="none" stroke="rgb(232,148,140)" stroke-width="28" stroke-dasharray="40 200" stroke-dashoffset="60" opacity="0.12" stroke-linecap="round"/>
+<path d="M104,30 L152,30 L156,40 L100,40Z" fill="rgb(81,7,0)" rx="2"/>
+<line x1="100" y1="33" x2="156" y2="33" stroke="rgb(112,9,0)" stroke-width="1" opacity="0.7"/>
+<line x1="100" y1="37" x2="156" y2="37" stroke="rgb(112,9,0)" stroke-width="1" opacity="0.7"/>
+<line x1="100" y1="41" x2="156" y2="41" stroke="rgb(112,9,0)" stroke-width="1" opacity="0.7"/>
+<path d="M104,108 C108,96 118,90 128,90 C138,90 148,96 152,108 L155,172 C151,182 141,188 128,188 C115,188 105,182 101,172Z" fill="url(#rgferrari488)"/>
+<path d="M104,108 C108,96 118,90 128,90 C138,90 148,96 152,108 L155,172 C151,182 141,188 128,188 C115,188 105,182 101,172Z" fill="rgb(97,8,0)" transform="translate(12,4) scale(0.92,1)" opacity="0.85"/>
+<path d="M104,108 C108,96 118,90 128,90 C138,90 148,96 152,108 L155,172 C151,182 141,188 128,188 C115,188 105,182 101,172Z" fill="rgb(217,123,114)" opacity="0.22"/>
+<path d="M106,108 C110,96 119,89 128,89 C137,89 146,96 150,108 L152,124 C148,130 139,134 128,134 C117,134 108,130 104,124Z" fill="url(#glferrari488)"/>
+<path d="M106,108 C110,96 119,89 128,89 C137,89 146,96 150,108 L152,124 C148,130 139,134 128,134 C117,134 108,130 104,124Z" fill="rgba(202,220,238,0.18)" transform="translate(0,2)"/>
+<path d="M103,160 C107,150 117,145 128,145 C139,145 149,150 153,160 L154,172 C150,182 140,188 128,188 C116,188 106,182 102,172Z" fill="url(#glferrari488)"/>
+<path d="M102,136 Q128,132 154,136" stroke="rgb(146,12,0)" stroke-width="1" fill="none" opacity="0.7"/>
+<rect x="74" y="28" width="28" height="7" rx="3" fill="#fffce0" opacity="0.96"/>
+<rect x="76" y="29" width="24" height="3" rx="1" fill="#ffee88" opacity="0.5"/>
+<rect x="79"  y="30" width="18" height="2" rx="1" fill="rgba(255,250,200,0.7)"/>
+<rect x="146" y="28" width="28" height="7" rx="3" fill="#fffce0" opacity="0.96"/>
+<rect x="148" y="29" width="24" height="3" rx="1" fill="#ffee88" opacity="0.5"/>
+<rect x="151"  y="30" width="18" height="2" rx="1" fill="rgba(255,250,200,0.7)"/>
+<rect x="78" y="214" width="28" height="7" rx="3" fill="#cc1100" opacity="0.92"/>
+<rect x="82" y="215" width="20" height="3" rx="1" fill="#ff2200" opacity="0.45"/>
+<rect x="150" y="214" width="28" height="7" rx="3" fill="#cc1100" opacity="0.92"/>
+<rect x="154" y="215" width="20" height="3" rx="1" fill="#ff2200" opacity="0.45"/>
+<ellipse cx="72" cy="88" rx="22" ry="19" fill="#161616"/>
+<ellipse cx="71" cy="87" rx="20" ry="17" fill="#2a2a2a" opacity="0.5"/>
+<ellipse cx="72" cy="88" rx="13" ry="11" fill="url(#wgferrari488)"/>
+<ellipse cx="72" cy="88" rx="9" ry="7" fill="none" stroke="#b8b8be" stroke-width="2.2"/>
+<line x1="72" y1="88" x2="79.6" y2="90.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="72" y1="88" x2="72.0" y2="95.0" stroke="#aaaaae" stroke-width="2"/>
+<line x1="72" y1="88" x2="64.4" y2="90.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="72" y1="88" x2="67.3" y2="82.3" stroke="#aaaaae" stroke-width="2"/>
+<line x1="72" y1="88" x2="76.7" y2="82.3" stroke="#aaaaae" stroke-width="2"/>
+<circle cx="72" cy="88" r="4" fill="#d0d0d4"/>
+<circle cx="72" cy="88" r="2" fill="#888"/>
+<ellipse cx="72" cy="88" rx="7" ry="6" fill="#1e1e1e" opacity="0.7"/>
+<ellipse cx="184" cy="88" rx="22" ry="19" fill="#161616"/>
+<ellipse cx="183" cy="87" rx="20" ry="17" fill="#2a2a2a" opacity="0.5"/>
+<ellipse cx="184" cy="88" rx="13" ry="11" fill="url(#wgferrari488)"/>
+<ellipse cx="184" cy="88" rx="9" ry="7" fill="none" stroke="#b8b8be" stroke-width="2.2"/>
+<line x1="184" y1="88" x2="191.6" y2="90.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="184" y1="88" x2="184.0" y2="95.0" stroke="#aaaaae" stroke-width="2"/>
+<line x1="184" y1="88" x2="176.4" y2="90.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="184" y1="88" x2="179.3" y2="82.3" stroke="#aaaaae" stroke-width="2"/>
+<line x1="184" y1="88" x2="188.7" y2="82.3" stroke="#aaaaae" stroke-width="2"/>
+<circle cx="184" cy="88" r="4" fill="#d0d0d4"/>
+<circle cx="184" cy="88" r="2" fill="#888"/>
+<ellipse cx="184" cy="88" rx="7" ry="6" fill="#1e1e1e" opacity="0.7"/>
+<ellipse cx="68" cy="178" rx="22" ry="19" fill="#161616"/>
+<ellipse cx="67" cy="177" rx="20" ry="17" fill="#2a2a2a" opacity="0.5"/>
+<ellipse cx="68" cy="178" rx="13" ry="11" fill="url(#wgferrari488)"/>
+<ellipse cx="68" cy="178" rx="9" ry="7" fill="none" stroke="#b8b8be" stroke-width="2.2"/>
+<line x1="68" y1="178" x2="75.6" y2="180.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="68" y1="178" x2="68.0" y2="185.0" stroke="#aaaaae" stroke-width="2"/>
+<line x1="68" y1="178" x2="60.4" y2="180.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="68" y1="178" x2="63.3" y2="172.3" stroke="#aaaaae" stroke-width="2"/>
+<line x1="68" y1="178" x2="72.7" y2="172.3" stroke="#aaaaae" stroke-width="2"/>
+<circle cx="68" cy="178" r="4" fill="#d0d0d4"/>
+<circle cx="68" cy="178" r="2" fill="#888"/>
+<ellipse cx="68" cy="178" rx="7" ry="6" fill="#1e1e1e" opacity="0.7"/>
+<ellipse cx="188" cy="178" rx="22" ry="19" fill="#161616"/>
+<ellipse cx="187" cy="177" rx="20" ry="17" fill="#2a2a2a" opacity="0.5"/>
+<ellipse cx="188" cy="178" rx="13" ry="11" fill="url(#wgferrari488)"/>
+<ellipse cx="188" cy="178" rx="9" ry="7" fill="none" stroke="#b8b8be" stroke-width="2.2"/>
+<line x1="188" y1="178" x2="195.6" y2="180.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="188" y1="178" x2="188.0" y2="185.0" stroke="#aaaaae" stroke-width="2"/>
+<line x1="188" y1="178" x2="180.4" y2="180.2" stroke="#aaaaae" stroke-width="2"/>
+<line x1="188" y1="178" x2="183.3" y2="172.3" stroke="#aaaaae" stroke-width="2"/>
+<line x1="188" y1="178" x2="192.7" y2="172.3" stroke="#aaaaae" stroke-width="2"/>
+<circle cx="188" cy="178" r="4" fill="#d0d0d4"/>
+<circle cx="188" cy="178" r="2" fill="#888"/>
+<ellipse cx="188" cy="178" rx="7" ry="6" fill="#1e1e1e" opacity="0.7"/>
 </svg>
