@@ -371,8 +371,8 @@ mark {
 /* ── Floating speed display ──────────────────────── */
 #nav-speed-float {
   display: none;
-  position: absolute;
-  bottom: calc(96px + env(safe-area-inset-bottom));
+  position: fixed;
+  bottom: calc(82px + env(safe-area-inset-bottom)); /* 12px above nav-footer */
   left: 16px; z-index: 900;
   flex-direction: column; align-items: center; gap: 6px;
 }
@@ -563,7 +563,7 @@ body.navigating #nav-speed-float { display: flex; }
 
 /* ── Report FAB — Waze-style yellow ⚠️+ ────────── */
 #report-btn {
-  position: absolute; z-index: 1010;
+  position: fixed; z-index: 1010;
   right: 16px;
   bottom: calc(90px + env(safe-area-inset-bottom));
   width: 56px; height: 56px; border-radius: 16px;
@@ -574,17 +574,18 @@ body.navigating #nav-speed-float { display: flex; }
   display: flex; align-items: center; justify-content: center;
 }
 body.navigating #report-btn {
-  bottom: calc(158px + env(safe-area-inset-bottom));
+  bottom: calc(82px + env(safe-area-inset-bottom)); /* right-side, level with speed display bottom */
 }
 #report-btn:hover { transform: scale(1.06); }
 body.previewing #report-btn { display: none; }
+body.navigating #recenter-btn { bottom: calc(152px + env(safe-area-inset-bottom)); } /* above report btn */
 #report-btn:active { transform: scale(.93); }
 
 /* ── Re-center button ─────────────────────────── */
 #recenter-btn {
-  position: absolute; z-index: 1010;
+  position: fixed; z-index: 1010;
   right: 16px;
-  bottom: calc(100px + env(safe-area-inset-bottom));
+  bottom: calc(90px + env(safe-area-inset-bottom));
   background: rgba(13,13,13,.92); border: 1.5px solid rgba(255,255,255,0.15);
   border-radius: 14px; color: var(--text); cursor: pointer;
   width: 50px; height: 50px; font-size: 1.1rem;
@@ -754,7 +755,7 @@ body:not(.nav-3d) #street-labels-overlay { display: none; }
 
 /* ── Compass widget — Waze-style rotating N/S diamond ── */
 #compass-widget {
-  position: absolute; top: 72px; right: 14px; z-index: 1001;
+  position: fixed; top: calc(env(safe-area-inset-top, 0px) + 120px); right: 14px; z-index: 1001;
   width: 52px; height: 52px; cursor: pointer;
   background: rgba(10,10,10,.92); border: 1px solid rgba(255,255,255,.12);
   border-radius: 50%; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -764,6 +765,7 @@ body:not(.nav-3d) #street-labels-overlay { display: none; }
   -webkit-tap-highlight-color: transparent;
 }
 #compass-widget:active { background: rgba(30,30,30,.98); transform: scale(.93); }
+body.navigating #compass-widget { top: calc(env(safe-area-inset-top, 0px) + 234px); }
 #compass-dial {
   display: flex; flex-direction: column; align-items: center; gap: 0;
 }
@@ -1005,7 +1007,7 @@ body:not(.navigating) #street-pill { display: none; }
 /* ── Wanted Level HUD — permanent top-right, GTA V style ── */
 #gta-hud {
   position: fixed;
-  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  top: calc(env(safe-area-inset-top, 0px) + 70px); /* below topbar (~58px) */
   right: 10px;
   z-index: 1005;
   display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
@@ -1016,6 +1018,11 @@ body:not(.navigating) #street-pill { display: none; }
   border: 1px solid rgba(255,255,255,0.07);
   box-shadow: 0 4px 20px rgba(0,0,0,0.5);
   transition: opacity .5s, background .5s, border-color .5s;
+}
+/* During nav: push below nav instruction + alert bar zone */
+body.navigating #gta-hud {
+  top: calc(env(safe-area-inset-top, 0px) + 182px);
+  z-index: 900; /* behind alert bar (999) so safety info wins */
 }
 /* 0 stars — faint ghost outline, no panel */
 #gta-hud[data-stars="0"] {
@@ -1218,7 +1225,7 @@ body:not(.navigating) #street-pill { display: none; }
 
 /* ── FAB ────────────────────────────────────── */
 #cw-fab {
-  position: absolute; z-index: 1010;
+  position: fixed; z-index: 1010;
   left: 16px; bottom: calc(170px + env(safe-area-inset-bottom));
   width: 52px; height: 52px; border-radius: 15px;
   background: #1e40af; border: none; color: #93c5fd;
@@ -1227,7 +1234,7 @@ body:not(.navigating) #street-pill { display: none; }
   transition: transform .15s;
 }
 #cw-fab:active { transform: scale(.93); }
-body.navigating #cw-fab { bottom: calc(158px + env(safe-area-inset-bottom)); }
+body.navigating #cw-fab { bottom: calc(240px + env(safe-area-inset-bottom)); } /* above speed display */
 
 /* ── Submission sheet ───────────────────────── */
 #cw-sheet {
