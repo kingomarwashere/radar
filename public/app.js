@@ -2171,21 +2171,31 @@ const _pc=(src)=>(h)=>_pngCar(src,h);
 const _pi=(src)=>`<img src="${src}" class="car-pick-img">`;
 
 const CARS=[
-  // ── Mario Kart characters (SVG) ──────────────
+  // ── 3D perspective car sprites ────────────────────────────────────────────
+  {id:'ferrari488',    name:'Ferrari 488',       icon:_pi('/cars/ferrari488.svg'),    fn:_pc('/cars/ferrari488.svg')},
+  {id:'lambohuracan',  name:'Huracán',            icon:_pi('/cars/lambohuracan.svg'),  fn:_pc('/cars/lambohuracan.svg')},
+  {id:'mclaren720',    name:'McLaren 720S',       icon:_pi('/cars/mclaren720.svg'),    fn:_pc('/cars/mclaren720.svg')},
+  {id:'bugattichiron', name:'Bugatti Chiron',     icon:_pi('/cars/bugattichiron.svg'), fn:_pc('/cars/bugattichiron.svg')},
+  {id:'bmwm4',         name:'BMW M4',             icon:_pi('/cars/bmwm4.svg'),         fn:_pc('/cars/bmwm4.svg')},
+  {id:'porsche911',    name:'Porsche 911',        icon:_pi('/cars/porsche911.svg'),    fn:_pc('/cars/porsche911.svg')},
+  {id:'amggt',         name:'AMG GT Black',       icon:_pi('/cars/amggt.svg'),         fn:_pc('/cars/amggt.svg')},
+  {id:'astondb11',     name:'Aston Martin DB11',  icon:_pi('/cars/astondb11.svg'),     fn:_pc('/cars/astondb11.svg')},
+  {id:'bentleygtc',    name:'Bentley GTC',        icon:_pi('/cars/bentleygtc.svg'),    fn:_pc('/cars/bentleygtc.svg')},
+  {id:'rollsroyce',    name:'Rolls-Royce',        icon:_pi('/cars/rollsroyce.svg'),    fn:_pc('/cars/rollsroyce.svg')},
+  {id:'gtrr35',        name:'Nissan GT-R',        icon:_pi('/cars/gtrr35.svg'),        fn:_pc('/cars/gtrr35.svg')},
+  {id:'challenger',    name:'Challenger',         icon:_pi('/cars/challenger.svg'),    fn:_pc('/cars/challenger.svg')},
+  {id:'mustanggt',     name:'Mustang GT500',      icon:_pi('/cars/mustanggt.svg'),     fn:_pc('/cars/mustanggt.svg')},
+  {id:'fordraptor',    name:'Ford Raptor',        icon:_pi('/cars/fordraptor.svg'),    fn:_pc('/cars/fordraptor.svg')},
+  {id:'rangerover',    name:'Range Rover',        icon:_pi('/cars/rangerover.svg'),    fn:_pc('/cars/rangerover.svg')},
+  {id:'lambourus',     name:'Lambo Urus',         icon:_pi('/cars/lambourus.svg'),     fn:_pc('/cars/lambourus.svg')},
+  {id:'cybertruck',    name:'Cybertruck',         icon:_pi('/cars/cybertruck.svg'),    fn:_pc('/cars/cybertruck.svg')},
+  {id:'wrangler',      name:'Wrangler',           icon:_pi('/cars/wrangler.svg'),      fn:_pc('/cars/wrangler.svg')},
+  // ── Easter eggs ───────────────────────────────────────────────────────────
   {id:'luigi',     name:'Luigi',     icon:'🟢', fn:makeLuigiIcon},
   {id:'mario',     name:'Mario',     icon:'🔴', fn:makeMarioIcon},
   {id:'pikachu',   name:'Pikachu',   icon:'⚡', fn:makePikachuIcon},
   {id:'bowser',    name:'Bowser',    icon:'🐢', fn:makeBowserIcon},
   {id:'peach',     name:'Peach',     icon:'👸', fn:makePeachIcon},
-  // ── Realistic 3D sprites (Unlucky Studio, free) ──
-  {id:'audi',      name:'Audi',      icon:_pi('/cars/Audi.png'),       fn:_pc('/cars/Audi.png')},
-  {id:'viper',     name:'Viper',     icon:_pi('/cars/Black_viper.png'),fn:_pc('/cars/Black_viper.png')},
-  {id:'police',    name:'Police',    icon:_pi('/cars/Police.png'),     fn:_pc('/cars/Police.png')},
-  {id:'taxi',      name:'Taxi',      icon:_pi('/cars/taxi.png'),       fn:_pc('/cars/taxi.png')},
-  {id:'suv',       name:'SUV',       icon:_pi('/cars/Car.png'),        fn:_pc('/cars/Car.png')},
-  {id:'ambulance', name:'Ambulance', icon:_pi('/cars/Ambulance.png'),  fn:_pc('/cars/Ambulance.png')},
-  {id:'van',       name:'Van',       icon:_pi('/cars/Mini_van.png'),   fn:_pc('/cars/Mini_van.png')},
-  {id:'pickup',    name:'Pickup',    icon:_pi('/cars/Mini_truck.png'), fn:_pc('/cars/Mini_truck.png')},
 ];
 let selectedCar=localStorage.getItem('selectedCar')??(CARS[0].id);
 function getCarFn(){ return CARS.find(c=>c.id===selectedCar)?.fn ?? makeLuigiIcon; }

@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+<defs>
+<linearGradient id="pgwrangler" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%"   stop-color="rgb(161,175,147)"/>
+  <stop offset="22%"  stop-color="rgb(60,90,30)"/>
+  <stop offset="60%"  stop-color="rgb(40,61,20)"/>
+  <stop offset="100%" stop-color="rgb(31,46,15)"/>
+</linearGradient>
+<linearGradient id="spwrangler" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0%"   stop-color="rgb(26,40,13)"/>
+  <stop offset="100%" stop-color="rgb(18,27,9)"/>
+</linearGradient>
+<linearGradient id="rgwrangler" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%"   stop-color="rgb(65,86,42)"/>
+  <stop offset="50%"  stop-color="rgb(40,64,14)"/>
+  <stop offset="100%" stop-color="rgb(32,51,11)"/>
+</linearGradient>
+<linearGradient id="glwrangler" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0%"   stop-color="rgba(210,240,255,0.75)"/>
+  <stop offset="50%"  stop-color="rgba(130,190,230,0.60)"/>
+  <stop offset="100%" stop-color="rgba(80,140,190,0.70)"/>
+</linearGradient>
+<radialGradient id="wgwrangler" cx="42%" cy="38%" r="58%">
+  <stop offset="0%"   stop-color="#aaa"/>
+  <stop offset="45%"  stop-color="#555"/>
+  <stop offset="100%" stop-color="#181818"/>
+</radialGradient>
+</defs>
+<ellipse cx="141" cy="238" rx="100" ry="11" fill="rgba(0,0,0,0.22)"/>
+<polygon points="178,24 213,40 250,246 192,222" fill="url(#spwrangler)"/>
+<polygon points="46,24 178,24 192,222 32,222" fill="url(#pgwrangler)"/>
+<polygon points="46,24 178,24 180,63 43,63" fill="rgb(57,86,28)"/>
+<line x1="102" y1="29" x2="105" y2="57" stroke="rgb(161,175,147)" stroke-width="2" opacity="0.38"/>
+<line x1="112" y1="24" x2="112" y2="63" stroke="rgb(48,72,24)" stroke-width="0.8" opacity="0.55"/>
+<polygon points="35,178 188,178 192,222 32,222" fill="rgb(55,82,27)"/>
+<polygon points="43,63 180,63 167,78 57,78" fill="rgb(60,90,30)"/>
+<polygon points="57,78 167,78 179,180 45,180" fill="url(#rgwrangler)"/>
+<polygon points="167,78 191,91 199,193 179,180" fill="rgb(23,37,8)"/>
+<polygon points="63,82 157,82 165,175 50,175" fill="rgb(147,159,134)" opacity="0.28"/>
+<polygon points="57,78 167,78 180,65 43,65" fill="url(#glwrangler)"/>
+<polygon points="63,81 159,81 153,88 67,88" fill="rgba(255,255,255,0.20)"/>
+<polygon points="45,180 179,180 188,176 35,176" fill="url(#glwrangler)"/>
+<polygon points="167,78 191,91 199,193 179,180" fill="url(#glwrangler)" opacity="0.80"/>
+<line x1="39" y1="115" x2="184" y2="115" stroke="rgb(46,70,23)" stroke-width="0.7" opacity="0.6"/>
+<rect x="51" y="24" width="122" height="6" rx="3" fill="rgb(52,79,26)"/>
+<rect x="56" y="28" width="112" height="3" rx="1" fill="rgb(45,67,22)"/>
+<rect x="37" y="216" width="150" height="6" rx="3" fill="rgb(52,79,26)"/>
+<rect x="52" y="24" width="26" height="7" rx="2" fill="#fffce8" opacity="0.95"/>
+<rect x="146" y="24" width="26" height="7" rx="2" fill="#fffce8" opacity="0.95"/>
+<rect x="54" y="26" width="22" height="2" rx="1" fill="rgba(255,255,180,0.55)"/>
+<rect x="148" y="26" width="22" height="2" rx="1" fill="rgba(255,255,180,0.55)"/>
+<rect x="38" y="215" width="32" height="7" rx="2" fill="#cc1100" opacity="0.92"/>
+<rect x="154" y="215" width="32" height="7" rx="2" fill="#cc1100" opacity="0.92"/>
+<ellipse cx="34" cy="75" rx="25" ry="21" fill="#151515"/>
+<ellipse cx="33" cy="74" rx="23" ry="19" fill="#333" opacity="0.30"/>
+<ellipse cx="34" cy="75" rx="16" ry="13" fill="url(#wgwrangler)"/>
+<ellipse cx="34" cy="75" rx="11" ry="9" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="34" y1="75" x2="43.6" y2="78.1" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="34" y1="75" x2="34.4" y2="83.8" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="34" y1="75" x2="25.2" y2="78.1" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="34" y1="75" x2="28.7" y2="68.7" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="34" y1="75" x2="40.0" y2="68.7" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="34" cy="75" r="3" fill="#ddd"/>
+<ellipse cx="34" cy="75" rx="9" ry="8" fill="#222" opacity="0.6"/>
+<ellipse cx="189" cy="75" rx="25" ry="21" fill="#151515"/>
+<ellipse cx="188" cy="74" rx="23" ry="19" fill="#333" opacity="0.30"/>
+<ellipse cx="189" cy="75" rx="16" ry="13" fill="url(#wgwrangler)"/>
+<ellipse cx="189" cy="75" rx="11" ry="9" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="189" y1="75" x2="198.8" y2="78.1" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="189" y1="75" x2="189.6" y2="83.8" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="189" y1="75" x2="180.4" y2="78.1" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="189" y1="75" x2="184.0" y2="68.7" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="189" y1="75" x2="195.3" y2="68.7" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="189" cy="75" r="3" fill="#ddd"/>
+<ellipse cx="189" cy="75" rx="9" ry="8" fill="#222" opacity="0.6"/>
+<ellipse cx="27" cy="166" rx="25" ry="21" fill="#151515"/>
+<ellipse cx="26" cy="165" rx="23" ry="19" fill="#333" opacity="0.30"/>
+<ellipse cx="27" cy="166" rx="16" ry="13" fill="url(#wgwrangler)"/>
+<ellipse cx="27" cy="166" rx="11" ry="9" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="27" y1="166" x2="37.1" y2="169.1" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="27" y1="166" x2="27.9" y2="174.9" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="27" y1="166" x2="18.7" y2="169.1" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="27" y1="166" x2="22.2" y2="159.8" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="27" y1="166" x2="33.6" y2="159.8" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="27" cy="166" r="3" fill="#ddd"/>
+<ellipse cx="27" cy="166" rx="9" ry="8" fill="#222" opacity="0.6"/>
+<ellipse cx="196" cy="166" rx="25" ry="21" fill="#151515"/>
+<ellipse cx="195" cy="165" rx="23" ry="19" fill="#333" opacity="0.30"/>
+<ellipse cx="196" cy="166" rx="16" ry="13" fill="url(#wgwrangler)"/>
+<ellipse cx="196" cy="166" rx="11" ry="9" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="196" y1="166" x2="205.3" y2="169.1" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="196" y1="166" x2="196.1" y2="174.9" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="196" y1="166" x2="186.9" y2="169.1" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="196" y1="166" x2="190.4" y2="159.8" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="196" y1="166" x2="201.8" y2="159.8" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="196" cy="166" r="3" fill="#ddd"/>
+<ellipse cx="196" cy="166" rx="9" ry="8" fill="#222" opacity="0.6"/>
+</svg>

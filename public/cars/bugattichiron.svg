@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+<defs>
+<linearGradient id="pgbugattichiron" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%"   stop-color="rgb(133,144,190)"/>
+  <stop offset="22%"  stop-color="rgb(2,24,120)"/>
+  <stop offset="60%"  stop-color="rgb(1,16,81)"/>
+  <stop offset="100%" stop-color="rgb(1,12,62)"/>
+</linearGradient>
+<linearGradient id="spbugattichiron" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0%"   stop-color="rgb(0,10,53)"/>
+  <stop offset="100%" stop-color="rgb(0,7,36)"/>
+</linearGradient>
+<linearGradient id="rgbugattichiron" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%"   stop-color="rgb(44,44,44)"/>
+  <stop offset="50%"  stop-color="rgb(16,16,16)"/>
+  <stop offset="100%" stop-color="rgb(12,12,12)"/>
+</linearGradient>
+<linearGradient id="glbugattichiron" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0%"   stop-color="rgba(210,240,255,0.75)"/>
+  <stop offset="50%"  stop-color="rgba(130,190,230,0.60)"/>
+  <stop offset="100%" stop-color="rgba(80,140,190,0.70)"/>
+</linearGradient>
+<radialGradient id="wgbugattichiron" cx="42%" cy="38%" r="58%">
+  <stop offset="0%"   stop-color="#aaa"/>
+  <stop offset="45%"  stop-color="#555"/>
+  <stop offset="100%" stop-color="#181818"/>
+</radialGradient>
+</defs>
+<ellipse cx="141" cy="224" rx="100" ry="11" fill="rgba(0,0,0,0.22)"/>
+<polygon points="165,36 200,52 242,232 184,208" fill="url(#spbugattichiron)"/>
+<polygon points="59,36 165,36 184,208 40,208" fill="url(#pgbugattichiron)"/>
+<polygon points="59,36 165,36 171,97 52,97" fill="rgb(1,23,115)"/>
+<line x1="102" y1="41" x2="106" y2="91" stroke="rgb(133,144,190)" stroke-width="2" opacity="0.38"/>
+<line x1="112" y1="36" x2="112" y2="97" stroke="rgb(1,19,96)" stroke-width="0.8" opacity="0.55"/>
+<polygon points="42,189 181,189 184,208 40,208" fill="rgb(1,22,110)"/>
+<polygon points="52,97 171,97 140,102 84,102" fill="rgb(2,24,120)"/>
+<polygon points="84,102 140,102 151,164 73,164" fill="url(#rgbugattichiron)"/>
+<polygon points="140,102 164,115 171,177 151,164" fill="rgb(9,9,9)"/>
+<polygon points="90,106 130,106 137,159 78,159" fill="rgb(135,135,135)" opacity="0.28"/>
+<polygon points="84,102 140,102 171,99 52,99" fill="url(#glbugattichiron)"/>
+<polygon points="90,105 132,105 126,112 94,112" fill="rgba(255,255,255,0.20)"/>
+<polygon points="73,164 151,164 181,187 42,187" fill="url(#glbugattichiron)"/>
+<polygon points="140,102 164,115 171,177 151,164" fill="url(#glbugattichiron)" opacity="0.80"/>
+<line x1="50" y1="115" x2="173" y2="115" stroke="rgb(1,18,93)" stroke-width="0.7" opacity="0.6"/>
+<rect x="64" y="36" width="96" height="6" rx="3" fill="rgb(1,21,105)"/>
+<rect x="69" y="40" width="86" height="3" rx="1" fill="rgb(1,18,90)"/>
+<rect x="45" y="202" width="134" height="6" rx="3" fill="rgb(1,21,105)"/>
+<rect x="65" y="36" width="22" height="7" rx="2" fill="#fffce8" opacity="0.95"/>
+<rect x="137" y="36" width="22" height="7" rx="2" fill="#fffce8" opacity="0.95"/>
+<rect x="67" y="38" width="18" height="2" rx="1" fill="rgba(255,255,180,0.55)"/>
+<rect x="139" y="38" width="18" height="2" rx="1" fill="rgba(255,255,180,0.55)"/>
+<rect x="46" y="201" width="28" height="7" rx="2" fill="#cc1100" opacity="0.92"/>
+<rect x="150" y="201" width="28" height="7" rx="2" fill="#cc1100" opacity="0.92"/>
+<ellipse cx="46" cy="80" rx="21" ry="18" fill="#151515"/>
+<ellipse cx="45" cy="79" rx="19" ry="16" fill="#333" opacity="0.30"/>
+<ellipse cx="46" cy="80" rx="12" ry="10" fill="url(#wgbugattichiron)"/>
+<ellipse cx="46" cy="80" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="46" y1="80" x2="53.6" y2="82.8" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="46" y1="80" x2="46.1" y2="87.5" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="46" y1="80" x2="38.5" y2="82.8" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="46" y1="80" x2="41.4" y2="75.2" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="46" y1="80" x2="50.7" y2="75.2" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="46" cy="80" r="3" fill="#ddd"/>
+<ellipse cx="46" cy="80" rx="7" ry="6" fill="#222" opacity="0.6"/>
+<ellipse cx="177" cy="80" rx="21" ry="18" fill="#151515"/>
+<ellipse cx="176" cy="79" rx="19" ry="16" fill="#333" opacity="0.30"/>
+<ellipse cx="177" cy="80" rx="12" ry="10" fill="url(#wgbugattichiron)"/>
+<ellipse cx="177" cy="80" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="177" y1="80" x2="185.5" y2="82.8" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="177" y1="80" x2="177.9" y2="87.5" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="177" y1="80" x2="170.4" y2="82.8" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="177" y1="80" x2="173.3" y2="75.2" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="177" y1="80" x2="182.6" y2="75.2" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="177" cy="80" r="3" fill="#ddd"/>
+<ellipse cx="177" cy="80" rx="7" ry="6" fill="#222" opacity="0.6"/>
+<ellipse cx="37" cy="159" rx="21" ry="18" fill="#151515"/>
+<ellipse cx="36" cy="158" rx="19" ry="16" fill="#333" opacity="0.30"/>
+<ellipse cx="37" cy="159" rx="12" ry="10" fill="url(#wgbugattichiron)"/>
+<ellipse cx="37" cy="159" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="37" y1="159" x2="44.9" y2="161.9" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="37" y1="159" x2="37.3" y2="166.7" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="37" y1="159" x2="29.8" y2="161.9" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="37" y1="159" x2="32.7" y2="154.3" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="37" y1="159" x2="42.0" y2="154.3" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="37" cy="159" r="3" fill="#ddd"/>
+<ellipse cx="37" cy="159" rx="7" ry="6" fill="#222" opacity="0.6"/>
+<ellipse cx="186" cy="159" rx="21" ry="18" fill="#151515"/>
+<ellipse cx="185" cy="158" rx="19" ry="16" fill="#333" opacity="0.30"/>
+<ellipse cx="186" cy="159" rx="12" ry="10" fill="url(#wgbugattichiron)"/>
+<ellipse cx="186" cy="159" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="186" y1="159" x2="194.2" y2="161.9" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="186" y1="159" x2="186.7" y2="166.7" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="186" y1="159" x2="179.1" y2="161.9" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="186" y1="159" x2="182.0" y2="154.3" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="186" y1="159" x2="191.3" y2="154.3" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="186" cy="159" r="3" fill="#ddd"/>
+<ellipse cx="186" cy="159" rx="7" ry="6" fill="#222" opacity="0.6"/>
+</svg>

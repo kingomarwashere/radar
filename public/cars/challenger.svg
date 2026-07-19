@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+<defs>
+<linearGradient id="pgchallenger" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%"   stop-color="rgb(140,140,140)"/>
+  <stop offset="22%"  stop-color="rgb(17,17,17)"/>
+  <stop offset="60%"  stop-color="rgb(11,11,11)"/>
+  <stop offset="100%" stop-color="rgb(8,8,8)"/>
+</linearGradient>
+<linearGradient id="spchallenger" x1="0" y1="0" x2="1" y2="0">
+  <stop offset="0%"   stop-color="rgb(7,7,7)"/>
+  <stop offset="100%" stop-color="rgb(5,5,5)"/>
+</linearGradient>
+<linearGradient id="rgchallenger" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%"   stop-color="rgb(30,30,30)"/>
+  <stop offset="50%"  stop-color="rgb(0,0,0)"/>
+  <stop offset="100%" stop-color="rgb(0,0,0)"/>
+</linearGradient>
+<linearGradient id="glchallenger" x1="0" y1="0" x2="1" y2="1">
+  <stop offset="0%"   stop-color="rgba(210,240,255,0.75)"/>
+  <stop offset="50%"  stop-color="rgba(130,190,230,0.60)"/>
+  <stop offset="100%" stop-color="rgba(80,140,190,0.70)"/>
+</linearGradient>
+<radialGradient id="wgchallenger" cx="42%" cy="38%" r="58%">
+  <stop offset="0%"   stop-color="#aaa"/>
+  <stop offset="45%"  stop-color="#555"/>
+  <stop offset="100%" stop-color="#181818"/>
+</radialGradient>
+</defs>
+<ellipse cx="139" cy="230" rx="100" ry="11" fill="rgba(0,0,0,0.22)"/>
+<polygon points="175,30 208,45 244,236 190,214" fill="url(#spchallenger)"/>
+<polygon points="49,30 175,30 190,214 34,214" fill="url(#pgchallenger)"/>
+<polygon points="49,30 175,30 179,88 44,88" fill="rgb(16,16,16)"/>
+<line x1="102" y1="35" x2="105" y2="82" stroke="rgb(140,140,140)" stroke-width="2" opacity="0.38"/>
+<line x1="112" y1="30" x2="112" y2="88" stroke="rgb(13,13,13)" stroke-width="0.8" opacity="0.55"/>
+<polygon points="37,177 187,177 190,214 34,214" fill="rgb(15,15,15)"/>
+<polygon points="44,88 179,88 151,98 73,98" fill="rgb(17,17,17)"/>
+<polygon points="73,98 151,98 162,162 62,162" fill="url(#rgchallenger)"/>
+<polygon points="151,98 173,110 181,174 162,162" fill="rgb(0,0,0)"/>
+<polygon points="79,102 141,102 148,157 67,157" fill="rgb(127,127,127)" opacity="0.28"/>
+<polygon points="73,98 151,98 179,90 44,90" fill="url(#glchallenger)"/>
+<polygon points="79,101 143,101 137,108 83,108" fill="rgba(255,255,255,0.20)"/>
+<polygon points="62,162 162,162 187,175 37,175" fill="url(#glchallenger)"/>
+<polygon points="151,98 173,110 181,174 162,162" fill="url(#glchallenger)" opacity="0.80"/>
+<line x1="42" y1="114" x2="181" y2="114" stroke="rgb(13,13,13)" stroke-width="0.7" opacity="0.6"/>
+<rect x="54" y="30" width="116" height="6" rx="3" fill="rgb(14,14,14)"/>
+<rect x="59" y="34" width="106" height="3" rx="1" fill="rgb(12,12,12)"/>
+<rect x="39" y="208" width="146" height="6" rx="3" fill="rgb(14,14,14)"/>
+<rect x="55" y="30" width="25" height="7" rx="2" fill="#fffce8" opacity="0.95"/>
+<rect x="144" y="30" width="25" height="7" rx="2" fill="#fffce8" opacity="0.95"/>
+<rect x="57" y="32" width="21" height="2" rx="1" fill="rgba(255,255,180,0.55)"/>
+<rect x="146" y="32" width="21" height="2" rx="1" fill="rgba(255,255,180,0.55)"/>
+<rect x="40" y="207" width="31" height="7" rx="2" fill="#cc1100" opacity="0.92"/>
+<rect x="153" y="207" width="31" height="7" rx="2" fill="#cc1100" opacity="0.92"/>
+<ellipse cx="37" cy="77" rx="22" ry="18" fill="#151515"/>
+<ellipse cx="36" cy="76" rx="20" ry="17" fill="#333" opacity="0.30"/>
+<ellipse cx="37" cy="77" rx="13" ry="11" fill="url(#wgchallenger)"/>
+<ellipse cx="37" cy="77" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="37" y1="77" x2="44.6" y2="79.9" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="37" y1="77" x2="37.1" y2="84.7" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="37" y1="77" x2="29.6" y2="79.9" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="37" y1="77" x2="32.4" y2="72.3" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="37" y1="77" x2="41.8" y2="72.3" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="37" cy="77" r="3" fill="#ddd"/>
+<ellipse cx="37" cy="77" rx="7" ry="6" fill="#222" opacity="0.6"/>
+<ellipse cx="186" cy="77" rx="22" ry="18" fill="#151515"/>
+<ellipse cx="185" cy="76" rx="20" ry="17" fill="#333" opacity="0.30"/>
+<ellipse cx="186" cy="77" rx="13" ry="11" fill="url(#wgchallenger)"/>
+<ellipse cx="186" cy="77" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="186" y1="77" x2="194.4" y2="79.9" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="186" y1="77" x2="186.9" y2="84.7" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="186" y1="77" x2="179.4" y2="79.9" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="186" y1="77" x2="182.2" y2="72.3" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="186" y1="77" x2="191.6" y2="72.3" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="186" cy="77" r="3" fill="#ddd"/>
+<ellipse cx="186" cy="77" rx="7" ry="6" fill="#222" opacity="0.6"/>
+<ellipse cx="30" cy="162" rx="22" ry="18" fill="#151515"/>
+<ellipse cx="29" cy="161" rx="20" ry="17" fill="#333" opacity="0.30"/>
+<ellipse cx="30" cy="162" rx="13" ry="11" fill="url(#wgchallenger)"/>
+<ellipse cx="30" cy="162" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="30" y1="162" x2="37.7" y2="164.6" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="30" y1="162" x2="30.2" y2="169.3" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="30" y1="162" x2="22.7" y2="164.6" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="30" y1="162" x2="25.5" y2="157.0" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="30" y1="162" x2="34.9" y2="157.0" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="30" cy="162" r="3" fill="#ddd"/>
+<ellipse cx="30" cy="162" rx="7" ry="6" fill="#222" opacity="0.6"/>
+<ellipse cx="193" cy="162" rx="22" ry="18" fill="#151515"/>
+<ellipse cx="192" cy="161" rx="20" ry="17" fill="#333" opacity="0.30"/>
+<ellipse cx="193" cy="162" rx="13" ry="11" fill="url(#wgchallenger)"/>
+<ellipse cx="193" cy="162" rx="9" ry="7" fill="none" stroke="#c8c8cc" stroke-width="1.8"/>
+<line x1="193" y1="162" x2="201.3" y2="164.6" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="193" y1="162" x2="193.8" y2="169.3" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="193" y1="162" x2="186.3" y2="164.6" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="193" y1="162" x2="189.1" y2="157.0" stroke="#b0b0b4" stroke-width="1.5"/>
+<line x1="193" y1="162" x2="198.5" y2="157.0" stroke="#b0b0b4" stroke-width="1.5"/>
+<circle cx="193" cy="162" r="3" fill="#ddd"/>
+<ellipse cx="193" cy="162" rx="7" ry="6" fill="#222" opacity="0.6"/>
+</svg>
