@@ -5,6 +5,16 @@
       <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
       <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+    <filter id="textGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Gold gradient: bright top, richer bottom — Pricedown sheen -->
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#fff7a0"/>
+      <stop offset="30%"  stop-color="#ffd700"/>
+      <stop offset="100%" stop-color="#c8890a"/>
+    </linearGradient>
     <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
       <stop offset="0%" stop-color="#000" stop-opacity="0"/>
       <stop offset="100%" stop-color="#000" stop-opacity="0.65"/>
@@ -17,24 +27,44 @@
 
   <!-- 5 Wanted Stars -->
   <g fill="#ffd700" filter="url(#starGlow)">
-    <use href="#s" transform="translate(56,180)"/>
-    <use href="#s" transform="translate(156,180)"/>
-    <use href="#s" transform="translate(256,180)"/>
-    <use href="#s" transform="translate(356,180)"/>
-    <use href="#s" transform="translate(456,180)"/>
+    <use href="#s" transform="translate(56,172)"/>
+    <use href="#s" transform="translate(156,172)"/>
+    <use href="#s" transform="translate(256,172)"/>
+    <use href="#s" transform="translate(356,172)"/>
+    <use href="#s" transform="translate(456,172)"/>
   </g>
 
-  <!-- GTA-style GHOST text -->
-  <text x="256" y="382"
+  <!-- 3-D shadow layer (dark brown, offset down-right) -->
+  <text x="262" y="392"
         font-family="Arial Black, Impact, sans-serif"
         font-weight="900"
-        font-style="italic"
-        font-size="118"
-        fill="white"
-        stroke="#000"
-        stroke-width="12"
-        stroke-linejoin="round"
-        paint-order="stroke fill"
+        font-size="112"
+        fill="#5a3500"
         text-anchor="middle"
-        letter-spacing="4">GHOST</text>
+        textLength="448"
+        lengthAdjust="spacingAndGlyphs">GHOST</text>
+
+  <!-- Outer black stroke -->
+  <text x="256" y="386"
+        font-family="Arial Black, Impact, sans-serif"
+        font-weight="900"
+        font-size="112"
+        fill="none"
+        stroke="#000"
+        stroke-width="16"
+        stroke-linejoin="round"
+        text-anchor="middle"
+        textLength="448"
+        lengthAdjust="spacingAndGlyphs">GHOST</text>
+
+  <!-- Main gold fill with glow -->
+  <text x="256" y="386"
+        font-family="Arial Black, Impact, sans-serif"
+        font-weight="900"
+        font-size="112"
+        fill="url(#goldGrad)"
+        text-anchor="middle"
+        textLength="448"
+        lengthAdjust="spacingAndGlyphs"
+        filter="url(#textGlow)">GHOST</text>
 </svg>
