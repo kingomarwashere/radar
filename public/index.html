@@ -41,11 +41,11 @@
 <div id="topbar">
   <div id="logo"><span id="logo-text">GHOST</span></div>
   <div id="filters">
-    <button class="filter-btn active" data-layer="police" title="Police">🚔</button>
-    <button class="filter-btn active" data-layer="speed"  title="Cameras">📷</button>
+    <button class="filter-btn active" data-layer="police" title="Police">🚨</button>
+    <button class="filter-btn active" data-layer="speed"  title="Cameras">🎯</button>
     <button class="filter-btn active" data-layer="red_light" title="Red light">🔴</button>
     <button class="filter-btn" id="heatmap-btn" title="Report heatmap">🔥</button>
-    <button class="filter-btn" id="trafficcam-btn" title="Traffic cameras">📹</button>
+    <button class="filter-btn" id="trafficcam-btn" title="Traffic cameras">📡</button>
     <button class="filter-btn" id="pigs-btn" title="All cops in NSW">🐷</button>
   </div>
 </div>
@@ -135,7 +135,7 @@
 
 <!-- ── Camera / hazard alert bar ────────────────── -->
 <div id="alert-bar" class="hidden">
-  <span id="alert-icon">📷</span>
+  <span id="alert-icon">🎯</span>
   <span id="alert-text">Speed camera ahead</span>
   <span id="alert-dist">–</span>
 </div>
@@ -205,7 +205,7 @@
 <!-- ── Arrival overlay ──────────────────────────── -->
 <div id="arrival-overlay" class="hidden">
   <div id="arrival-card">
-    <div id="arrival-emoji">🏁</div>
+    <div id="arrival-emoji">⭐</div>
     <div id="arrival-title">You've arrived!</div>
     <div id="arrival-dest">–</div>
     <button id="arrival-done">Done</button>
@@ -258,16 +258,16 @@
 
     <div class="settings-section-label" style="margin-top:18px">Alerts & navigation</div>
     <div id="settings-toggles">
-      <label class="setting-row"><span>🔊 Voice guidance</span>     <input type="checkbox" id="s-voice"   checked></label>
-      <label class="setting-row"><span>📷 Camera alerts</span>      <input type="checkbox" id="s-camera"  checked></label>
-      <label class="setting-row"><span>🚔 Police alerts</span>      <input type="checkbox" id="s-police"  checked></label>
+      <label class="setting-row"><span>📻 Radio guidance</span>     <input type="checkbox" id="s-voice"   checked></label>
+      <label class="setting-row"><span>🎯 Camera alerts</span>      <input type="checkbox" id="s-camera"  checked></label>
+      <label class="setting-row"><span>🚨 Wanted alerts</span>      <input type="checkbox" id="s-police"  checked></label>
       <label class="setting-row"><span>📳 Haptic feedback</span>    <input type="checkbox" id="s-haptic"  checked></label>
       <label class="setting-row"><span>🚫 Avoid tolls by default</span><input type="checkbox" id="s-tolls" checked></label>
       <label class="setting-row"><span>📍 Choose custom start point</span><input type="checkbox" id="s-choosestart"></label>
     </div>
 
     <button id="open-leaderboard-btn" style="width:100%;margin-top:16px;padding:14px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.4);border-radius:12px;color:#fbbf24;font-weight:800;font-size:.95rem;cursor:pointer;font-family:inherit">🏆 Most Wanted Leaderboard</button>
-    <button id="open-cw-gallery-btn" style="width:100%;margin-top:10px;padding:14px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.4);border-radius:12px;color:#60a5fa;font-weight:800;font-size:.95rem;cursor:pointer;font-family:inherit">🎥 Cop Watch Feed</button>
+    <button id="open-cw-gallery-btn" style="width:100%;margin-top:10px;padding:14px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.4);border-radius:12px;color:#60a5fa;font-weight:800;font-size:.95rem;cursor:pointer;font-family:inherit">🎬 Cop Watch Feed</button>
 
     <div class="settings-section-label" style="margin-top:18px">🏎️ Your ride</div>
     <div id="car-grid"></div>
@@ -320,7 +320,7 @@
 <div id="cw-sheet" class="hidden">
   <div class="rpt-drag-handle"></div>
   <div class="rpt-header">
-    <span class="rpt-title">🎥 Cop Watch</span>
+    <span class="rpt-title">🎬 Cop Watch</span>
     <button class="rpt-close" id="cw-close">✕</button>
   </div>
 
@@ -330,7 +330,7 @@
     <button class="cw-type-btn" data-type="speeding">💨 Speeding cop</button>
     <button class="cw-type-btn" data-type="checkpoint">✋ Checkpoint</button>
     <button class="cw-type-btn" data-type="unmarked">🕵️ Unmarked</button>
-    <button class="cw-type-btn" data-type="misconduct">⚠️ Misconduct</button>
+    <button class="cw-type-btn" data-type="misconduct">💥 Misconduct</button>
   </div>
 
   <!-- Plate input -->
@@ -345,7 +345,7 @@
     <div id="cw-photo-area">
       <div id="cw-photo-preview" class="hidden"><img id="cw-preview-img" alt=""/><button id="cw-photo-clear" type="button">✕</button></div>
       <div id="cw-photo-btns">
-        <label class="cw-photo-label" for="cw-camera-input">📷 Take photo
+        <label class="cw-photo-label" for="cw-camera-input">📸 Take photo
           <input id="cw-camera-input" type="file" accept="image/*" capture="environment">
         </label>
         <label class="cw-photo-label" for="cw-gallery-input">🖼️ Gallery
@@ -371,7 +371,7 @@
 <div id="cw-gallery" class="hidden">
   <div id="cw-gallery-card">
     <div id="cw-gallery-header">
-      <span>🎥 Cop Watch Feed</span>
+      <span>🎬 Cop Watch Feed</span>
       <button id="cw-gallery-close">✕</button>
     </div>
     <div id="cw-search-bar">
@@ -433,11 +433,11 @@
     </div>
     <div id="rpt-categories">
       <button class="rpt-cat" data-cat="police">
-        <div class="rpt-icon" style="background:#0ea5e9">👮</div>
-        <span>Police</span>
+        <div class="rpt-icon" style="background:#0ea5e9">🚨</div>
+        <span>5-0</span>
       </button>
       <button class="rpt-cat" data-cat="speed_trap">
-        <div class="rpt-icon" style="background:#1e1a2e">📷</div>
+        <div class="rpt-icon" style="background:#1e1a2e">🎯</div>
         <span>Speed trap</span>
       </button>
       <button class="rpt-cat" data-cat="accident">
@@ -449,7 +449,7 @@
         <span>Traffic</span>
       </button>
       <button class="rpt-cat" data-cat="hazard">
-        <div class="rpt-icon" style="background:#241c0a">⚠️</div>
+        <div class="rpt-icon" style="background:#241c0a">💀</div>
         <span>Hazard</span>
       </button>
       <button class="rpt-cat" data-cat="closure">
@@ -457,7 +457,7 @@
         <span>Closure</span>
       </button>
       <button class="rpt-cat" data-cat="roadwork">
-        <div class="rpt-icon" style="background:#1a1608">👷</div>
+        <div class="rpt-icon" style="background:#1a1608">🔧</div>
         <span>Roadwork</span>
       </button>
       <button class="rpt-cat" data-cat="weather">
@@ -854,7 +854,7 @@
       const ageS = age < 60 ? `${age}m ago` : `${Math.round(age / 60)}h ago`;
       new maplibregl.Popup({ offset: 16 })
         .setLngLat(e.features[0].geometry.coordinates)
-        .setHTML(`<strong>🚔 Police</strong>${p.desc ? `<p style="margin:4px 0">${p.desc}</p>` : ''}<p style="color:#888;font-size:.75rem">${ageS}</p>`)
+        .setHTML(`<strong>🚨 5-0</strong>${p.desc ? `<p style="margin:4px 0">${p.desc}</p>` : ''}<p style="color:#888;font-size:.75rem">${ageS}</p>`)
         .addTo(map);
     });
 
