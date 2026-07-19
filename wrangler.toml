@@ -25,4 +25,4 @@ pattern = "radar.theradicalparty.com/*"
 zone_name = "theradicalparty.com"
 
 [triggers]
-crons = ["*/5 * * * *"]
+crons = ["*/20 * * * *"]

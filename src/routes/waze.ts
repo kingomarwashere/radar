@@ -135,8 +135,8 @@ const OWN_BASE  = 'https://api.openwebninja.com/waze/alerts-and-jams';
 const WAZE_TTL_MS = 90 * 60 * 1000;
 
 const NSW  = { n: -28.15, s: -37.51, w: 140.99, e: 153.64 };
-const ROWS = 3;
-const COLS = 4;
+const ROWS = 2;
+const COLS = 2;
 
 interface OWNAlert {
   alert_id: string;
