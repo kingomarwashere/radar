@@ -1,6 +1,6 @@
 {
-  "name": "Radar — Live Police & Camera Map",
-  "short_name": "Radar",
+  "name": "Ghost — Live Police & Camera Map",
+  "short_name": "Ghost",
   "description": "Crowdsourced police sightings, speed cameras, and turn-by-turn navigation.",
   "start_url": "/",
   "scope": "/",

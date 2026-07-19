@@ -13,6 +13,16 @@ import adminApi from './routes/admin-api';
 
 const app = new Hono<{ Bindings: Env }>();
 
+app.use('*', async (c, next) => {
+  const host = c.req.header('host') || '';
+  if (host.startsWith('radar.')) {
+    const url = new URL(c.req.url);
+    url.hostname = 'ghost.theradicalparty.com';
+    return c.redirect(url.toString(), 301);
+  }
+  await next();
+});
+
 app.use('*', cors({ origin: '*' }));
 
 app.route('/api/reports', reports);
@@ -31,7 +41,7 @@ app.get('/api/health', (c) => c.json({ ok: true, ts: Date.now() }));
 // GET /api/traffic-cams — camera metadata list (cached 1h at edge)
 app.get('/api/traffic-cams', async (c) => {
   const resp = await fetch('https://www.livetraffic.com/datajson/all-feeds-web.json', {
-    headers: { 'User-Agent': 'radar/1.0', 'Accept': 'application/json' },
+    headers: { 'User-Agent': 'ghost/1.0', 'Accept': 'application/json' },
     // @ts-ignore — CF-specific cache option
     cf: { cacheTtl: 3600, cacheEverything: true },
   });
