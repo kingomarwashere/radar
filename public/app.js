@@ -167,10 +167,13 @@ const RASTER_STYLES = {
 const emptyFC = () => ({type:'FeatureCollection',features:[]});
 
 // MapLibre GL JS — native WebGL pitch/bearing/3D
+const _savedPos = JSON.parse(localStorage.getItem('radar_lastpos') ?? 'null');
 const map = new maplibregl.Map({
   container:'map',
   style: VECTOR_STYLES[prefs.mapStyle] || VECTOR_STYLES.voyager,
-  center:[133.5,-27.5], zoom:5, bearing:0, pitch:0,
+  center: _savedPos ? [_savedPos.lng, _savedPos.lat] : [151.2093, -33.8688],
+  zoom:   _savedPos ? 14 : 13,
+  bearing:0, pitch:0,
   attributionControl:false, maxPitch:85,
 });
 map.addControl(new maplibregl.NavigationControl({showCompass:false}), 'bottom-left');
@@ -189,6 +192,7 @@ map.on('style.load', () => {
     // Initial location + auto-night
     navigator.geolocation.getCurrentPosition(pos=>{
       autoNightCheck();
+      localStorage.setItem('radar_lastpos', JSON.stringify({lat:pos.coords.latitude,lng:pos.coords.longitude}));
       if(navState==='idle') map.flyTo({center:[pos.coords.longitude,pos.coords.latitude],zoom:14,duration:1500});
     }, null, {enableHighAccuracy:false,timeout:8000,maximumAge:60000});
     scheduleFetch();
@@ -2379,6 +2383,7 @@ function makeUserMarker(lat,lng,gpsHdg=0){
 /* ── GPS handler ────────────────────────────────── */
 function onGPS(pos){
   const {latitude:lat,longitude:lng,speed:rawSpd,heading}=pos.coords;
+  localStorage.setItem('radar_lastpos', JSON.stringify({lat,lng}));
 
   // Speed first — needed by heading-freeze logic below
   let speedMs=rawSpd;
