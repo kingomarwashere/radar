@@ -184,7 +184,7 @@ map.on('style.load', () => {
   _palApplied = false;
   fixPalestineLabels();
   setupMapLayers();
-  if(prefs.mapStyle==='gta') applyGtaColors();
+  if(prefs.mapStyle==='gta'){ applyGtaColors(); addGtaPoiLayer(); }
   // Re-draw route after any style swap — covers preview and active nav
   if(routePoints.length) updateRouteGeoJSON();
   if(!_mapReady){
@@ -201,7 +201,7 @@ map.on('style.load', () => {
 });
 
 // Custom layer IDs — never touched by hideNavClutter
-const CUSTOM_LAYERS = new Set(['route-main','route-traveled','route-alts','route-warn','heatmap-layer','3d-buildings']);
+const CUSTOM_LAYERS = new Set(['route-main','route-traveled','route-alts','route-warn','heatmap-layer','3d-buildings','gta-poi']);
 
 function setupMapLayers(){
   // Route line sources
@@ -3338,9 +3338,108 @@ function applyGtaColors(){
   ['road_primary','road_secondary','primary','secondary'].forEach(l=>tryPaint(l,'line-color','#8a7040'));
   ['road_tertiary','road_minor','tertiary','minor_road','road'].forEach(l=>tryPaint(l,'line-color','#2a2a3a'));
   ['road_path','path','footway'].forEach(l=>tryPaint(l,'line-color','#1e1e2e'));
+  // GTA V GPS route line — vivid magenta/pink (matches the in-game minimap route)
+  tryPaint('route-main','line-color','#ff2ec4');
+  tryPaint('route-traveled','line-color','#6d2c5f');
+  tryPaint('route-alts','line-color','#5b2a6b');
   // Tweak UI surface too
   document.documentElement.style.setProperty('--surface','#0d1117');
   document.documentElement.style.setProperty('--surface2','#111827');
+}
+
+/* ═══════════════════════════════════════════════
+   GTA POI BLIPS — icon-per-place on the GTA map only
+   Strip club → 👠, Ammu-Nation (gun shop) → 🔫, bar → 🍸, etc.
+   Driven by the vector tile `poi` source-layer (OpenMapTiles schema).
+═══════════════════════════════════════════════ */
+// subclass (OSM-ish tag value) → [emoji, ring colour]
+const GTA_POI = {
+  stripclub:['👠','#ff2ec4'], nightclub:['🍸','#c026d3'], bar:['🍸','#c026d3'],
+  pub:['🍺','#d97706'], biergarten:['🍺','#d97706'], casino:['🎰','#eab308'],
+  fast_food:['🍔','#f59e0b'], restaurant:['🍴','#f97316'], cafe:['☕','#a16207'],
+  bakery:['🥐','#d97706'], butcher:['🥩','#ef4444'], ice_cream:['🍦','#f472b6'],
+  fuel:['⛽','#22c55e'], charging_station:['🔌','#22c55e'],
+  hospital:['🏥','#ef4444'], clinic:['🏥','#ef4444'], doctors:['🩺','#ef4444'],
+  dentist:['🦷','#38bdf8'], pharmacy:['💊','#10b981'], veterinary:['🐾','#10b981'],
+  police:['👮','#3b82f6'], fire_station:['🚒','#ef4444'], prison:['🔒','#94a3b8'],
+  hotel:['🛏️','#8b5cf6'], motel:['🛏️','#8b5cf6'], hostel:['🛏️','#8b5cf6'],
+  supermarket:['🛒','#22d3ee'], convenience:['🏪','#22d3ee'], mall:['🛍️','#38bdf8'],
+  bank:['💰','#eab308'], atm:['💵','#eab308'],
+  parking:['🅿️','#3b82f6'],
+  cinema:['🎬','#a855f7'], theatre:['🎭','#a855f7'], nightlife:['🍸','#c026d3'],
+  hairdresser:['💈','#f472b6'], beauty:['💅','#f472b6'], tattoo:['🎨','#f472b6'],
+  clothes:['👕','#38bdf8'], shoes:['👟','#38bdf8'], jewelry:['💍','#eab308'],
+  books:['📖','#a16207'], florist:['🌹','#f472b6'], gift:['🎁','#f472b6'],
+  car_repair:['🔧','#94a3b8'], car:['🚗','#94a3b8'], car_parts:['🔩','#94a3b8'],
+  gym:['💪','#f43f5e'], fitness_centre:['💪','#f43f5e'], swimming_pool:['🏊','#38bdf8'],
+  weapons:['🔫','#94a3b8'], hunting:['🔫','#94a3b8'],
+  place_of_worship:['⛪','#cbd5e1'], school:['🏫','#fbbf24'], university:['🎓','#fbbf24'],
+  college:['🎓','#fbbf24'], library:['📚','#fbbf24'], post_office:['📮','#ef4444'],
+  stadium:['🏟️','#22c55e'], pitch:['⚽','#22c55e'], golf_course:['⛳','#22c55e'],
+  marina:['⚓','#38bdf8'], zoo:['🦁','#f59e0b'], theme_park:['🎡','#f472b6'],
+  laundry:['🧺','#38bdf8'], dry_cleaning:['🧺','#38bdf8'],
+};
+
+// Render an emoji onto a GTA-style dark blip with a coloured ring → raw image for addImage.
+function makePoiIcon(emoji, color='#0a0a10'){
+  const S=64, c=document.createElement('canvas'); c.width=c.height=S;
+  const x=c.getContext('2d');
+  x.beginPath(); x.arc(S/2,S/2,S/2-5,0,Math.PI*2);
+  x.fillStyle='rgba(10,10,16,0.82)'; x.fill();
+  x.lineWidth=3.5; x.strokeStyle=color; x.stroke();
+  x.font='34px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+  x.textAlign='center'; x.textBaseline='middle';
+  x.fillText(emoji, S/2, S/2+1);
+  const d=x.getImageData(0,0,S,S);
+  return {width:S, height:S, data:new Uint8Array(d.data.buffer)};
+}
+
+function addGtaPoiLayer(){
+  try{
+    const style=map.getStyle();
+    const vsrc=Object.keys(style.sources).find(k=>style.sources[k].type==='vector');
+    if(!vsrc) return;
+    // Register one blip image per category (idempotent across style reloads)
+    for(const [sub,[emoji,color]] of Object.entries(GTA_POI)){
+      const id='gp-'+sub;
+      if(!map.hasImage(id)){ try{ map.addImage(id, makePoiIcon(emoji,color), {pixelRatio:2}); }catch{} }
+    }
+    const knownSubs=Object.keys(GTA_POI);
+    const iconMatch=['match',['get','subclass']];
+    for(const sub of knownSubs) iconMatch.push(sub,'gp-'+sub);
+    iconMatch.push('gp-'+knownSubs[0]); // default (never hit — filtered)
+    // Prefer a non-italic Regular font stack the style's glyph server actually serves
+    let fontStack=['Noto Sans Regular'];
+    for(const l of style.layers){
+      const f=l.layout&&l.layout['text-font'];
+      if(f&&/Regular/.test(f[0])&&!/Italic/.test(f[0])){ fontStack=f; break; }
+    }
+    if(map.getLayer('gta-poi')) map.removeLayer('gta-poi');
+    map.addLayer({
+      id:'gta-poi', type:'symbol', source:vsrc, 'source-layer':'poi',
+      minzoom:14.5,
+      filter:['match',['get','subclass'], knownSubs, true, false],
+      layout:{
+        'icon-image':iconMatch,
+        'icon-size':0.5,
+        'icon-allow-overlap':false,
+        'symbol-sort-key':['coalesce',['get','rank'],100],
+        'text-field':['coalesce',['get','name'],''],
+        'text-font':fontStack,
+        'text-size':10.5,
+        'text-offset':[0,1.3],
+        'text-anchor':'top',
+        'text-optional':true,
+        'text-max-width':8,
+      },
+      paint:{
+        'text-color':'#ffd1f2',
+        'text-halo-color':'#1a001a',
+        'text-halo-width':1.3,
+        'icon-opacity':0.96,
+      },
+    });
+  }catch(e){ console.warn('gta poi layer',e); }
 }
 
 /* ═══════════════════════════════════════════════
