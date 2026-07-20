@@ -1,3 +1,5 @@
+# Worker name stays "radar": the live worker owns the routes + holds secrets
+# (OWN_API_KEY). Renaming would orphan secrets and require route migration.
 name = "radar"
 main = "src/index.ts"
 compatibility_date = "2025-01-01"
