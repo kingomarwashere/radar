@@ -697,18 +697,95 @@ body.navigating #recenter-btn { bottom: calc(152px + env(safe-area-inset-bottom)
   letter-spacing: .02em;
 }
 
-/* ── User position arrow ──────────────────────── */
+/* ── User position arrow (SVG kart easter eggs) ── */
 .user-arrow {
   display: block; transform-origin: center;
   filter: drop-shadow(0 4px 16px rgba(0,0,0,.9));
   width: auto; height: auto;
-  max-width: 72px; max-height: 106px;
+  max-width: 90px; max-height: 120px;
 }
-/* ── GTA car sprite (Unlucky Studio realistic PNGs) ── */
-.car-sprite {
-  width: 64px; height: 64px; display: block;
-  object-fit: contain;
-  image-rendering: auto;
+
+/* ═══ CSS 3D car system ═══════════════════════════════════════════════ */
+/* car3d-wrap MUST NOT have filter — it kills preserve-3d in Chrome/Safari.
+   Shadow lives on the img so it composites flat and doesn't break the 3D. */
+.car3d-wrap {
+  transform-origin: center;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.car3d-tilt {
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.car3d-body {
+  position: relative;
+  width: 64px; height: 64px;
+  transform-style: preserve-3d;
+}
+/* Top face — carries the SVG bird's-eye art */
+.c3-top {
+  position: absolute; inset: 0;
+  transform: translateZ(var(--d, 13px));
+}
+.car3d-img {
+  width: 64px; height: 64px;
+  object-fit: contain; display: block;
+  filter: drop-shadow(0 4px 18px rgba(0,0,0,.9));
+}
+/* Front face — visible at high map pitch (car nose) */
+.c3-front {
+  position: absolute;
+  width: 64px; height: var(--d, 13px);
+  top: 0; left: 0;
+  background: var(--front, #111);
+  transform-origin: top center;
+  transform: rotateX(90deg);
+}
+.c3-front::before, .c3-front::after {
+  content: '';
+  position: absolute;
+  width: 12px; height: 4px;
+  background: rgba(255,252,200,.95);
+  bottom: 2px; border-radius: 2px;
+  box-shadow: 0 0 8px 2px rgba(255,248,160,.65);
+}
+.c3-front::before { left: 5px; }
+.c3-front::after  { right: 5px; }
+/* Rear face — visible in 3D nav (camera behind car) */
+.c3-back {
+  position: absolute;
+  width: 64px; height: var(--d, 13px);
+  bottom: 0; left: 0;
+  background: var(--back, #0a0a0a);
+  transform-origin: bottom center;
+  transform: rotateX(-90deg);
+}
+.c3-back::before, .c3-back::after {
+  content: '';
+  position: absolute;
+  width: 11px; height: 4px;
+  background: rgba(220,20,0,.92);
+  top: 2px; border-radius: 2px;
+  box-shadow: 0 0 7px 2px rgba(200,10,0,.55);
+}
+.c3-back::before { left: 5px; }
+.c3-back::after  { right: 5px; }
+/* Side faces */
+.c3-side-l, .c3-side-r {
+  position: absolute;
+  width: var(--d, 13px); height: 64px;
+  top: 0;
+  background: var(--side, #1a1a1a);
+}
+.c3-side-l {
+  left: 0;
+  transform-origin: left center;
+  transform: rotateY(90deg);
+}
+.c3-side-r {
+  right: 0;
+  transform-origin: right center;
+  transform: rotateY(-90deg);
 }
 /* car picker thumbnail */
 .car-pick-img {
@@ -779,7 +856,7 @@ body:not(.nav-3d) #street-labels-overlay { display: none; }
   -webkit-tap-highlight-color: transparent;
 }
 #compass-widget:active { background: rgba(30,30,30,.98); transform: scale(.93); }
-body.navigating #compass-widget { top: calc(env(safe-area-inset-top, 0px) + 234px); }
+body.navigating #compass-widget { top: calc(env(safe-area-inset-top, 0px) + 250px); }
 #compass-dial {
   display: flex; flex-direction: column; align-items: center; gap: 0;
 }
@@ -1248,7 +1325,12 @@ body.navigating #gta-hud {
   transition: transform .15s;
 }
 #cw-fab:active { transform: scale(.93); }
-body.navigating #cw-fab { bottom: calc(240px + env(safe-area-inset-bottom)); } /* above speed display */
+/* During nav the left side is occupied by the tall speed float (limit sign + big
+   speed number), so move Cop Watch to the right column, stacked above recenter. */
+body.navigating #cw-fab {
+  left: auto; right: 16px;
+  bottom: calc(222px + env(safe-area-inset-bottom));
+}
 
 /* ── Submission sheet ───────────────────────── */
 #cw-sheet {

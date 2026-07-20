@@ -1394,6 +1394,22 @@ function animateMarkerTo(lat,lng,hdg,dur){
   _mRaf=requestAnimationFrame(_stepMarker);
 }
 
+function _syncMarkerTransform(){
+  if(!userMarker)return;
+  const el=userMarker.getElement();
+  const rot=_mCurHdg-map.getBearing();
+  const pitch=map.getPitch();
+  const wrap=el.querySelector('.car3d-wrap');
+  if(wrap){
+    wrap.style.transform=`rotate(${rot}deg)`;
+    const tilt=wrap.querySelector('.car3d-tilt');
+    if(tilt) tilt.style.transform=`rotateX(${pitch}deg)`;
+    return;
+  }
+  const svg=el.querySelector('svg,.user-arrow');
+  if(svg) svg.style.transform=`rotate(${rot}deg)`;
+}
+
 function _stepMarker(ts){
   const t=_easeIO(Math.min((ts-_mStart)/_mDur,1));
   const lat=_mFrom.lat+(_mTo.lat-_mFrom.lat)*t;
@@ -1401,8 +1417,7 @@ function _stepMarker(ts){
   _mCurHdg=_mHdgFrom+_arc(_mHdgFrom,_mHdgTo)*t;
   if(userMarker){
     userMarker.setLngLat([lng,lat]);
-    const arrow=userMarker.getElement()?.querySelector('.user-arrow');
-    if(arrow) arrow.style.transform=`rotate(${_mCurHdg-map.getBearing()}deg)`;
+    _syncMarkerTransform();
   }
   // Drive the map camera at 60fps — car sits in lower third via top padding
   const _NAV_PAD={top:Math.round(window.innerHeight*0.30),bottom:0,left:0,right:0};
@@ -2456,6 +2471,9 @@ let _wantedBannerTimer=null;
 function showWantedBanner(stars){
   const banner=$$('gta-wanted-banner'); if(!banner) return;
   $$('gta-wanted-stars').textContent='★'.repeat(stars)+'☆'.repeat(5-stars);
+  // Sit the banner BELOW the nav instruction so it never covers the maneuver icon
+  const nav=$$('nav-instruction');
+  banner.style.top=(nav && !nav.classList.contains('hidden')) ? nav.offsetHeight+'px' : '0px';
   banner.classList.remove('hidden');
   clearTimeout(_wantedBannerTimer);
   _wantedBannerTimer=setTimeout(hideWantedBanner, 3500);
