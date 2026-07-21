@@ -40,16 +40,17 @@ const MODEL_CFG = {
   // Novelty + realistic
   'food/eggplant.glb':    { normalize: true, sizeMul: 1.0, yaw: 0 },
   'ferrari.glb':     { normalize: true, sizeMul: 1.3, yaw: 0 },
-  // Realistic fleet (Poly Pizza, CC-BY/CC0) — normalized; yaw tuned per model
-  'real-charger.glb':     { normalize: true, sizeMul: 1.1,  yaw: 0 },
-  'real-rangerover.glb':  { normalize: true, sizeMul: 1.15, yaw: 0 },
-  'real-rx7.glb':         { normalize: true, sizeMul: 1.1,  yaw: 0 },
-  'real-convertible.glb': { normalize: true, sizeMul: 1.05, yaw: 0 },
-  'real-interceptor.glb': { normalize: true, sizeMul: 1.1,  yaw: 0 },
-  'real-musclecar.glb':   { normalize: true, sizeMul: 1.1,  yaw: 0 },
-  'real-hatch2.glb':      { normalize: true, sizeMul: 1.0,  yaw: 0 },
-  'real-crossover.glb':   { normalize: true, sizeMul: 1.15, yaw: 0 },
-  'real-coupe.glb':       { normalize: true, sizeMul: 1.05, yaw: 0 },
+  // Realistic fleet (Sketchfab, CC-BY) — normalized; yaw tuned per model
+  'sk-pony.glb':       { normalize: true, sizeMul: 1.1,  yaw: 0 },
+  'sk-f40.glb':        { normalize: true, sizeMul: 1.1,  yaw: 0 },
+  'sk-koenigsegg.glb': { normalize: true, sizeMul: 1.1,  yaw: 0 },
+  'sk-phoenix.glb':    { normalize: true, sizeMul: 1.1,  yaw: 90 },
+  'sk-copcruiser.glb': { normalize: true, sizeMul: 1.1,  yaw: 90 },
+  'sk-cyber.glb':      { normalize: true, sizeMul: 1.1,  yaw: 90 },
+  'sk-volvo130.glb':   { normalize: true, sizeMul: 1.05, yaw: 0 },
+  'sk-c10pickup.glb':  { normalize: true, sizeMul: 1.15, yaw: 0 },
+  'sk-cadillac.glb':   { normalize: true, sizeMul: 1.1,  yaw: 0 },
+  'sk-karlmann.glb':   { normalize: true, sizeMul: 1.15, yaw: 90 },
 };
 const cfgOf = (f) => MODEL_CFG[f] || {};
 

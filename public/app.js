@@ -91,7 +91,8 @@ function autoNightCheck() {
 ═══════════════════════════════════════════════ */
 
 // CartoDB publish their tile styles as free MapLibre GL JSON — no API key needed.
-// Vector tiles let us rewrite label text before it ever renders (see fixPalestineLabels).
+// Inside the Middle East region we override these with our own Israel-free vector
+// tiles; see setupMideastTiles().
 const VECTOR_STYLES = {
   dark:    'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
   light:   'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
@@ -131,6 +132,18 @@ const PAL_NAMES = {
   'Kiryat Gat':        'Faluja',      'Kiryat Shmona':  'Khalsa',
   'Nof HaGalil':       'Nabi Rubin',  'Upper Nazareth': 'Nabi Rubin',
   'Dimona':            'Dimuna',
+  // More towns built on/near depopulated Palestinian villages
+  'Yavne':             'Yibna',       'Yavneh':         'Yibna',
+  'Gedera':            'Qatra',       'Kfar Saba':      'Kafr Saba',
+  'Rosh HaAyin':       'Ras al-Ayn',  'Rosh Ha\'ayin':  'Ras al-Ayn',
+  'Or Yehuda':         'Kafr Ana',    'Yehud':          'Al-Yahudiyya',
+  'Yehud-Monosson':    'Al-Yahudiyya','Rosh Pina':      'Al-Ja\'una',
+  'Rosh Pinna':        'Al-Ja\'una',  'Migdal HaEmek':  'Al-Mujaydil',
+  'Tirat Karmel':      'Al-Tira',     'Zikhron Yaakov': 'Zammarin',
+  'Zichron Yaakov':    'Zammarin',    'Sderot':         'Najd',
+  'Kiryat Ata':        'Kafr Ata',    'Bnei Brak':      'Ibn Ibraq',
+  'Bene Beraq':        'Ibn Ibraq',   'Beit Dagan':     'Bayt Dajan',
+  'Kiryat Motzkin':    'Al-Sumayriyya','Yesud HaMaala':  'Al-Zuq al-Tahtani',
   // Regions
   'Negev':             'An-Naqab',    'Galilee':        'Al-Jalil',
   'Judea':             'Al-Quds area','Samaria':        'As-Samariyya',
@@ -184,14 +197,13 @@ function toExpr(f){
   return f;                                            // already an expression
 }
 
-let _meApplied = false; // latches true once the region setup has actually stuck
 function setupMideastTiles(){
   // Runs on the map 'idle' event (see wiring below). We deliberately DON'T run this
-  // straight from 'style.load': during that event the style isn't fully ready and
-  // addSource/addLayer silently no-op (they neither throw nor persist). By 'idle'
-  // the style has settled and additions stick. _meApplied is reset on every
-  // style.load so each theme swap re-applies.
-  if(_meApplied) return;
+  // from 'style.load': during that event the style isn't ready and addSource/addLayer
+  // silently no-op (neither throw nor persist). Idempotent + self-healing: a theme
+  // swap (setStyle) wipes our clones — sometimes WITHOUT firing style.load — so we
+  // detect their absence here and re-apply. Fast path when already present.
+  if(map.getStyle().layers.some(l => l.id.startsWith('me_'))) return;
 
   try{
     if(!map.getSource('me')) map.addSource('me', { type:'vector', url: MIDEAST_PMTILES });
@@ -228,15 +240,12 @@ function setupMideastTiles(){
       }
     }
     // Suppress CartoDB's own labels/boundaries inside the region. Guard against
-    // double-wrapping if this runs again before latching.
+    // double-wrapping if the pristine filter was already suppressed.
     if(!JSON.stringify(l.filter||'').includes('within')){
       const filtered = base ? ['all', base, notInRegion] : notInRegion;
       try{ map.setFilter(l.id, filtered); }catch(_){}
     }
   });
-
-  // Only latch once the work actually persisted — otherwise let the next 'idle' retry.
-  if(map.getSource('me') && map.getStyle().layers.some(l => l.id.startsWith('me_'))) _meApplied = true;
 }
 
 // Raster fallback styles (satellite/terrain) as inline MapLibre style objects
@@ -266,9 +275,9 @@ window.dispatchEvent(new Event('ghostmap-ready'));
 // On every style.load (initial + setStyle calls): fix labels, add custom layers
 let _mapReady = false;
 // Re-apply the Middle East tiles whenever the map next goes idle (style fully ready).
+// setupMideastTiles is self-healing: it re-adds its layers if a style swap wiped them.
 map.on('idle', setupMideastTiles);
 map.on('style.load', () => {
-  _meApplied = false;           // new style wiped our layers → let 'idle' re-apply
   setupMapLayers();
   if(prefs.mapStyle==='gta'){ applyGtaColors(); addGtaPoiLayer(); }
   // Re-draw route after any style swap — covers preview and active nav
@@ -2532,17 +2541,18 @@ function makePeachIcon(gpsHdg=0){
 function _d3Marker(){ return {html:'<div class="user-arrow car3d-anchor" style="width:4px;height:4px;pointer-events:none"></div>', d3:true}; }
 
 const CARS=[
-  // ── Realistic fleet (higher-detail models — Poly Pizza) ──────────────────
-  {id:'ferrari',         name:'Ferrari',       emoji:'🏎️', model:'ferrari.glb',          fn:_d3Marker, d3:true},
-  {id:'charger',         name:'Dodge Charger', emoji:'🏎️', model:'real-charger.glb',     fn:_d3Marker, d3:true},
-  {id:'rx7',             name:'Mazda RX-7',    emoji:'🏎️', model:'real-rx7.glb',         fn:_d3Marker, d3:true},
-  {id:'rangerover',      name:'Range Rover',   emoji:'🚙', model:'real-rangerover.glb',  fn:_d3Marker, d3:true},
-  {id:'musclecar',       name:'Muscle Car',    emoji:'🚗', model:'real-musclecar.glb',   fn:_d3Marker, d3:true},
-  {id:'coupe2',          name:'Coupe',         emoji:'🚗', model:'real-coupe.glb',        fn:_d3Marker, d3:true},
-  {id:'convertible2',    name:'Convertible',   emoji:'🚗', model:'real-convertible.glb',  fn:_d3Marker, d3:true},
-  {id:'hatch2',          name:'Hatchback',     emoji:'🚗', model:'real-hatch2.glb',       fn:_d3Marker, d3:true},
-  {id:'crossover',       name:'Crossover',     emoji:'🚙', model:'real-crossover.glb',    fn:_d3Marker, d3:true},
-  {id:'interceptor',     name:'Interceptor',   emoji:'🚓', model:'real-interceptor.glb',  fn:_d3Marker, d3:true},
+  // ── Realistic fleet (Sketchfab, CC-BY — see CREDITS.md) ──────────────────
+  {id:'ferrari',    name:'Ferrari',        emoji:'🏎️', model:'ferrari.glb',        fn:_d3Marker, d3:true},
+  {id:'pony',       name:'GT Sport',       emoji:'🏎️', model:'sk-pony.glb',        fn:_d3Marker, d3:true},
+  {id:'f40',        name:'F40 LM',         emoji:'🏎️', model:'sk-f40.glb',         fn:_d3Marker, d3:true},
+  {id:'koenigsegg', name:'Koenigsegg One', emoji:'🏎️', model:'sk-koenigsegg.glb',  fn:_d3Marker, d3:true},
+  {id:'phoenix',    name:'Muscle Car',     emoji:'🚗', model:'sk-phoenix.glb',     fn:_d3Marker, d3:true},
+  {id:'copcruiser', name:'Cop Cruiser',    emoji:'🚓', model:'sk-copcruiser.glb',  fn:_d3Marker, d3:true},
+  {id:'cyber',      name:'Cyber Car',      emoji:'🏎️', model:'sk-cyber.glb',       fn:_d3Marker, d3:true},
+  {id:'volvo130',   name:'Classic Coupe',  emoji:'🚗', model:'sk-volvo130.glb',    fn:_d3Marker, d3:true},
+  {id:'c10pickup',  name:'C10 Pickup',     emoji:'🛻', model:'sk-c10pickup.glb',   fn:_d3Marker, d3:true},
+  {id:'cadillac',   name:'Classic Sedan',  emoji:'🚗', model:'sk-cadillac.glb',    fn:_d3Marker, d3:true},
+  {id:'karlmann',   name:'Luxury SUV',     emoji:'🚙', model:'sk-karlmann.glb',    fn:_d3Marker, d3:true},
   // ── 3D models (Kenney Car Kit) ───────────────────────────────────────────
   {id:'sedan-sports',    name:'Sports Sedan',  emoji:'🏎️', model:'sedan-sports.glb',    fn:_d3Marker, d3:true},
   {id:'race',            name:'Race Car',      emoji:'🏁', model:'race.glb',             fn:_d3Marker, d3:true},
