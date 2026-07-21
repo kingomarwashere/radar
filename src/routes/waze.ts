@@ -225,7 +225,7 @@ async function scrapeOpenWebNinja(db: D1Database, apiKey: string, now: number): 
   }
 
   const results = await Promise.allSettled(fetches);
-  const seen = new Map<string, { lat: number; lng: number; type: ReportType; desc: string }>();
+  const seen = new Map<string, { lat: number; lng: number; type: ReportType; desc: string; up: number }>();
 
   for (const res of results) {
     if (res.status !== 'fulfilled' || res.value.status !== 'OK') continue;
@@ -240,6 +240,8 @@ async function scrapeOpenWebNinja(db: D1Database, apiKey: string, now: number): 
       seen.set(alert.alert_id, {
         lat: alert.latitude, lng: alert.longitude,
         type: mapped.type, desc: `${mapped.label}${street}${city}`,
+        // Real Waze upvotes → seed the confirm count ("✅ 36 still there")
+        up: Math.max(0, alert.num_thumbs_up ?? 0),
       });
     }
 
@@ -252,7 +254,7 @@ async function scrapeOpenWebNinja(db: D1Database, apiKey: string, now: number): 
       const spd    = jam.speed_kmh != null ? ` (${Math.round(jam.speed_kmh)} km/h)` : '';
       seen.set(jam.jam_id, {
         lat: mid.lat, lng: mid.lon,
-        type: 'traffic', desc: `${sev}${spd}${street}`,
+        type: 'traffic', desc: `${sev}${spd}${street}`, up: 0,
       });
     }
   }
@@ -270,9 +272,12 @@ async function scrapeOpenWebNinja(db: D1Database, apiKey: string, now: number): 
       return [
         db.prepare(`
           INSERT INTO reports (id, lat, lng, type, description, confirms, denies, created_at, expires_at, reporter_hash)
-          VALUES (?, ?, ?, ?, ?, 0, 0, ?, ?, 'waze')
-          ON CONFLICT(id) DO UPDATE SET expires_at = excluded.expires_at, description = excluded.description
-        `).bind(id, r.lat, r.lng, r.type, r.desc, now, expiresAt),
+          VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, 'waze')
+          ON CONFLICT(id) DO UPDATE SET
+            expires_at  = excluded.expires_at,
+            description = excluded.description,
+            confirms    = MAX(reports.confirms, excluded.confirms)
+        `).bind(id, r.lat, r.lng, r.type, r.desc, r.up, now, expiresAt),
         db.prepare(`INSERT OR IGNORE INTO report_history (id, lat, lng, type, created_at) VALUES (?, ?, ?, ?, ?)`)
           .bind(histId, r.lat, r.lng, r.type, now),
       ];
