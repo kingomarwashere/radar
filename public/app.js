@@ -1411,24 +1411,38 @@ let arrivedFlag=false, _plannedArriveMs=0;
 plannerBack.addEventListener('click', closePlanner);
 
 /* ═══════════════════════════════════════════════
-   SMOOTH MARKER ANIMATION — interpolates between GPS fixes
-   so the car doesn't teleport between 1-2 second position updates.
+   SMOOTH MOTION — continuous dead-reckoning + GPS correction
+   The car is driven by a velocity model, NOT by tweening between
+   fixes. A single rAF loop advances the car forward along its
+   heading at its current speed every frame, so it always flows.
+   Each GPS fix updates a target (pos/heading/speed); the rendered
+   car critically-damps toward that target PROJECTED FORWARD by the
+   fix's age — so during a GPS gap the target keeps moving and the
+   car flows with it, and on reconnect the correction is tiny (no
+   jump). Long dropouts decay speed to a smooth stop.
 ═══════════════════════════════════════════════ */
-let _mFrom=null, _mTo=null, _mHdgFrom=0, _mHdgTo=0;
-let _mStart=0, _mDur=1000, _mRaf=null, _mCurHdg=0, _mLastSpeedMs=0;
-const _easeIO=t=>t<0.5?2*t*t:-1+(4-2*t)*t;
+let _mCurHdg=0, _mLastSpeedMs=0, _mRaf=null;
+let _mv=null;   // rendered state {lat,lng,hdg,spd(m/s)}
+let _mt=null;   // latest GPS target {lat,lng,hdg,spd,ts}
+let _mLastFrame=0;
 const _arc=(a,b)=>((b-a)%360+540)%360-180;
 
-function animateMarkerTo(lat,lng,hdg,dur){
-  const cur=userMarker?userMarker.getLngLat():{lat,lng};
-  if(_mRaf){cancelAnimationFrame(_mRaf);_mRaf=null;}
-  _mFrom={lat:cur.lat,lng:cur.lng};
-  _mHdgFrom=_mCurHdg;
-  _mTo={lat,lng};
-  _mHdgTo=hdg;
-  _mDur=Math.max(dur,300);
-  _mStart=performance.now();
-  _mRaf=requestAnimationFrame(_stepMarker);
+// Called on every GPS fix. Updates the target; snaps only on an
+// implausible teleport (real GPS glitch), otherwise stays smooth.
+function _setMotionTarget(lat,lng,hdg,spd){
+  const now=performance.now();
+  spd=Math.max(0, spd||0);
+  if(!_mv){
+    _mv={lat,lng,hdg,spd};
+  } else {
+    const d=haversine(_mv.lat,_mv.lng,lat,lng);
+    // How far off we could plausibly be given our speed — dead reckoning
+    // should have kept us close. Beyond this it's a teleport → snap once.
+    const tol=Math.max(120, _mv.spd*6+60);
+    if(d>tol){ _mv.lat=lat; _mv.lng=lng; _mv.hdg=hdg; _mv.spd=spd; }
+  }
+  _mt={lat,lng,hdg,spd,ts:now};
+  if(_mRaf==null){ _mLastFrame=now; _mRaf=requestAnimationFrame(_motionFrame); }
 }
 
 function _syncMarkerTransform(){
@@ -1447,27 +1461,62 @@ function _syncMarkerTransform(){
   if(svg) svg.style.transform=`rotate(${rot}deg)`;
 }
 
-function _stepMarker(ts){
-  const t=_easeIO(Math.min((ts-_mStart)/_mDur,1));
-  const lat=_mFrom.lat+(_mTo.lat-_mFrom.lat)*t;
-  const lng=_mFrom.lng+(_mTo.lng-_mFrom.lng)*t;
-  _mCurHdg=_mHdgFrom+_arc(_mHdgFrom,_mHdgTo)*t;
-  if(userMarker){
-    userMarker.setLngLat([lng,lat]);
-    _syncMarkerTransform();
-    window.Car3D?.setPos(lng,lat,_mCurHdg);
+function _motionFrame(ts){
+  if(!userMarker||!_mv||!_mt){ _mRaf=null; return; }
+  const now=performance.now();
+  const dt=Math.min(Math.max((ts-_mLastFrame)/1000,0.001),0.1); // clamp long tab-away gaps
+  _mLastFrame=ts;
+  const age=(now-_mt.ts)/1000; // seconds since last GPS fix
+
+  // Staleness: hold speed for 2.5 s, then glide to a stop by ~5 s (no runaway on dropout)
+  const stale=age<=2.5?1:Math.max(0,1-(age-2.5)/2.5);
+  const tgtSpd=_mt.spd*stale;
+
+  // Ease rendered speed + heading toward target (exponential smoothing)
+  _mv.spd+=(tgtSpd-_mv.spd)*(1-Math.exp(-dt/0.6));
+  _mv.hdg+=_arc(_mv.hdg,_mt.hdg)*(1-Math.exp(-dt/0.35));
+
+  // Predicted "true" position = last fix projected forward along its heading
+  // by speed × age. This IS the dead reckoning: as the fix ages during a GPS
+  // gap, the target keeps advancing, so the car keeps flowing forward.
+  const projDist=Math.min(age,3)*tgtSpd;
+  let ptLat=_mt.lat, ptLng=_mt.lng;
+  if(projDist>0.2){ const p=aheadPoint(_mt.lat,_mt.lng,_mt.hdg,projDist); ptLat=p[0]; ptLng=p[1]; }
+
+  // Critically-damped convergence toward the (moving) predicted target.
+  const kPos=1-Math.exp(-dt/0.32);
+  let nLat=_mv.lat+(ptLat-_mv.lat)*kPos;
+  let nLng=_mv.lng+(ptLng-_mv.lng)*kPos;
+  // While moving, never let a correction push the car BACKWARD along its heading
+  // (that reads as stutter). Keep the lateral component (road-snapping), drop the
+  // reverse along-track component so motion always flows forward.
+  if(_mv.spd>2){
+    const hr=_mv.hdg*Math.PI/180, cosL=Math.cos(_mv.lat*Math.PI/180);
+    let dLat=nLat-_mv.lat, dLng=(nLng-_mv.lng)*cosL;
+    const fLat=Math.cos(hr), fLng=Math.sin(hr);          // forward unit vector
+    const along=dLat*fLat+dLng*fLng;
+    if(along<0){ dLat-=along*fLat; dLng-=along*fLng; nLat=_mv.lat+dLat; nLng=_mv.lng+dLng/cosL; }
   }
+  _mv.lat=nLat; _mv.lng=nLng;
+
+  _mCurHdg=_mv.hdg; _mLastSpeedMs=_mv.spd;
+  userMarker.setLngLat([_mv.lng,_mv.lat]);
+  _syncMarkerTransform();
+  window.Car3D?.setPos(_mv.lng,_mv.lat,_mv.hdg);
+
   // Drive the map camera at 60fps — car sits in lower third via top padding
   const _NAV_PAD={top:Math.round(window.innerHeight*0.30),bottom:0,left:0,right:0};
   if(navState==='navigating' && !userPanning){
     if(perspective3D){
-      const navZ=targetNavZoom(_mLastSpeedMs);
-      map.jumpTo({center:[lng,lat],bearing:_mCurHdg,pitch:65,zoom:navZ,padding:_NAV_PAD});
+      map.jumpTo({center:[_mv.lng,_mv.lat],bearing:_mv.hdg,pitch:65,zoom:targetNavZoom(_mLastSpeedMs),padding:_NAV_PAD});
     } else {
-      map.jumpTo({center:[lng,lat],bearing:headingUpMode?_mCurHdg:map.getBearing(),pitch:0,zoom:targetNavZoom(_mLastSpeedMs),padding:_NAV_PAD});
+      map.jumpTo({center:[_mv.lng,_mv.lat],bearing:headingUpMode?_mv.hdg:map.getBearing(),pitch:0,zoom:targetNavZoom(_mLastSpeedMs),padding:_NAV_PAD});
     }
   }
-  _mRaf=t<1?requestAnimationFrame(_stepMarker):null;
+  // Pause the loop once the car is parked + settled — it restarts on the next
+  // fix (_setMotionTarget). Avoids spinning at 60fps at red lights / when idle.
+  const settled=_mv.spd<0.5 && Math.hypot(ptLat-_mv.lat,ptLng-_mv.lng)*111000<1;
+  _mRaf = settled ? null : requestAnimationFrame(_motionFrame);
 }
 
 // Keep SVG rotation in sync when map rotates (bearing-up panning)
@@ -2198,6 +2247,7 @@ function endNav(){
 
   releaseWakeLock();
   if(_mRaf){cancelAnimationFrame(_mRaf);_mRaf=null;}
+  _mv=null; _mt=null;
   clearRoute();
   if(userMarker){userMarker.remove();userMarker=null;}
   window.Car3D?.hide();
@@ -2743,18 +2793,12 @@ function onGPS(pos){
 
   if(!userMarker){
     userMarker=makeUserMarker(dispLat,dispLng,dispHdg).addTo(map);
-    _mCurHdg=dispHdg; _mHdgTo=dispHdg;
-    _mFrom={lat:dispLat,lng:dispLng}; _mTo={lat:dispLat,lng:dispLng};
-  } else {
-    const gpsInterval=prevPos?Math.min(Math.max(pos.timestamp-prevPos.ts,400),2000):800;
-    const cur=userMarker.getLngLat();
-    const jumpDist=haversine(cur.lat,cur.lng,dispLat,dispLng);
-    // For large GPS jumps slow down the catch-up to avoid a teleport snap;
-    // extend normal interval by 25% so adjacent animations always overlap.
-    const animMs = jumpDist>80 ? gpsInterval*2.5 : gpsInterval*1.25;
-    animateMarkerTo(dispLat,dispLng,dispHdg,animMs);
+    _mCurHdg=dispHdg;
+    _mv={lat:dispLat,lng:dispLng,hdg:dispHdg,spd:speedMs};
   }
-  // Camera follow is driven by _stepMarker at 60fps — no easeTo here during nav
+  // Feed the fix to the continuous motion controller (dead-reckoning + damping).
+  _setMotionTarget(dispLat,dispLng,dispHdg,speedMs);
+  // Motion + 60fps camera follow run continuously in _motionFrame
 
   if(navState==='navigating'){
     currentSpeedEl.innerHTML=fmtSpeed(speedMs);
