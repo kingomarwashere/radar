@@ -2468,12 +2468,16 @@ const CARS=[
   {id:'firetruck',       name:'Fire Truck',    emoji:'🚒', model:'firetruck.glb',        fn:_d3Marker, d3:true},
   {id:'garbage-truck',   name:'Garbage Truck', emoji:'🗑️', model:'garbage-truck.glb',   fn:_d3Marker, d3:true},
   {id:'tractor',         name:'Tractor',       emoji:'🚜', model:'tractor.glb',          fn:_d3Marker, d3:true},
-  // ── Easter eggs (emoji sprites) ──────────────────────────────────────────
-  {id:'luigi',     name:'Luigi',     emoji:'🟢', fn:makeLuigiIcon},
-  {id:'mario',     name:'Mario',     emoji:'🔴', fn:makeMarioIcon},
-  {id:'pikachu',   name:'Pikachu',   emoji:'⚡', fn:makePikachuIcon},
-  {id:'bowser',    name:'Bowser',    emoji:'🐢', fn:makeBowserIcon},
-  {id:'peach',     name:'Peach',     emoji:'👸', fn:makePeachIcon},
+  // ── Planes (fly above the map) ───────────────────────────────────────────
+  {id:'plane-prop',      name:'Prop Plane',    emoji:'🛩️', model:'plane-prop.glb',       fn:_d3Marker, d3:true},
+  {id:'plane-liner',     name:'Airliner',      emoji:'✈️', model:'plane-liner.glb',      fn:_d3Marker, d3:true},
+  {id:'plane-paper',     name:'Paper Plane',   emoji:'📄', model:'plane-paper.glb',      fn:_d3Marker, d3:true},
+  // ── Karts (tinted 3D karts — tint set per model in car3d.js) ─────────────
+  {id:'mario',     name:'Mario',     emoji:'🔴', model:'kart-oodi.glb', fn:_d3Marker, d3:true},
+  {id:'luigi',     name:'Luigi',     emoji:'🟢', model:'kart-oobi.glb', fn:_d3Marker, d3:true},
+  {id:'peach',     name:'Peach',     emoji:'👸', model:'kart-oopi.glb', fn:_d3Marker, d3:true},
+  {id:'bowser',    name:'Bowser',    emoji:'🐢', model:'kart-oozi.glb', fn:_d3Marker, d3:true},
+  {id:'pikachu',   name:'Pikachu',   emoji:'⚡', model:'kart-ooli.glb', fn:_d3Marker, d3:true},
 ];
 // Migrate legacy selections (old PNG ids) → default 3D car
 let selectedCar=localStorage.getItem('selectedCar')??(CARS[0].id);

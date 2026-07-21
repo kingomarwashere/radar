@@ -8,6 +8,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const MODEL_DIR = '/cars3d/';
 
@@ -18,6 +19,26 @@ const TUNE = {
   sign: 1,            // heading rotation direction
 };
 
+// Normalized footprint (map units) for models that need auto-scaling.
+const CANON = 2.6;
+
+// Per-model config: tint (recolour body), normalize (auto scale/centre off-scale
+// models like planes), sizeMul (relative size), lift (hover altitude, metres),
+// yaw (orientation offset, degrees).
+const MODEL_CFG = {
+  // Character karts — same Kenney units as cars, just tinted bodies
+  'kart-oodi.glb': { tint: '#ef4444' }, // Mario  — red
+  'kart-oobi.glb': { tint: '#22c55e' }, // Luigi  — green
+  'kart-oopi.glb': { tint: '#ec4899' }, // Peach  — pink
+  'kart-oozi.glb': { tint: '#f97316' }, // Bowser — orange
+  'kart-ooli.glb': { tint: '#facc15' }, // Pikachu— yellow
+  // Planes — wildly different source scales, so normalize; they hover
+  'plane-prop.glb':  { normalize: true, sizeMul: 2.6, lift: 45, yaw: 0 },
+  'plane-liner.glb': { normalize: true, sizeMul: 3.0, lift: 55, yaw: 0 },
+  'plane-paper.glb': { normalize: true, sizeMul: 1.7, lift: 30, yaw: 180 },
+};
+const cfgOf = (f) => MODEL_CFG[f] || {};
+
 // ── Shared GLTF loader + model cache ────────────────────────────────────────
 const loader = new GLTFLoader();
 const modelCache = new Map(); // file -> Promise<THREE.Group>
@@ -26,23 +47,62 @@ function loadModel(file) {
   if (!modelCache.has(file)) {
     modelCache.set(file, new Promise((resolve, reject) => {
       loader.load(MODEL_DIR + file, (gltf) => {
-        const root = gltf.scene;
-        root.traverse((o) => {
-          if (o.isMesh) {
-            o.castShadow = false;
-            o.receiveShadow = false;
-            if (o.material) {
-              o.material.metalness = 0.1;
-              o.material.roughness = 0.6;
-            }
+        const cfg = cfgOf(file);
+        let out = gltf.scene;
+
+        // Auto-normalize off-scale models (planes come in from ~2 to ~1600 units):
+        // scale the longest horizontal dimension to a canonical footprint, centre
+        // it on x/z and sit it on the ground.
+        if (cfg.normalize) {
+          const box = new THREE.Box3().setFromObject(out);
+          const size = box.getSize(new THREE.Vector3());
+          const ctr = box.getCenter(new THREE.Vector3());
+          const horiz = Math.max(size.x, size.z) || 1;
+          const s = (CANON * (cfg.sizeMul || 1)) / horiz;
+          out.position.set(-ctr.x, -box.min.y, -ctr.z);
+          const g = new THREE.Group();
+          g.add(out);
+          g.scale.setScalar(s);
+          out = g;
+        }
+        // Per-model orientation offset
+        if (cfg.yaw) {
+          const g = new THREE.Group();
+          g.add(out);
+          g.rotation.y = cfg.yaw * Math.PI / 180;
+          out = g;
+        }
+
+        out.traverse((o) => {
+          if (!o.isMesh || !o.material) return;
+          o.castShadow = false; o.receiveShadow = false;
+          const m = o.material;
+          // Glossier, reflective paint (env map supplies the reflections)
+          if ('metalness' in m) m.metalness = Math.max(m.metalness ?? 0, 0.35);
+          if ('roughness' in m) m.roughness = Math.min(m.roughness ?? 1, 0.45);
+          m.envMapIntensity = 1.25;
+          // Tint the body (not wheels) for character karts
+          if (cfg.tint && !/wheel/i.test(o.name || '')) {
+            o.material = m.clone();
+            o.material.color = new THREE.Color(cfg.tint);
           }
         });
-        resolve(root);
+        resolve(out);
       }, undefined, reject);
     }));
   }
   // Return a fresh clone each time so map + showroom don't share a node
   return modelCache.get(file).then((root) => root.clone(true));
+}
+
+// PMREM environment → soft reflections that make the paint read as real.
+let _envTex = null;
+function ensureEnv(renderer, scene) {
+  if (!_envTex) {
+    try { _envTex = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture; }
+    catch (e) { return; }
+  }
+  scene.environment = _envTex;
 }
 
 function addLights(scene) {
@@ -62,7 +122,7 @@ function addLights(scene) {
 const MERC = () => window.maplibregl.MercatorCoordinate;
 
 const player = {
-  lng: 151.2093, lat: -33.8688, headingDeg: 0,
+  lng: 151.2093, lat: -33.8688, headingDeg: 0, lift: 0,
   visible: false, modelFile: 'sedan-sports.glb',
   pivot: null, scene: null, camera: null, renderer: null, map: null,
   loadingToken: 0,
@@ -86,12 +146,13 @@ function makeCustomLayer(map) {
         antialias: true,
       });
       player.renderer.autoClear = false;
+      ensureEnv(player.renderer, player.scene);
       swapModel(player.modelFile);
     },
     render(_gl, matrix) {
       if (!player.visible || !player.pivot) { return; }
       const Merc = MERC();
-      const merc = Merc.fromLngLat([player.lng, player.lat], 0);
+      const merc = Merc.fromLngLat([player.lng, player.lat], player.lift || 0);
       const s = merc.meterInMercatorCoordinateUnits() * TUNE.scaleMeters;
       const headingRad = (TUNE.sign * player.headingDeg + TUNE.baseDeg) * Math.PI / 180;
       const l = new THREE.Matrix4()
@@ -108,6 +169,7 @@ function makeCustomLayer(map) {
 }
 
 function swapModel(file) {
+  player.lift = cfgOf(file).lift || 0;
   if (!player.pivot) { player.modelFile = file; return; }
   const token = ++player.loadingToken;
   loadModel(file).then((model) => {
@@ -130,7 +192,8 @@ function mountShowroom(canvas) {
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   const scene = new THREE.Scene();
   addLights(scene);
-  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+  ensureEnv(renderer, scene);
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 200);
   camera.position.set(3.4, 2.4, 4.2);
   camera.lookAt(0, 0.4, 0);
 
@@ -154,6 +217,16 @@ function mountShowroom(canvas) {
     loadModel(file).then((m) => {
       if (t !== token) return;
       pivot.add(m);
+      // Auto-frame: fit the camera to whatever model this is (cars vs big planes).
+      const box = new THREE.Box3().setFromObject(m);
+      const size = box.getSize(new THREE.Vector3());
+      const ctr = box.getCenter(new THREE.Vector3());
+      m.position.x -= ctr.x; m.position.z -= ctr.z; // centre horizontally
+      const r = Math.max(size.x, size.y, size.z) || 2.5;
+      const d = r * 1.9;
+      camera.position.set(d * 0.62, d * 0.42, d * 0.85);
+      camera.lookAt(0, size.y * 0.35, 0);
+      camera.updateProjectionMatrix();
     });
   }
 
