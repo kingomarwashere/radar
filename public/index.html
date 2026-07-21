@@ -305,8 +305,10 @@
       </div>
     </div>
 
-    <button id="open-leaderboard-btn" style="width:100%;margin-top:16px;padding:14px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.4);border-radius:12px;color:#fbbf24;font-weight:800;font-size:.95rem;cursor:pointer;font-family:inherit">🏆 Most Wanted Leaderboard</button>
-    <button id="open-cw-gallery-btn" style="width:100%;margin-top:10px;padding:14px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.4);border-radius:12px;color:#60a5fa;font-weight:800;font-size:.95rem;cursor:pointer;font-family:inherit">🎬 Cop Watch Feed</button>
+    <button id="open-daily-btn" style="position:relative;width:100%;margin-top:16px;padding:14px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.4);border-radius:12px;color:#4ade80;font-weight:800;font-size:.95rem;cursor:pointer;font-family:inherit">🎯 Daily Challenges <span id="daily-streak-chip" class="hidden"></span><span id="daily-badge" class="daily-badge">0/3</span></button>
+    <button id="open-replays-btn" style="width:100%;margin-top:10px;padding:14px;background:rgba(236,72,153,.12);border:1px solid rgba(236,72,153,.4);border-radius:12px;color:#f472b6;font-weight:800;font-size:.95rem;cursor:pointer;font-family:inherit">🎬 My Replays</button>
+    <button id="open-leaderboard-btn" style="width:100%;margin-top:10px;padding:14px;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.4);border-radius:12px;color:#fbbf24;font-weight:800;font-size:.95rem;cursor:pointer;font-family:inherit">🏆 Most Wanted Leaderboard</button>
+    <button id="open-cw-gallery-btn" style="width:100%;margin-top:10px;padding:14px;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.4);border-radius:12px;color:#60a5fa;font-weight:800;font-size:.95rem;cursor:pointer;font-family:inherit">👮 Cop Watch Feed</button>
 
     <div class="settings-section-label" style="margin-top:18px">🏎️ Your ride</div>
     <div id="car-showroom"><canvas id="car-showroom-canvas"></canvas><span id="car-showroom-name"></span></div>
@@ -345,6 +347,12 @@
     <line x1="22" y1="4" x2="28" y2="4" stroke="#000" stroke-width="2.2" stroke-linecap="round"/>
     <line x1="25" y1="1" x2="25" y2="7" stroke="#000" stroke-width="2.2" stroke-linecap="round"/>
   </svg>
+</button>
+
+<!-- ── Record drive FAB (records the map + your car) ─────────── -->
+<button id="rec-fab" title="Record your drive">
+  <span id="rec-dot"></span>
+  <span id="rec-time">0:00</span>
 </button>
 
 <!-- ── Cop Watch FAB ──────────────────────────────────────── -->
@@ -556,6 +564,30 @@
   </div>
 </div>
 
+<!-- ── Daily Challenges modal ─────────────────────────────── -->
+<div id="daily-modal" class="game-modal hidden">
+  <div class="game-card">
+    <div class="game-card-head"><span>🎯 Daily Challenges</span><button id="daily-close" class="game-close">✕</button></div>
+    <div id="daily-body"></div>
+  </div>
+</div>
+
+<!-- ── Replays modal ──────────────────────────────────────── -->
+<div id="replays-modal" class="game-modal hidden">
+  <div class="game-card">
+    <div class="game-card-head"><span>🎬 My Replays</span><button id="replays-close" class="game-close">✕</button></div>
+    <div id="replays-list"></div>
+  </div>
+</div>
+
+<!-- ── Video player modal ─────────────────────────────────── -->
+<div id="video-modal" class="game-modal hidden">
+  <div class="video-wrap">
+    <button id="video-close" class="game-close">✕</button>
+    <video id="video-player" controls playsinline loop></video>
+  </div>
+</div>
+
 <!-- Pigs banner -->
 <div id="pigs-banner" style="display:none"></div>
 
@@ -567,6 +599,7 @@
 }}
 </script>
 <script src="/app.js"></script>
+<script src="/game.js"></script>
 <script type="module" src="/car3d.js"></script>
 <script>
 // ── Traffic Camera Layer ─────────────────────────────────────────────

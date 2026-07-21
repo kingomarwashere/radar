@@ -175,6 +175,7 @@ const map = new maplibregl.Map({
   zoom:   _savedPos ? 14 : 13,
   bearing:0, pitch:0,
   attributionControl:false, maxPitch:85,
+  preserveDrawingBuffer:true, // needed for in-app recording (captureStream) + thumbnails
 });
 map.addControl(new maplibregl.NavigationControl({showCompass:false}), 'bottom-left');
 // Expose map to the 3D car module (car3d.js, loaded as a deferred ES module)
@@ -1071,6 +1072,7 @@ $$('rpt-submit').addEventListener('click', async()=>{
       body:JSON.stringify({lat:pendingLat,lng:pendingLng,type:apiType,description:desc})});
     if(res.ok){
       closeReportSheet();
+      window.Game?.onReport(); // daily "report N hazards"
       map.easeTo({center:[pendingLng,pendingLat],zoom:Math.max(map.getZoom(),14)});
       loadReports();
       showToast(`${cat.emoji} ${desc} reported!`);
@@ -2179,6 +2181,7 @@ function endNav(){
   if(watchId!=null){navigator.geolocation.clearWatch(watchId);watchId=null;}
   [navInst,navFooter,alertBar,arrivalOverlay,$$('nav-search-sheet'),$$('nav-routes-sheet')].forEach(el=>el?.classList.add('hidden'));
   updateRouteWarn(null);
+  window.Game?.onDriveEnd(gta.score); // daily "drives"/"bestScore" + auto-stop recording
   gtaEndNav();
   accelReset();
   topbar.classList.remove('hidden');
@@ -2520,6 +2523,7 @@ function setGtaStars(newStars, prevStars){
     for(let i=prevStars+1;i<=newStars;i++) setTimeout(()=>flashStar(i),(i-prevStars-1)*120);
     showWantedBanner(newStars);
     gta.highStars=Math.max(gta.highStars,newStars);
+    window.Game?.onStars(newStars); // daily "reach N wanted stars"
   } else if(newStars===0 && prevStars>=3){
     // Evaded!
     showEvaded();
@@ -2559,6 +2563,7 @@ function showBusted(){
 function showEvaded(){
   const ov=$$('gta-evaded-overlay'); if(!ov) return;
   ov.classList.remove('hidden');
+  window.Game?.onEvade(); // daily "evade the cops"
   speak('Evaded!');
   const bonus=gta.highStars*500;
   gta.score+=bonus;
@@ -2718,6 +2723,7 @@ function onGPS(pos){
 
   _mLastSpeedMs=speedMs; // expose speed to rAF camera loop
   accelTick(speedMs);
+  window.Game?.onSpeed(speedMs*3.6); // daily top-speed + recording stat
 
   // Snap car to the nearest point on the route polyline when within 40 m.
   // Eliminates GPS drift that places the car icon off the road.
@@ -3704,7 +3710,9 @@ const _origPrevPos_hook=()=>{
 function trackNavDistance(){
   if(navState!=='navigating') return;
   if(_prevNavPos&&prevPos){
-    _navDistance+=haversine(prevPos.lat,prevPos.lng,_prevNavPos.lat,_prevNavPos.lng);
+    const seg=haversine(prevPos.lat,prevPos.lng,_prevNavPos.lat,_prevNavPos.lng);
+    _navDistance+=seg;
+    if(seg>0&&seg<2000) window.Game?.onDistance(seg/1000); // daily distance + recording stat
   }
   _prevNavPos=prevPos?{...prevPos}:null;
 }
