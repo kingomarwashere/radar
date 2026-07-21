@@ -2451,6 +2451,8 @@ function makePeachIcon(gpsHdg=0){
 function _d3Marker(){ return {html:'<div class="user-arrow car3d-anchor" style="width:4px;height:4px;pointer-events:none"></div>', d3:true}; }
 
 const CARS=[
+  // ── Realistic (higher-detail model) ──────────────────────────────────────
+  {id:'ferrari',         name:'Ferrari',       emoji:'🏎️', model:'ferrari.glb',          fn:_d3Marker, d3:true},
   // ── 3D models (Kenney Car Kit) ───────────────────────────────────────────
   {id:'sedan-sports',    name:'Sports Sedan',  emoji:'🏎️', model:'sedan-sports.glb',    fn:_d3Marker, d3:true},
   {id:'race',            name:'Race Car',      emoji:'🏁', model:'race.glb',             fn:_d3Marker, d3:true},
@@ -2472,7 +2474,9 @@ const CARS=[
   {id:'plane-prop',      name:'Prop Plane',    emoji:'🛩️', model:'plane-prop.glb',       fn:_d3Marker, d3:true},
   {id:'plane-liner',     name:'Airliner',      emoji:'✈️', model:'plane-liner.glb',      fn:_d3Marker, d3:true},
   {id:'plane-paper',     name:'Paper Plane',   emoji:'📄', model:'plane-paper.glb',      fn:_d3Marker, d3:true},
-  // ── Karts (tinted 3D karts — tint set per model in car3d.js) ─────────────
+  // ── Novelty ──────────────────────────────────────────────────────────────
+  {id:'eggplant',        name:'Eggplant',      emoji:'🍆', model:'food/eggplant.glb',         fn:_d3Marker, d3:true},
+  // ── Karts (tinted 3D karts + character faces — set in car3d.js) ───────────
   {id:'mario',     name:'Mario',     emoji:'🔴', model:'kart-oodi.glb', fn:_d3Marker, d3:true},
   {id:'luigi',     name:'Luigi',     emoji:'🟢', model:'kart-oobi.glb', fn:_d3Marker, d3:true},
   {id:'peach',     name:'Peach',     emoji:'👸', model:'kart-oopi.glb', fn:_d3Marker, d3:true},
