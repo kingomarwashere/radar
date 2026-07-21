@@ -53,53 +53,70 @@ const modelCache = new Map(); // file -> Promise<THREE.Group>
 
 // ── Character faces — drawn as SVG → texture → sprite on the kart's head ─────
 function faceSVG(kind) {
-  const marioLike = (cap, capDark, letter) => `
-    <ellipse cx="30" cy="68" rx="8" ry="10" fill="#ffcc99"/><ellipse cx="90" cy="68" rx="8" ry="10" fill="#ffcc99"/>
-    <ellipse cx="60" cy="66" rx="30" ry="32" fill="#ffcc99"/>
-    <path d="M32 62 Q30 86 42 94 L46 74 Z" fill="#3a2412"/><path d="M88 62 Q90 86 78 94 L74 74 Z" fill="#3a2412"/>
-    <path d="M24 54 Q60 8 96 54 Q60 34 24 54 Z" fill="${cap}"/>
-    <path d="M22 54 Q60 42 98 54 Q100 63 88 64 Q60 52 32 64 Q20 63 22 54Z" fill="${capDark}"/>
-    <circle cx="60" cy="34" r="11" fill="#fff"/>
-    <text x="60" y="40" font-size="14" font-weight="900" text-anchor="middle" fill="${cap}" font-family="Arial">${letter}</text>
-    <ellipse cx="50" cy="62" rx="5" ry="8" fill="#fff"/><ellipse cx="70" cy="62" rx="5" ry="8" fill="#fff"/>
-    <circle cx="51" cy="64" r="3" fill="#2a3a6a"/><circle cx="69" cy="64" r="3" fill="#2a3a6a"/>
-    <circle cx="60" cy="75" r="8" fill="#ffb88a"/>
-    <path d="M40 81 Q50 91 60 85 Q70 91 80 81 Q74 93 60 91 Q46 93 40 81Z" fill="#3a2412"/>`;
+  // Each character is a "bust" (torso drawn first, then head) so the sprite
+  // reads as a whole driver sitting in the kart. viewBox 120 x 150.
+  const marioLike = (cap, capDark, letter) => {
+    const torso = `
+      <path d="M28 118 Q60 100 92 118 Q98 138 96 150 L24 150 Q22 138 28 118Z" fill="${cap}"/>
+      <path d="M40 116 L46 150" stroke="#2a49a0" stroke-width="8" stroke-linecap="round"/>
+      <path d="M80 116 L74 150" stroke="#2a49a0" stroke-width="8" stroke-linecap="round"/>
+      <path d="M40 128 Q60 122 80 128 L80 150 L40 150Z" fill="#2a49a0"/>
+      <circle cx="49" cy="128" r="3.4" fill="#f7d21a"/><circle cx="71" cy="128" r="3.4" fill="#f7d21a"/>
+      <path d="M42 116 Q60 128 78 116" stroke="${capDark}" stroke-width="3" fill="none"/>`;
+    const head = `
+      <ellipse cx="31" cy="70" rx="8" ry="10" fill="#ffcc99"/><ellipse cx="89" cy="70" rx="8" ry="10" fill="#ffcc99"/>
+      <ellipse cx="60" cy="68" rx="30" ry="32" fill="#ffcc99"/>
+      <path d="M32 64 Q30 88 42 96 L46 76 Z" fill="#3a2412"/><path d="M88 64 Q90 88 78 96 L74 76 Z" fill="#3a2412"/>
+      <path d="M24 56 Q60 12 96 56 Q60 38 24 56 Z" fill="${cap}"/>
+      <path d="M22 56 Q60 44 98 56 Q100 65 88 66 Q60 54 32 66 Q20 65 22 56Z" fill="${capDark}"/>
+      <circle cx="60" cy="37" r="11" fill="#fff"/>
+      <text x="60" y="43" font-size="14" font-weight="900" text-anchor="middle" fill="${cap}" font-family="Arial">${letter}</text>
+      <ellipse cx="50" cy="65" rx="5" ry="8" fill="#fff"/><ellipse cx="70" cy="65" rx="5" ry="8" fill="#fff"/>
+      <circle cx="51" cy="67" r="3" fill="#2a3a6a"/><circle cx="69" cy="67" r="3" fill="#2a3a6a"/>
+      <circle cx="60" cy="78" r="8" fill="#ffb88a"/>
+      <path d="M40 84 Q50 94 60 88 Q70 94 80 84 Q74 96 60 94 Q46 96 40 84Z" fill="#3a2412"/>`;
+    return torso + head;
+  };
   const inner = {
     mario: marioLike('#e11d1d', '#b81212', 'M'),
     luigi: marioLike('#25a025', '#1c7c1c', 'L'),
     peach: `
-      <path d="M28 50 Q28 100 46 104 Q40 70 60 66 Q80 70 74 104 Q92 100 92 50 Q60 20 28 50Z" fill="#f4d03f"/>
-      <ellipse cx="60" cy="66" rx="26" ry="30" fill="#ffe0c0"/>
-      <path d="M34 52 Q40 64 46 54 Q52 66 60 54 Q68 66 74 54 Q80 64 86 52 Q60 38 34 52Z" fill="#f6d64a"/>
-      <path d="M44 30 L48 40 L60 34 L72 40 L76 30 L72 22 L66 28 L60 20 L54 28 L48 22Z" fill="#ffd24a" stroke="#e0a500" stroke-width="1"/>
-      <circle cx="60" cy="30" r="2.6" fill="#e74c9b"/><circle cx="50" cy="30" r="2" fill="#4aa3e7"/><circle cx="70" cy="30" r="2" fill="#4aa3e7"/>
-      <ellipse cx="51" cy="64" rx="4.5" ry="7" fill="#fff"/><ellipse cx="69" cy="64" rx="4.5" ry="7" fill="#fff"/>
-      <circle cx="51" cy="66" r="3" fill="#2a6ad0"/><circle cx="69" cy="66" r="3" fill="#2a6ad0"/>
-      <circle cx="44" cy="74" r="4" fill="#ffb0c0" opacity=".7"/><circle cx="76" cy="74" r="4" fill="#ffb0c0" opacity=".7"/>
-      <path d="M54 82 Q60 87 66 82 Q60 84 54 82Z" fill="#e0507a"/>`,
+      <path d="M26 120 Q60 102 94 120 Q100 138 100 150 L20 150 Q20 138 26 120Z" fill="#f6a5c0"/>
+      <circle cx="60" cy="124" r="4.5" fill="#2a6ad0"/>
+      <path d="M28 52 Q28 104 46 108 Q40 74 60 70 Q80 74 74 108 Q92 104 92 52 Q60 22 28 52Z" fill="#f4d03f"/>
+      <ellipse cx="60" cy="68" rx="26" ry="30" fill="#ffe0c0"/>
+      <path d="M34 54 Q40 66 46 56 Q52 68 60 56 Q68 68 74 56 Q80 66 86 54 Q60 40 34 54Z" fill="#f6d64a"/>
+      <path d="M44 32 L48 42 L60 36 L72 42 L76 32 L72 24 L66 30 L60 22 L54 30 L48 24Z" fill="#ffd24a" stroke="#e0a500" stroke-width="1"/>
+      <circle cx="60" cy="32" r="2.6" fill="#e74c9b"/><circle cx="50" cy="32" r="2" fill="#4aa3e7"/><circle cx="70" cy="32" r="2" fill="#4aa3e7"/>
+      <ellipse cx="51" cy="66" rx="4.5" ry="7" fill="#fff"/><ellipse cx="69" cy="66" rx="4.5" ry="7" fill="#fff"/>
+      <circle cx="51" cy="68" r="3" fill="#2a6ad0"/><circle cx="69" cy="68" r="3" fill="#2a6ad0"/>
+      <circle cx="44" cy="76" r="4" fill="#ffb0c0" opacity=".7"/><circle cx="76" cy="76" r="4" fill="#ffb0c0" opacity=".7"/>
+      <path d="M54 84 Q60 89 66 84 Q60 86 54 84Z" fill="#e0507a"/>`,
     bowser: `
-      <path d="M60 24 Q26 30 24 66 Q20 96 44 100 Q30 70 60 66 Q90 70 76 100 Q100 96 96 66 Q94 30 60 24Z" fill="#e2622a"/>
-      <ellipse cx="60" cy="66" rx="30" ry="30" fill="#8bd24a"/>
-      <path d="M36 44 L28 28 L46 40Z" fill="#f2ead2"/><path d="M84 44 L92 28 L74 40Z" fill="#f2ead2"/>
-      <path d="M42 54 L56 60" stroke="#2a6a1a" stroke-width="4" stroke-linecap="round"/><path d="M78 54 L64 60" stroke="#2a6a1a" stroke-width="4" stroke-linecap="round"/>
-      <ellipse cx="50" cy="62" rx="4" ry="5" fill="#fff"/><ellipse cx="70" cy="62" rx="4" ry="5" fill="#fff"/>
-      <circle cx="51" cy="63" r="2.4" fill="#c0202a"/><circle cx="69" cy="63" r="2.4" fill="#c0202a"/>
-      <ellipse cx="60" cy="79" rx="16" ry="11" fill="#c8e88a"/>
-      <circle cx="54" cy="77" r="1.6" fill="#3a5a2a"/><circle cx="66" cy="77" r="1.6" fill="#3a5a2a"/>
-      <path d="M48 85 Q60 93 72 85" stroke="#2a4a1a" stroke-width="2" fill="none"/>
-      <path d="M52 85 L50 91 L56 85Z" fill="#fff"/><path d="M68 85 L70 91 L64 85Z" fill="#fff"/>`,
+      <path d="M28 120 Q60 104 92 120 L98 150 L22 150Z" fill="#3a9a3a"/>
+      <ellipse cx="60" cy="140" rx="22" ry="14" fill="#e2c24a"/>
+      <path d="M60 26 Q26 32 24 68 Q20 98 44 102 Q30 72 60 68 Q90 72 76 102 Q100 98 96 68 Q94 32 60 26Z" fill="#e2622a"/>
+      <ellipse cx="60" cy="68" rx="30" ry="30" fill="#8bd24a"/>
+      <path d="M36 46 L28 30 L46 42Z" fill="#f2ead2"/><path d="M84 46 L92 30 L74 42Z" fill="#f2ead2"/>
+      <path d="M42 56 L56 62" stroke="#2a6a1a" stroke-width="4" stroke-linecap="round"/><path d="M78 56 L64 62" stroke="#2a6a1a" stroke-width="4" stroke-linecap="round"/>
+      <ellipse cx="50" cy="64" rx="4" ry="5" fill="#fff"/><ellipse cx="70" cy="64" rx="4" ry="5" fill="#fff"/>
+      <circle cx="51" cy="65" r="2.4" fill="#c0202a"/><circle cx="69" cy="65" r="2.4" fill="#c0202a"/>
+      <ellipse cx="60" cy="81" rx="16" ry="11" fill="#c8e88a"/>
+      <circle cx="54" cy="79" r="1.6" fill="#3a5a2a"/><circle cx="66" cy="79" r="1.6" fill="#3a5a2a"/>
+      <path d="M48 87 Q60 95 72 87" stroke="#2a4a1a" stroke-width="2" fill="none"/>
+      <path d="M52 87 L50 93 L56 87Z" fill="#fff"/><path d="M68 87 L70 93 L64 87Z" fill="#fff"/>`,
     pikachu: `
-      <path d="M40 44 L26 12 Q22 8 30 12 L48 40Z" fill="#f6c915"/><path d="M22 20 L26 12 L34 18Z" fill="#2a2a2a"/>
-      <path d="M80 44 L94 12 Q98 8 90 12 L72 40Z" fill="#f6c915"/><path d="M98 20 L94 12 L86 18Z" fill="#2a2a2a"/>
-      <ellipse cx="60" cy="70" rx="32" ry="28" fill="#f6c915"/>
-      <circle cx="40" cy="76" r="8" fill="#e2402a"/><circle cx="80" cy="76" r="8" fill="#e2402a"/>
-      <circle cx="50" cy="66" r="6" fill="#2a2a2a"/><circle cx="70" cy="66" r="6" fill="#2a2a2a"/>
-      <circle cx="52" cy="64" r="2" fill="#fff"/><circle cx="72" cy="64" r="2" fill="#fff"/>
-      <circle cx="60" cy="72" r="1.8" fill="#2a2a2a"/>
-      <path d="M54 78 Q60 84 66 78" stroke="#2a2a2a" stroke-width="2" fill="none"/>`,
+      <path d="M32 122 Q60 108 88 122 L90 150 L30 150Z" fill="#f6c915"/>
+      <path d="M40 46 L26 14 Q22 10 30 14 L48 42Z" fill="#f6c915"/><path d="M22 22 L26 14 L34 20Z" fill="#2a2a2a"/>
+      <path d="M80 46 L94 14 Q98 10 90 14 L72 42Z" fill="#f6c915"/><path d="M98 22 L94 14 L86 20Z" fill="#2a2a2a"/>
+      <ellipse cx="60" cy="72" rx="32" ry="28" fill="#f6c915"/>
+      <circle cx="40" cy="78" r="8" fill="#e2402a"/><circle cx="80" cy="78" r="8" fill="#e2402a"/>
+      <circle cx="50" cy="68" r="6" fill="#2a2a2a"/><circle cx="70" cy="68" r="6" fill="#2a2a2a"/>
+      <circle cx="52" cy="66" r="2" fill="#fff"/><circle cx="72" cy="66" r="2" fill="#fff"/>
+      <circle cx="60" cy="74" r="1.8" fill="#2a2a2a"/>
+      <path d="M54 80 Q60 86 66 80" stroke="#2a2a2a" stroke-width="2" fill="none"/>`,
   }[kind] || '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">${inner}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150">${inner}</svg>`;
 }
 
 const _faceCache = new Map();
@@ -122,10 +139,10 @@ function faceTexture(kind) {
   return tex;
 }
 function addFaceSprite(group, kind) {
-  const mat = new THREE.SpriteMaterial({ map: faceTexture(kind), transparent: true, depthTest: false, depthWrite: false });
+  const mat = new THREE.SpriteMaterial({ map: faceTexture(kind), transparent: true, depthTest: true, depthWrite: false });
   const sp = new THREE.Sprite(mat);
-  sp.scale.set(0.75, 0.75, 1);
-  sp.position.set(0, 0.52, -0.05); // over the kart driver's head
+  sp.scale.set(0.86, 1.08, 1);        // bust aspect (120x150)
+  sp.position.set(0, 0.42, -0.04);    // seated in the kart, head up top
   sp.renderOrder = 999;
   group.add(sp);
 }
@@ -163,6 +180,8 @@ function loadModel(file) {
         out.traverse((o) => {
           if (!o.isMesh || !o.material) return;
           o.castShadow = false; o.receiveShadow = false;
+          // Hide the built-in Kenney driver (blank head) — the face sprite replaces it
+          if (cfg.face && /character/i.test(o.name || '')) { o.visible = false; return; }
           const m = o.material;
           // Glossier, reflective paint (env map supplies the reflections)
           if ('metalness' in m) m.metalness = Math.max(m.metalness ?? 0, 0.35);
