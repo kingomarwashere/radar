@@ -1819,3 +1819,82 @@ body.previewing #rec-fab { display: none; }
 .video-wrap { position: relative; width: min(92vw,520px); }
 #video-player { width: 100%; border-radius: 14px; background: #000; max-height: 80vh; display: block; }
 #video-modal .game-close { position: absolute; top: -42px; right: 0; }
+
+/* ═══════════════════════════════════════════════
+   RACE MODE
+═══════════════════════════════════════════════ */
+#race-route-btn {
+  background: linear-gradient(135deg,#ff0099,#7c2d92); border: none; color: #fff;
+  font-weight: 800; border-radius: 12px; padding: 0 14px; cursor: pointer;
+  font-family: inherit; font-size: .9rem;
+}
+#race-route-btn:active { transform: scale(.95); }
+
+.race-modal {
+  position: absolute; inset: 0; z-index: 4200; background: rgba(0,0,0,.78);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+}
+.race-modal.hidden { display: none; }
+.race-card {
+  background: #111827; border: 1px solid rgba(255,0,153,.35); border-radius: 20px;
+  padding: 22px; width: min(360px,92vw); box-shadow: 0 8px 48px rgba(0,0,0,.8), 0 0 60px rgba(255,0,153,.12);
+}
+.race-card-head { display: flex; align-items: center; justify-content: space-between; font-size: 1.2rem; font-weight: 900; color: #fff; }
+.race-x { background: rgba(255,255,255,.08); border: none; color: #fff; width: 32px; height: 32px; border-radius: 10px; cursor: pointer; }
+.race-sub { color: #9ca3af; font-size: .84rem; margin: 8px 0 14px; }
+.race-code {
+  text-align: center; font-size: 2.6rem; font-weight: 900; letter-spacing: .35em;
+  color: #ff0099; background: rgba(255,0,153,.08); border: 1px dashed rgba(255,0,153,.4);
+  border-radius: 14px; padding: 12px 0; margin-bottom: 14px; text-indent: .35em;
+}
+.race-btns { display: flex; gap: 10px; }
+.race-btn {
+  flex: 1; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14);
+  color: #fff; font-weight: 800; border-radius: 12px; padding: 12px; cursor: pointer; font-family: inherit; font-size: .9rem;
+}
+.race-btn-pink { background: linear-gradient(135deg,#ff0099,#7c2d92); border: none; }
+.race-btn:active { transform: scale(.96); }
+.race-players { margin: 14px 0 6px; min-height: 24px; }
+.race-player { color: #fff; font-weight: 700; font-size: .9rem; padding: 4px 0; }
+.race-host { color: #fbbf24; font-size: .7rem; font-weight: 800; }
+.race-wait { color: #9ca3af; font-size: .85rem; font-style: italic; }
+.race-hint { color: #6b7280; font-size: .75rem; margin-top: 6px; text-align: center; }
+
+/* VS bar during nav */
+#race-vs {
+  position: fixed; left: 10px; right: 10px; top: calc(env(safe-area-inset-top) + 118px);
+  z-index: 1400; background: rgba(10,12,20,.88); border: 1px solid rgba(255,0,153,.35);
+  border-radius: 14px; padding: 8px 12px; backdrop-filter: blur(10px);
+}
+#race-vs.hidden { display: none; }
+.race-vs-title { color: #ff5bbf; font-weight: 900; font-size: .78rem; margin-bottom: 6px; }
+.race-vs-row { display: flex; align-items: center; gap: 8px; margin: 4px 0; opacity: .85; }
+.race-vs-row.leader { opacity: 1; }
+.race-vs-lbl { width: 62px; font-size: .74rem; font-weight: 800; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.race-vs-row.leader .race-vs-lbl::after { content: ' 👑'; }
+.race-vs-bar { flex: 1; height: 8px; background: rgba(255,255,255,.1); border-radius: 6px; overflow: hidden; }
+.race-vs-bar span { display: block; height: 100%; width: 0; border-radius: 6px; background: linear-gradient(90deg,#22c55e,#4ade80); transition: width .4s ease; }
+.race-vs-row[data-who="opp"] .race-vs-bar span { background: linear-gradient(90deg,#f43f5e,#fb7185); }
+.race-vs-d { width: 52px; text-align: right; font-size: .74rem; font-weight: 800; color: #e5e7eb; }
+
+/* Opponent marker */
+.race-opp-marker { display: flex; flex-direction: column; align-items: center; }
+.race-opp-dot { font-size: 1.4rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,.6)); }
+.race-opp-name { background: rgba(244,63,94,.9); color: #fff; font-size: .62rem; font-weight: 800; padding: 1px 6px; border-radius: 8px; margin-top: -2px; white-space: nowrap; }
+
+/* Result */
+.race-result-card { text-align: center; }
+.race-result-emoji { font-size: 3.4rem; }
+.race-result-title { font-size: 2rem; font-weight: 900; margin: 4px 0; letter-spacing: .02em; }
+.race-result-title.win { color: #4ade80; }
+.race-result-title.lose { color: #f43f5e; }
+.race-result-line { color: #e5e7eb; font-size: .95rem; font-weight: 700; }
+
+#race-toast {
+  position: fixed; left: 50%; bottom: calc(120px + env(safe-area-inset-bottom));
+  transform: translate(-50%,10px); z-index: 5000; background: rgba(17,24,39,.96);
+  border: 1px solid rgba(255,0,153,.4); border-radius: 12px; padding: 10px 16px;
+  color: #fff; font-weight: 700; font-size: .85rem; opacity: 0; pointer-events: none; transition: all .3s;
+}
+#race-toast.show { opacity: 1; transform: translate(-50%,0); }

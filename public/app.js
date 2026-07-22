@@ -1887,6 +1887,16 @@ function tryRoute(){
   calcRoute(from.lat,from.lng,toPlace.lat,toPlace.lng);
 }
 
+// ── Bridge for race.js (keeps race logic decoupled from app internals) ────────
+window.ghostRace = {
+  dest(){ return toPlace ? {lat:+toPlace.lat, lng:+toPlace.lng, name:toPlace.name||'Finish'} : null; },
+  pos(){ const g=userMarker?userMarker.getLngLat():(prevPos?{lat:prevPos.lat,lng:prevPos.lng}:null); return g?{lat:g.lat,lng:g.lng}:null; },
+  navState(){ return navState; },
+  car(){ return localStorage.getItem('selectedCar')||''; },
+  // Set a destination and show the route preview (used when joining a race)
+  routeTo(lat,lng,name){ toPlace={lat,lng,name:name||'Finish'}; if(typeof toInput!=='undefined'&&toInput){toInput.value=toPlace.name;toClear.classList.remove('hidden');} tryRoute(); },
+};
+
 /* ═══════════════════════════════════════════════
    ROUTING
 ═══════════════════════════════════════════════ */
@@ -1951,7 +1961,7 @@ function applySelectedRoute(){
   const lngs=routePoints.map(p=>p[1]),lats=routePoints.map(p=>p[0]);
   map.fitBounds([[Math.min(...lngs),Math.min(...lats)],[Math.max(...lngs),Math.max(...lats)]],{padding:80});
 
-  const td=routeData.summary.length, tt=routeData.summary.time;
+  const td=routeData.summary.length, tt=routeData.summary.time + trafficDelaySec(routePoints);
   previewDist.textContent=fmtDist(td*1000);
   previewTime.textContent=fmtTime(tt);
   if(previewETA) previewETA.textContent=`ETA ${fmtETA(tt)}`;
@@ -2273,8 +2283,11 @@ function startNav(){
   navFooter.classList.remove('hidden');
   navState='navigating';
   currentMidx=0; lastVoice=-1; offCount=0; alertedIds.clear();
-  remainingSec=routeData.summary.time;
-  _plannedArriveMs=Date.now()+routeData.summary.time*1000; // for arrival roast (original ETA)
+  // Lock in the ORIGINAL traffic-aware ETA at trip start — this is the baseline
+  // the arrival roast judges you against, and it never changes during the trip.
+  const _startTraffic=trafficDelaySec(routePoints);
+  remainingSec=routeData.summary.time+_startTraffic;
+  _plannedArriveMs=Date.now()+remainingSec*1000;
   arrivedFlag=false; headingUpMode=true;
 
   $$('compass-widget').classList.remove('hidden');
@@ -2934,6 +2947,7 @@ function onGPS(pos){
   // Detect traffic from own sustained low speed → feeds the red route overlay
   detectCongestion(lat,lng,speedMs*3.6,getSpeedLimit(lat,lng));
   updateCongestionGlow(lat,lng); // red/amber edge glow when inside a jam
+  window.Race?.tick(lat,lng);    // race: push my position + poll opponent
 
   const {idx,dist}=nearestOnRoute(routePoints,lat,lng);
   updateRouteStyling(idx);
@@ -2948,7 +2962,9 @@ function onGPS(pos){
   const nextM=maneuvers[currentMidx+1]??maneuvers[currentMidx];
   const nextPt=routePoints[nextM.begin_shape_index]??routePoints[routePoints.length-1];
   const distToTurn=haversine(lat,lng,nextPt[0],nextPt[1]);
-  remainingSec=Math.round(routeData.summary.time*(1-Math.min(idx/routePoints.length,1)));
+  // Base remaining time + traffic still ahead of us (shrinks as we clear jams)
+  remainingSec=Math.round(routeData.summary.time*(1-Math.min(idx/routePoints.length,1)))
+               + trafficDelaySec(routePoints.slice(idx));
 
   updateNavPanel(distToTurn);
   checkVoice(currentMidx,distToTurn);
@@ -2994,6 +3010,23 @@ function congestionSources(){
   liveCongestion=liveCongestion.filter(c=>now-c.ts<CONGESTION_TTL);
   const rep=lastReports.filter(r=>TRAFFIC_SEV[r.type]).map(r=>({lat:r.lat,lng:r.lng,sev:TRAFFIC_SEV[r.type]}));
   return rep.concat(liveCongestion);
+}
+
+// Extra seconds to add to a route's ETA for the traffic sitting on it.
+// Heavy jam ≈ crawl (8 km/h), slow ≈ 20 km/h, vs an assumed free-flow ~50 km/h.
+function trafficDelaySec(points){
+  const srcs=congestionSources();
+  if(!srcs.length || !points || points.length<2) return 0;
+  const THRESH=90, FREE=13.9, V_HEAVY=2.2, V_SLOW=5.5; // m/s
+  let heavyM=0, slowM=0;
+  for(let i=1;i<points.length;i++){
+    const seg=haversine(points[i-1][0],points[i-1][1],points[i][0],points[i][1]);
+    let sev=0;
+    for(const s of srcs){ if(haversine(points[i][0],points[i][1],s.lat,s.lng)<THRESH){ sev=Math.max(sev,s.sev==='heavy'?2:1); if(sev===2)break; } }
+    if(sev===2) heavyM+=seg; else if(sev===1) slowM+=seg;
+  }
+  const extra=heavyM*(1/V_HEAVY-1/FREE)+slowM*(1/V_SLOW-1/FREE);
+  return Math.max(0,Math.round(extra));
 }
 
 // Own-speed congestion detection: sustained crawl well below the limit = a jam.
@@ -3687,21 +3720,24 @@ async function renderNavRoutes(){
 }
 
 /* ── Arrival ──────────────────────────────────── */
-// Graded roast: late → "drive like a bitch", improving each minute up to ~20 min early
-function arrivalRoast(m){ // m = minutes early (negative = late)
-  if(m<=-8)  return ['🐌','You drive like a bitch.'];
-  if(m<=-4)  return ['💀','Slower than a funeral procession.'];
-  if(m<=-1.5)return ['🥱','Certified Sunday driver.'];
+// Graded roast — vs the ORIGINAL ETA locked in at trip start (never the updated
+// one). Negative m = arrived LATE. Punchy on both ends.
+function arrivalRoast(m){ // m = minutes early
+  if(m<=-12) return ['🚽','Dead last. Absolute little bitch.'];
+  if(m<=-7)  return ['🐌','You drive like a scared little bitch.'];
+  if(m<=-4)  return ['💀','Pathetic. My nan would’ve beaten you.'];
+  if(m<=-2)  return ['🥱','Late. Sunday-driver little bitch energy.'];
+  if(m<=-0.5)return ['😬','Cut it close, softie. Barely late.'];
   if(m< 1)   return ['🫡','Bang on time. Respectable.'];
-  if(m< 3)   return ['🐤','Early bird. Not bad.'];
-  if(m< 5)   return ['🏁','Quick hands on the wheel.'];
-  if(m< 8)   return ['😈','Certified speed demon.'];
-  if(m< 12)  return ['🚔','Absolute menace on the roads.'];
-  if(m< 16)  return ['👑','You ARE the traffic.'];
+  if(m< 3)   return ['🔥','Early. Not bad, hotshot.'];
+  if(m< 6)   return ['😈','Certified speed demon.'];
+  if(m< 10)  return ['🚔','Absolute menace. Cops want a word.'];
+  if(m< 15)  return ['👑','You ARE the traffic now.'];
   return ['🏆','LUDICROUS SPEED. GODLIKE.'];
 }
 function triggerArrival(){
   if(arrivedFlag)return; arrivedFlag=true;
+  window.Race?.onArrive(); // race: mark me finished (winner detection)
   speak('You have arrived at your destination.');
   dingChime(); setTimeout(dingChime,600); setTimeout(dingChime,1200);
   if(prefs.haptic&&navigator.vibrate)navigator.vibrate([300,100,300,100,300]);

@@ -102,6 +102,7 @@
     <div id="preview-actions">
       <button id="cancel-route-btn">Cancel</button>
       <button id="share-route-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:6px"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 14V3"/><path d="M8.5 6.5 12 3l3.5 3.5"/><path d="M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>Share</button>
+      <button id="race-route-btn" title="Race a friend to this destination">🏁 Race</button>
       <button id="start-nav-btn">Go now</button>
     </div>
   </div>
@@ -592,6 +593,7 @@
 <div id="pigs-banner" style="display:none"></div>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
@@ -600,6 +602,7 @@
 </script>
 <script src="/app.js"></script>
 <script src="/game.js"></script>
+<script src="/race.js"></script>
 <script type="module" src="/car3d.js"></script>
 <script>
 // ── Traffic Camera Layer ─────────────────────────────────────────────

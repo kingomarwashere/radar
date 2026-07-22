@@ -10,6 +10,7 @@ import copwatch from './routes/copwatch';
 import { scrapeAll } from './routes/waze';
 import auth from './routes/auth';
 import adminApi from './routes/admin-api';
+import race from './routes/race';
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -33,6 +34,7 @@ app.route('/api/leaderboard', leaderboard);
 app.route('/api/copwatch', copwatch);
 app.route('/api/auth', auth);
 app.route('/api/admin', adminApi);
+app.route('/api/race', race);
 
 app.get('/api/health', (c) => c.json({ ok: true, ts: Date.now() }));
 
@@ -189,6 +191,44 @@ app.get('/api/heatmap', async (c) => {
     thirtyDaysAgo
   ).all();
   return c.json(rows.results);
+});
+
+// ── Self-hosted Middle East vector tiles (Israel removed) ────────────────────
+// pmtiles.js fetches byte ranges out of a single .pmtiles archive on R2.
+// Reuses the existing PHOTOS bucket under the tiles/ prefix.
+app.get('/tiles/me.pmtiles', async (c) => {
+  const key = 'tiles/me.pmtiles';
+  const rangeHeader = c.req.header('range');
+
+  // Translate a `bytes=start-end` header into an R2Range.
+  let range: R2Range | undefined;
+  if (rangeHeader) {
+    const m = /^bytes=(\d*)-(\d*)$/.exec(rangeHeader.trim());
+    if (m) {
+      const [, s, e] = m;
+      if (s === '') range = { suffix: parseInt(e, 10) };
+      else if (e === '') range = { offset: parseInt(s, 10) };
+      else range = { offset: parseInt(s, 10), length: parseInt(e, 10) - parseInt(s, 10) + 1 };
+    }
+  }
+
+  const obj = await c.env.PHOTOS.get(key, range ? { range } : undefined);
+  if (!obj) return c.json({ error: 'not found' }, 404);
+
+  const headers = new Headers();
+  obj.writeHttpMetadata(headers);
+  headers.set('Content-Type', 'application/octet-stream');
+  headers.set('Accept-Ranges', 'bytes');
+  headers.set('Cache-Control', 'public, max-age=86400');
+  headers.set('Access-Control-Allow-Origin', '*');
+
+  if (range && obj.range) {
+    const off = 'offset' in obj.range && obj.range.offset != null ? obj.range.offset : 0;
+    const len = 'length' in obj.range && obj.range.length != null ? obj.range.length : obj.size - off;
+    headers.set('Content-Range', `bytes ${off}-${off + len - 1}/${obj.size}`);
+    return new Response(obj.body, { status: 206, headers });
+  }
+  return new Response(obj.body, { status: 200, headers });
 });
 
 // Serve static assets for everything else
