@@ -1518,6 +1518,7 @@ let _mCurHdg=0, _mLastSpeedMs=0, _mRaf=null;
 let _mv=null;   // rendered state {lat,lng,hdg,spd(m/s)}
 let _mt=null;   // latest GPS target {lat,lng,hdg,spd,ts}
 let _mLastFrame=0;
+const _POS_TAU=0.32; // position-filter time constant (s); also the feed-forward lead
 const _arc=(a,b)=>((b-a)%360+540)%360-180;
 
 // Called on every GPS fix. Updates the target; snaps only on an
@@ -1572,12 +1573,16 @@ function _motionFrame(ts){
   // Predicted "true" position = last fix projected forward along its heading
   // by speed × age. This IS the dead reckoning: as the fix ages during a GPS
   // gap, the target keeps advancing, so the car keeps flowing forward.
-  const projDist=Math.min(age,3)*tgtSpd;
+  // Plus a velocity feed-forward lead: an exponential filter chasing a moving
+  // target sits a steady τ·v behind it (τ=_POS_TAU below). Leading the target
+  // by that same distance cancels the lag so the car rides ON the road, not
+  // ~5 m behind it at speed. Lead fades to 0 as we stop, so no overshoot.
+  const projDist=Math.min(age,3)*tgtSpd + _POS_TAU*tgtSpd;
   let ptLat=_mt.lat, ptLng=_mt.lng;
   if(projDist>0.2){ const p=aheadPoint(_mt.lat,_mt.lng,_mt.hdg,projDist); ptLat=p[0]; ptLng=p[1]; }
 
   // Critically-damped convergence toward the (moving) predicted target.
-  const kPos=1-Math.exp(-dt/0.32);
+  const kPos=1-Math.exp(-dt/_POS_TAU);
   let nLat=_mv.lat+(ptLat-_mv.lat)*kPos;
   let nLng=_mv.lng+(ptLng-_mv.lng)*kPos;
   // While moving, never let a correction push the car BACKWARD along its heading
@@ -2838,7 +2843,7 @@ function makeUserMarker(lat,lng,gpsHdg=0){
 const ACCEL_RANGES = {'0-60':[0,60],'0-100':[0,100],'0-160':[0,160],'40-150':[40,150],'60-160':[60,160],'100-200':[100,200]};
 let _ax = {timing:false, t0:0, prevKmh:0, prevT:0, raf:null};
 function accelBest(range){ return parseFloat(localStorage.getItem('accelBest_'+range)||'')||null; }
-function accelReset(){ _ax.timing=false; _ax.prevKmh=0; _ax.prevT=0; _accelStopLive(); $$('accel-timer')?.classList.add('hidden'); }
+function accelReset(){ _ax.timing=false; _ax.prevKmh=0; _ax.prevT=0; _ax.doneUntil=0; _accelStopLive(); $$('accel-timer')?.classList.add('hidden'); }
 
 // Smooth live counter — GPS is only ~1 Hz, so tick the displayed time on rAF.
 function _accelStartLive(){
@@ -2863,6 +2868,11 @@ function accelTick(speedMs){
       _ax.t0=pt+f*(now-pt);
       _ax.timing=true;
       _accelStartLive();
+    } else if(kmh<hi && now>=(_ax.doneUntil||0)){
+      // Armed but not yet launched — show a live readout so you can SEE it's
+      // watching, instead of a silent pill that only appears after a full run.
+      // Suppressed briefly after a run so the result stays on screen.
+      renderAccelArmed(kmh);
     }
   } else {
     if(kmh>=hi){
@@ -2876,6 +2886,7 @@ function accelTick(speedMs){
       renderAccel('done',t,isBest);
       if(prefs.haptic&&navigator.vibrate) navigator.vibrate(isBest?[80,40,80,40,160]:[120]);
       _ax.prevKmh=kmh; _ax.prevT=now;
+      _ax.doneUntil=now+7000; // keep the result on screen; suppress armed readout
       clearTimeout(_ax._hide); _ax._hide=setTimeout(()=>{ if(!_ax.timing) $$('accel-timer')?.classList.add('hidden'); },7000);
       return;
     }
@@ -2904,6 +2915,18 @@ function ensureAccelWatch(){
   } else if(!want && accelWatchId!=null){
     navigator.geolocation.clearWatch(accelWatchId); accelWatchId=null; _accelPrev=null;
   }
+}
+// Idle "armed & watching" readout: current speed vs the target window, so you
+// can confirm the timer is live before you launch (no more silent waiting).
+function renderAccelArmed(kmh){
+  const el=$$('accel-timer'); if(!el) return;
+  const [lo,hi]=ACCEL_RANGES[prefs.accelRange]||[0,100];
+  const best=accelBest(prefs.accelRange);
+  el.classList.remove('hidden');
+  el.className='accel-timer accel-armed';
+  el.innerHTML=`<span class="accel-range">${prefs.accelRange} km/h</span>`+
+    `<span class="accel-time">${Math.round(kmh)}<small>km/h</small></span>`+
+    `<span class="accel-tag">${best?`BEST ${best.toFixed(2)}s`:'ready'}</span>`;
 }
 function renderAccel(state,t,isBest){
   const el=$$('accel-timer'); if(!el) return;
