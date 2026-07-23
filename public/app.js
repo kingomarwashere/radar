@@ -2629,6 +2629,13 @@ const CARS=[
   {id:'mini',       name:'Mini Cooper',    emoji:'🚗', model:'sk-mini.glb',        fn:_d3Marker, d3:true},
   {id:'vwbus',      name:'VW Kombi',       emoji:'🚐', model:'sk-vwbus.glb',       fn:_d3Marker, d3:true},
   {id:'jeep',       name:'Wrangler',       emoji:'🚙', model:'sk-jeep.glb',        fn:_d3Marker, d3:true},
+  {id:'countach',   name:'Countach',       emoji:'🏎️', model:'sk-countach.glb',    fn:_d3Marker, d3:true},
+  {id:'mclarenf1',  name:'F1 Car',         emoji:'🏎️', model:'sk-mclaren.glb',     fn:_d3Marker, d3:true},
+  {id:'charger',    name:'Charger (Cop)',  emoji:'🚓', model:'sk-charger.glb',     fn:_d3Marker, d3:true},
+  {id:'delorean',   name:'DeLorean',       emoji:'🚗', model:'sk-delorean.glb',    fn:_d3Marker, d3:true},
+  {id:'cybertruck', name:'Cybertruck',     emoji:'🛻', model:'sk-cybertruck.glb',  fn:_d3Marker, d3:true},
+  {id:'ae86',       name:'AE86 Trueno',    emoji:'🏎️', model:'sk-ae86.glb',        fn:_d3Marker, d3:true},
+  {id:'e30',        name:'BMW E30',        emoji:'🚗', model:'sk-e30.glb',         fn:_d3Marker, d3:true},
   // ── 3D models (Kenney Car Kit) ───────────────────────────────────────────
   {id:'sedan-sports',    name:'Sports Sedan',  emoji:'🏎️', model:'sedan-sports.glb',    fn:_d3Marker, d3:true},
   {id:'race',            name:'Race Car',      emoji:'🏁', model:'race.glb',             fn:_d3Marker, d3:true},
@@ -2656,6 +2663,8 @@ const CARS=[
   {id:'duck',            name:'Rubber Duck',   emoji:'🦆', model:'duck.glb',                   fn:_d3Marker, d3:true},
   {id:'toycar',          name:'Toy Car',       emoji:'🧸', model:'toycar.glb',                 fn:_d3Marker, d3:true},
   {id:'milktruck',       name:'Milk Truck',    emoji:'🥛', model:'milktruck.glb',              fn:_d3Marker, d3:true},
+  {id:'londonbus',       name:'London Bus',    emoji:'🚌', model:'sk-londonbus.glb',           fn:_d3Marker, d3:true},
+  {id:'monster',         name:'Monster Truck', emoji:'🛻', model:'sk-monster.glb',              fn:_d3Marker, d3:true},
   // ── Karts (tinted 3D karts + character faces — set in car3d.js) ───────────
   {id:'mario',     name:'Mario',     emoji:'🔴', model:'char-mario.glb', fn:_d3Marker, d3:true},
   {id:'luigi',     name:'Luigi',     emoji:'🟢', model:'char-luigi.glb', fn:_d3Marker, d3:true},

@@ -66,6 +66,16 @@ const MODEL_CFG = {
   'milktruck.glb':     { normalize: true, sizeMul: 1.2,  yaw: 90 },
   'duck.glb':          { normalize: true, sizeMul: 0.85, yaw: 180 },
   'food/avocado.glb':  { normalize: true, sizeMul: 1.1,  yaw: 0 },
+  // Fleet — batch 3 (Sketchfab, CC-BY) — yaw verified via tools/inspect-car
+  'sk-countach.glb':   { normalize: true, sizeMul: 1.05, yaw: 0 },
+  'sk-mclaren.glb':    { normalize: true, sizeMul: 1.15, yaw: 0 },
+  'sk-charger.glb':    { normalize: true, sizeMul: 1.1,  yaw: 90 },
+  'sk-delorean.glb':   { normalize: true, sizeMul: 1.05, yaw: 0 },
+  'sk-cybertruck.glb': { normalize: true, sizeMul: 1.15, yaw: 0 },
+  'sk-ae86.glb':       { normalize: true, sizeMul: 1.05, yaw: 90 },
+  'sk-londonbus.glb':  { normalize: true, sizeMul: 1.3,  yaw: 90 },
+  'sk-monster.glb':    { normalize: true, sizeMul: 1.2,  yaw: 90 },
+  'sk-e30.glb':        { normalize: true, sizeMul: 1.05, yaw: 90 },
 };
 const cfgOf = (f) => MODEL_CFG[f] || {};
 

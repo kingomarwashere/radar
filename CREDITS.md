@@ -45,6 +45,22 @@ they forbid commercial use.)
 
 All CC-BY — same attribution requirement as batch 1.
 
+#### Fleet — batch 3 (Sketchfab, CC-BY)
+
+| In-app name   | File               | Model                               | Author             |
+|---------------|--------------------|-------------------------------------|--------------------|
+| Countach      | sk-countach.glb    | [FREE] Cartoon Lamborghini Countach | Lambo_SC04         |
+| F1 Car        | sk-mclaren.glb     | F1 2021 McLaren MCL35M              | excalibur          |
+| Charger (Cop) | sk-charger.glb     | Dodge Charger Police NYPD           | David_Holiday      |
+| DeLorean      | sk-delorean.glb    | DMC12 - Low Poly                    | Islide             |
+| Cybertruck    | sk-cybertruck.glb  | Tesla Cybertruck                    | hashikemu          |
+| AE86 Trueno   | sk-ae86.glb        | Toyota Corolla AE86 Trueno          | Lexyc16            |
+| BMW E30       | sk-e30.glb         | [FREE] BMW M3 E30                   | TinoD2             |
+| London Bus    | sk-londonbus.glb   | London Bus double-decker (AEC)      | robinmikart        |
+| Monster Truck | sk-monster.glb     | drunk Monster Truck                 | aleksandr.yatsenco |
+
+All CC-BY — same attribution requirement as batch 1.
+
 ### Novelty — batch 2 (Khronos glTF Sample Assets)
 
 | In-app name | File             | Source model    | License note                               |
