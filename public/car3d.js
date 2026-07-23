@@ -15,7 +15,7 @@ const MODEL_DIR = '/cars3d/';
 
 // Tunable orientation/scale (adjust live via window.Car3D._tune if needed)
 const TUNE = {
-  scaleMeters: 4.5,   // apparent car length in metres on the map (smaller = tidier)
+  scaleMeters: 7.0,   // apparent car length in metres on the map (smaller = tidier)
   baseDeg: 180,       // model faces +Z; align "forward" with north-up
   sign: -1,           // heading rotation direction (−1 counters the mercator Y-flip)
   refZoom: 18.4,      // car keeps a steady screen size around this zoom
@@ -424,7 +424,10 @@ let _initDone = false;
 function init(map) {
   if (_initDone) return;
   _initDone = true;
-  const add = () => { if (!map.getLayer('player-car-3d')) map.addLayer(makeCustomLayer(map)); };
+  const add = () => {
+    if (!map.getLayer('player-car-3d')) map.addLayer(makeCustomLayer(map));
+    else try { map.moveLayer('player-car-3d'); } catch (_) {}
+  };
   if (map.isStyleLoaded()) add(); else map.once('load', add);
   // re-add layer after any style swap (basemap change removes custom layers)
   map.on('styledata', () => { try { add(); } catch (_) {} });

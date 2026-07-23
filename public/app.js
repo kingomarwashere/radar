@@ -360,6 +360,8 @@ function setupMapLayers(){
   ['route-main','route-traveled','route-alts'].forEach(id=>{
     try{ if(map.getLayer(id)) map.setLayoutProperty(id,'visibility','visible'); }catch(_){}
   });
+  // Keep the 3D car above all route lines — move it to top of the layer stack
+  try{ if(map.getLayer('player-car-3d')) map.moveLayer('player-car-3d'); }catch(_){}
 }
 
 // Hide non-navigation tile layers for a cleaner Waze-style map.
