@@ -1528,7 +1528,7 @@ const _arc=(a,b)=>((b-a)%360+540)%360-180;
 function _syncRouteLine(lat, lng) {
   if (!routePoints.length || navState !== 'navigating') return;
   const lo = _lastRouteIdx;
-  const hi = Math.min(routePoints.length - 1, lo + 12);
+  const hi = Math.min(routePoints.length - 1, lo + 30);
   let minD = Infinity, best = lo;
   for (let i = lo; i <= hi; i++) {
     const d = haversine(routePoints[i][0], routePoints[i][1], lat, lng);
@@ -3223,10 +3223,13 @@ function updateRouteGeoJSON(){
 function updateRouteStyling(idx){
   if(!routePoints.length) return;
   _lastRouteIdx=idx;
-  const rem = routePoints.slice(Math.max(0,idx));
-  map.getSource('route-main')?.setData({type:'Feature',geometry:{type:'LineString',coordinates:toGL(rem)}});
+  // Draw from the animated car position (not the raw GPS index) so the line
+  // never appears behind the car. _syncRouteLine owns the route-main visual.
+  const animLat = _mv ? _mv.lat : routePoints[idx][0];
+  const animLng = _mv ? _mv.lng : routePoints[idx][1];
+  _syncRouteLine(animLat, animLng);
   map.getSource('route-traveled')?.setData({type:'Feature',geometry:{type:'LineString',coordinates:[]}});
-  updateTrafficOverlay(rem);
+  updateTrafficOverlay(routePoints.slice(Math.max(0,idx)));
 }
 
 function updateNavPanel(distToTurn){
